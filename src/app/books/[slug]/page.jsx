@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useBookList } from "../../hooks/common/useBookList";
+import { useBookList } from "@/hooks/common/useBookList";
 import { useMemo } from "react";
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { IoIosHeartEmpty } from "react-icons/io";
-import Navigation from "@/features/Main/components/Navigation";
+import Navigation from "@/components/main/Navigation";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서" },

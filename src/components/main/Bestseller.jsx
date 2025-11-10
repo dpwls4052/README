@@ -16,8 +16,8 @@ import { useState } from "react";
 import { IoIosHeartEmpty } from "react-icons/io";
 import { useNavigate } from "react-router";
 import Modal from "../../../components/Modal";
-import { useAuth } from "../../../hooks/common/useAuth";
-import { useBookList } from "../../../hooks/common/useBookList";
+import { useAuth } from "../../hooks/common/useAuth";
+import { useBookList } from "../../hooks/common/useBookList";
 
 const Bestseller = () => {
   const { books, loading } = useBookList({

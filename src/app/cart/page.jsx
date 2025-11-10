@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Box, Flex, Heading, Text, Image, Button, HStack, VStack, IconButton } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Image,
+  Button,
+  HStack,
+  VStack,
+  IconButton,
+} from "@chakra-ui/react";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
@@ -72,12 +82,12 @@ const Cart = () => {
     }
 
     // 선택된 상품들을 PaymentPage 형식에 맞게 변환
-    const orderItems = selectedItems.map(item => ({
+    const orderItems = selectedItems.map((item) => ({
       id: item.id,
       title: item.name,
       image: item.image,
       quantity: item.count,
-      price: item.price
+      price: item.price,
     }));
 
     // PaymentPage로 데이터 전달
@@ -86,8 +96,8 @@ const Cart = () => {
         orderItems,
         totalItemPrice: itemsTotal,
         deliveryFee: shippingFee,
-        finalPrice: totalAmount
-      }
+        finalPrice: totalAmount,
+      },
     });
   };
 
@@ -107,20 +117,30 @@ const Cart = () => {
   const totalAmount = itemsTotal + shippingFee;
 
   return (
-    <Box  minH="100vh" py="40px">
+    <Box minH="100vh" py="40px">
       <Box maxW="1200px" mx="auto" px="20px">
         <Flex gap="40px" direction={{ base: "column", lg: "row" }}>
           {/* 왼쪽 영역 - 장바구니 목록 */}
-          <Box flex="2" bg="var(--bg-color)" p="20px" borderRadius="16px" boxShadow="sm">
-            <Heading size="xl" mb="20px" color="black" fontSize={'24px'}>
+          <Box
+            flex="2"
+            bg="var(--bg-color)"
+            p="20px"
+            borderRadius="16px"
+            boxShadow="sm"
+          >
+            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
               장바구니
             </Heading>
 
             <Flex justify="space-between" align="center" mb="16px">
-              <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <label
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
                 <input
                   type="checkbox"
-                  checked={items.length > 0 && selectedItems.length === items.length}
+                  checked={
+                    items.length > 0 && selectedItems.length === items.length
+                  }
                   onChange={handleSelectAll}
                 />
                 <Text fontWeight="medium">
@@ -128,9 +148,9 @@ const Cart = () => {
                 </Text>
               </label>
               <HStack gap="8px">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={handleDeleteSelected}
                   bg="var(--sub-color)"
                   color="#fff"
@@ -139,9 +159,9 @@ const Cart = () => {
                 >
                   선택삭제
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={handleDeleteAll}
                   bg="var(--sub-color)"
                   color="#fff"
@@ -183,7 +203,11 @@ const Cart = () => {
                           <Text fontSize="md" fontWeight="medium" color="black">
                             {item.name}
                           </Text>
-                          <Text fontSize="lg" fontWeight="bold" color="var(--main-color)">
+                          <Text
+                            fontSize="lg"
+                            fontWeight="bold"
+                            color="var(--main-color)"
+                          >
                             {item.price.toLocaleString()}원
                           </Text>
                         </VStack>
@@ -201,7 +225,12 @@ const Cart = () => {
                         >
                           <FiMinus />
                         </IconButton>
-                        <Text fontWeight="medium" minW="30px" textAlign="center" color="black">
+                        <Text
+                          fontWeight="medium"
+                          minW="30px"
+                          textAlign="center"
+                          color="black"
+                        >
                           {item.count}
                         </Text>
                         <IconButton
@@ -216,7 +245,9 @@ const Cart = () => {
                         </IconButton>
                       </HStack>
                     </Flex>
-                    {index < items.length - 1 && <Box borderBottom="1px solid" borderColor="gray.200" />}
+                    {index < items.length - 1 && (
+                      <Box borderBottom="1px solid" borderColor="gray.200" />
+                    )}
                   </Box>
                 ))}
               </VStack>
@@ -234,24 +265,33 @@ const Cart = () => {
             position={{ lg: "sticky" }}
             top="20px"
           >
-            <Heading size="xl" mb="20px" color="black" fontSize={'24px'}>
+            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
               결제정보
             </Heading>
 
             <VStack gap="12px" align="stretch" mb="16px">
               <Flex justify="space-between">
                 <Text color="black">상품 금액</Text>
-                <Text fontWeight="bold" color="black">{itemsTotal.toLocaleString()}원</Text>
+                <Text fontWeight="bold" color="black">
+                  {itemsTotal.toLocaleString()}원
+                </Text>
               </Flex>
               <Flex justify="space-between">
                 <Text color="black">배송비</Text>
-                <Text fontWeight="bold" color={shippingFee === 0 ? "var(--main-color)" : "black"}>
-                  {shippingFee === 0 ? "무료" : `${shippingFee.toLocaleString()}원`}
+                <Text
+                  fontWeight="bold"
+                  color={shippingFee === 0 ? "var(--main-color)" : "black"}
+                >
+                  {shippingFee === 0
+                    ? "무료"
+                    : `${shippingFee.toLocaleString()}원`}
                 </Text>
               </Flex>
               <Box borderBottom="1px solid" borderColor="gray.200" />
               <Flex justify="space-between" fontSize="lg">
-                <Text fontWeight="bold" color="black">결제 예정 금액</Text>
+                <Text fontWeight="bold" color="black">
+                  결제 예정 금액
+                </Text>
                 <Text fontWeight="bold" color="var(--main-color)">
                   {totalAmount.toLocaleString()}원
                 </Text>
