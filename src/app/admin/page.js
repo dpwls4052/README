@@ -1,13 +1,13 @@
-import { Box } from "@chakra-ui/react";
+"use client";
 import SideBar from "@/components/admin/SideBar";
-import { useTab } from "@/hooks/useTab";
+import { useTab } from "@/hooks/common/useTab";
 import { ADMIN_TAB } from "@/constants/adminMenu";
 import {
   BookManagement,
   ReviewManagement,
   DeliveryManagement,
   FAQManagement,
-} from "@/components/adminManagement";
+} from "@/components/admin/Management";
 
 const Admin = () => {
   // 탭 상태
@@ -26,12 +26,12 @@ const Admin = () => {
     TAB_COMPONENTS[tabValues[tabIndex]] ?? (() => <Box>준비 중(스켈레톤)</Box>);
 
   return (
-    <Box as="main" p="20px" h="100dvh" display="flex" gap="20px">
+    <main p="20px" h="100dvh" display="flex" gap="20px">
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />
-      <Box flex="1">
+      <div flex="1">
         <ActiveComponent />
-      </Box>
-    </Box>
+      </div>
+    </main>
   );
 };
 

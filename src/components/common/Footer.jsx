@@ -1,127 +1,57 @@
-import React from 'react';
-import { Box, Container, Flex, Text, HStack, VStack, Heading } from '@chakra-ui/react';
-import { FaInstagram, FaFacebook, FaTwitter, FaYoutube } from 'react-icons/fa';
+import React from "react";
+import { FaInstagram, FaFacebook, FaTwitter, FaYoutube } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <Box bg="var(--bg-color)" marginTop="120px" py="60px" borderTop="1px solid" borderColor="gray.200">
-      <Container maxW="1200px">
-        <Flex direction={{ base: 'column', lg: 'row' }} gap="40px" justify="space-between">
-          {/* 왼쪽 영역 - 사이트 정보 */}
-          <VStack align="start" gap="16px" flex="1">
-            <Heading fontSize="28px" color="var(--main-color)" fontWeight="bold">
-              README
-            </Heading>
-            <Text fontSize="14px" color="#666" lineHeight="1.6">
-              당신의 독서 생활을 함께하는 도서 쇼핑몰
-            </Text>
-            <VStack align="start" gap="8px" fontSize="14px" color="#666">
-              <Text>대표: 정원준</Text>
-              <Text>사업자등록번호: 123-45-67890</Text>
-              <Text>통신판매업신고: 2025-서울강남-12345</Text>
-              <Text>주소: 서울특별시 강남구 테헤란로 123</Text>
-              <Text>이메일: contact@readme.com</Text>
-              <Text>고객센터: 1234-5678 (평일 09:00-18:00)</Text>
-            </VStack>
-          </VStack>
+    <footer className="bg-[var(--bg-color)] mt-[120px] py-[60px] border-t border-gray-200">
+      <div className="max-w-[1200px] mx-auto px-4 flex flex-col lg:flex-row gap-10 justify-between">
+        {/* 왼쪽 영역 - 사이트 정보 */}
+        <div className="flex-1 flex flex-col gap-4">
+          <h2 className="text-[28px] font-bold text-[var(--main-color)]">README</h2>
+          <p className="text-[14px] text-gray-600 leading-[1.6]">
+            당신의 독서 생활을 함께하는 도서 쇼핑몰
+          </p>
+          <div className="flex flex-col gap-1 text-[14px] text-gray-600">
+            <span>대표: 정원준</span>
+            <span>사업자등록번호: 123-45-67890</span>
+            <span>통신판매업신고: 2025-서울강남-12345</span>
+            <span>주소: 서울특별시 강남구 테헤란로 123</span>
+            <span>이메일: contact@readme.com</span>
+            <span>고객센터: 1234-5678 (평일 09:00-18:00)</span>
+          </div>
+        </div>
 
-          {/* 중앙 영역 - 링크 */}
-          <VStack align="start" gap="16px" flex="1">
-            <Heading fontSize="18px" color="var(--main-color)" fontWeight="bold" mb="8px">
-              고객지원
-            </Heading>
-            <VStack align="start" gap="12px">
-              <Text 
-                fontSize="14px" 
-                color="#666" 
-                cursor="pointer"
-                _hover={{ color: "var(--main-color)", textDecoration: "underline" }}
-              >
-                이용약관
-              </Text>
-              <Text 
-                fontSize="14px" 
-                color="#666" 
-                cursor="pointer"
-                _hover={{ color: "var(--main-color)", textDecoration: "underline" }}
-              >
-                개인정보 처리방침
-              </Text>
-              <Text 
-                fontSize="14px" 
-                color="#666" 
-                cursor="pointer"
-                _hover={{ color: "var(--main-color)", textDecoration: "underline" }}
-              >
-                고객센터
-              </Text>
-            </VStack>
-          </VStack>
+        {/* 중앙 영역 - 링크 */}
+        <div className="flex-1 flex flex-col gap-4">
+          <h3 className="text-[18px] font-bold text-[var(--main-color)] mb-2">고객지원</h3>
+          <div className="flex flex-col gap-3 text-[14px] text-gray-600">
+            <span className="cursor-pointer hover:text-[var(--main-color)] hover:underline">이용약관</span>
+            <span className="cursor-pointer hover:text-[var(--main-color)] hover:underline">개인정보 처리방침</span>
+            <span className="cursor-pointer hover:text-[var(--main-color)] hover:underline">고객센터</span>
+          </div>
+        </div>
 
-          {/* 오른쪽 영역 - SNS & 팀원 */}
-          <VStack align="start" gap="16px" flex="1">
-            <Heading fontSize="18px" color="var(--main-color)" fontWeight="bold" mb="8px">
-              Follow Us
-            </Heading>
-            <HStack gap="16px">
-              <Box
-                cursor="pointer"
-                color="var(--sub-color)"
-                _hover={{ color: "var(--main-color)", transform: "scale(1.1)" }}
-                transition="all 0.2s"
-              >
-                <FaInstagram size={24} />
-              </Box>
-              <Box
-                cursor="pointer"
-                color="var(--sub-color)"
-                _hover={{ color: "var(--main-color)", transform: "scale(1.1)" }}
-                transition="all 0.2s"
-              >
-                <FaFacebook size={24} />
-              </Box>
-              <Box
-                cursor="pointer"
-                color="var(--sub-color)"
-                _hover={{ color: "var(--main-color)", transform: "scale(1.1)" }}
-                transition="all 0.2s"
-              >
-                <FaTwitter size={24} />
-              </Box>
-              <Box
-                cursor="pointer"
-                color="var(--sub-color)"
-                _hover={{ color: "var(--main-color)", transform: "scale(1.1)" }}
-                transition="all 0.2s"
-              >
-                <FaYoutube size={24} />
-              </Box>
-            </HStack>
+        {/* 오른쪽 영역 - SNS & 팀원 */}
+        <div className="flex-1 flex flex-col gap-4">
+          <h3 className="text-[18px] font-bold text-[var(--main-color)] mb-2">Follow Us</h3>
+          <div className="flex gap-4">
+            <FaInstagram className="text-[var(--sub-color)] cursor-pointer hover:text-[var(--main-color)] hover:scale-110 transition-transform duration-200" size={24} />
+            <FaFacebook className="text-[var(--sub-color)] cursor-pointer hover:text-[var(--main-color)] hover:scale-110 transition-transform duration-200" size={24} />
+            <FaTwitter className="text-[var(--sub-color)] cursor-pointer hover:text-[var(--main-color)] hover:scale-110 transition-transform duration-200" size={24} />
+            <FaYoutube className="text-[var(--sub-color)] cursor-pointer hover:text-[var(--main-color)] hover:scale-110 transition-transform duration-200" size={24} />
+          </div>
 
-            <VStack align="start" gap="8px" mt="16px">
-              <Text fontSize="14px" color="var(--main-color)" fontWeight="bold">
-                Team
-              </Text>
-              <Text fontSize="14px" color="#666">
-                강두연 · 김근영 · 배예진 · 이주형
-              </Text>
-            </VStack>
-          </VStack>
-        </Flex>
+          <div className="flex flex-col gap-1 mt-4 text-[14px]">
+            <span className="font-bold text-[var(--main-color)]">Team</span>
+            <span className="text-gray-600">강두연 · 김근영 · 배예진 · 이주형</span>
+          </div>
+        </div>
+      </div>
 
-        {/* 하단 저작권 */}
-        <Box 
-          borderTop="1px solid" 
-          borderColor="gray.200" 
-          mt="40px" 
-          pt="24px"
-          textAlign="center"
-        >
-          <Text fontSize="14px" color="#999">
-            © 2025 README. All rights reserved.
-          </Text>
-        </Box>
-      </Container>
-    </Box>
+      {/* 하단 저작권 */}
+      <div className="border-t border-gray-200 mt-10 pt-6 text-center">
+        <p className="text-[14px] text-gray-400">© 2025 README. All rights reserved.</p>
+      </div>
+    </footer>
   );
 }
