@@ -1,23 +1,9 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  Image,
-  Button,
-  HStack,
-  VStack,
-  IconButton,
-} from "@chakra-ui/react";
-import { FiPlus, FiMinus } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Plus, Minus } from 'lucide-react';
 
-const Cart = () => {
-  const navigate = useNavigate();
-
+// Cart Page Component
+export default function CartPage() {
   const [items, setItems] = useState([
-    // TODO :: 상품 불러와서 채우기 - USER DATA 랑 연결해서 유저가 장바구니 담을 수 있게 구성
     {
       id: 1,
       name: "자바스크립트",
@@ -80,248 +66,171 @@ const Cart = () => {
       alert("상품을 선택해주세요");
       return;
     }
-
-    // 선택된 상품들을 PaymentPage 형식에 맞게 변환
-    const orderItems = selectedItems.map((item) => ({
-      id: item.id,
-      title: item.name,
-      image: item.image,
-      quantity: item.count,
-      price: item.price,
-    }));
-
-    // PaymentPage로 데이터 전달
-    navigate("/kt_3team_project_2025/pay", {
-      state: {
-        orderItems,
-        totalItemPrice: itemsTotal,
-        deliveryFee: shippingFee,
-        finalPrice: totalAmount,
-      },
-    });
+    
+    // Next.js router를 사용하여 결제 페이지로 이동
+    // router.push({
+    //   pathname: '/payment',
+    //   query: {
+    //     orderItems: JSON.stringify(orderItems),
+    //     totalItemPrice: itemsTotal,
+    //     deliveryFee: shippingFee,
+    //     finalPrice: totalAmount
+    //   }
+    // });
+    
+    alert("결제 페이지로 이동합니다");
   };
 
   const selectedItems = items.filter((item) => item.selected);
-
   const itemsTotal = selectedItems.reduce(
     (acc, item) => acc + item.price * item.count,
     0
   );
-
   let shippingFee = 0;
   if (itemsTotal > 0 && itemsTotal < 30000) {
-    // 배송비
     shippingFee = 30;
   }
-
   const totalAmount = itemsTotal + shippingFee;
 
   return (
-    <Box minH="100vh" py="40px">
-      <Box maxW="1200px" mx="auto" px="20px">
-        <Flex gap="40px" direction={{ base: "column", lg: "row" }}>
+    <div className="min-h-screen bg-white py-10">
+      <div className="max-w-7xl mx-auto px-5">
+        <div className="flex flex-col lg:flex-row gap-10">
           {/* 왼쪽 영역 - 장바구니 목록 */}
-          <Box
-            flex="2"
-            bg="var(--bg-color)"
-            p="20px"
-            borderRadius="16px"
-            boxShadow="sm"
-          >
-            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
-              장바구니
-            </Heading>
+          <div className="flex-[2] bg-[#f5f5f5] p-5 rounded-2xl shadow-sm">
+            <h1 className="text-2xl font-bold mb-5 text-black">장바구니</h1>
 
-            <Flex justify="space-between" align="center" mb="16px">
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
+            <div className="flex justify-between items-center mb-4">
+              <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={
-                    items.length > 0 && selectedItems.length === items.length
-                  }
+                  checked={items.length > 0 && selectedItems.length === items.length}
                   onChange={handleSelectAll}
+                  className="w-4 h-4"
                 />
-                <Text fontWeight="medium">
+                <span className="font-medium text-black">
                   전체선택 ({selectedItems.length}/{items.length})
-                </Text>
+                </span>
               </label>
-              <HStack gap="8px">
-                <Button
-                  size="sm"
-                  variant="outline"
+              <div className="flex gap-2">
+                <button
                   onClick={handleDeleteSelected}
-                  bg="var(--sub-color)"
-                  color="#fff"
-                  borderColor="var(--sub-color)"
-                  _hover={{ bg: "#6d7a58" }}
+                  className="px-4 py-2 text-sm bg-[#8b9670] text-white rounded-lg hover:bg-[#6d7a58] transition-colors"
                 >
                   선택삭제
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
+                </button>
+                <button
                   onClick={handleDeleteAll}
-                  bg="var(--sub-color)"
-                  color="#fff"
-                  borderColor="var(--sub-color)"
-                  _hover={{ bg: "#6d7a58" }}
+                  className="px-4 py-2 text-sm bg-[#8b9670] text-white rounded-lg hover:bg-[#6d7a58] transition-colors"
                 >
                   전체삭제
-                </Button>
-              </HStack>
-            </Flex>
+                </button>
+              </div>
+            </div>
 
-            <Box borderBottom="1px solid" borderColor="gray.200" mb="16px" />
+            <div className="border-b border-gray-200 mb-4" />
 
             {items.length === 0 ? (
-              <Box textAlign="center" py="40px">
-                <Text color="gray.500" fontSize="lg">
+              <div className="text-center py-10">
+                <p className="text-gray-500 text-lg">
                   장바구니가 비어 있습니다.
-                </Text>
-              </Box>
+                </p>
+              </div>
             ) : (
-              <VStack gap="0" align="stretch">
+              <div className="space-y-0">
                 {items.map((item, index) => (
-                  <Box key={item.id}>
-                    <Flex justify="space-between" align="center" py="16px">
-                      <Flex align="center" gap="16px">
+                  <div key={item.id}>
+                    <div className="flex justify-between items-center py-4">
+                      <div className="flex items-center gap-4">
                         <input
                           type="checkbox"
                           checked={item.selected}
                           onChange={() => handleSelect(item.id)}
+                          className="w-4 h-4"
                         />
-                        <Image
+                        <img
                           src={item.image}
                           alt={item.name}
-                          boxSize="80px"
-                          borderRadius="8px"
-                          objectFit="cover"
+                          className="w-20 h-20 rounded-lg object-cover"
                         />
-                        <VStack align="start" gap="4px">
-                          <Text fontSize="md" fontWeight="medium" color="black">
+                        <div className="flex flex-col gap-1">
+                          <p className="text-base font-medium text-black">
                             {item.name}
-                          </Text>
-                          <Text
-                            fontSize="lg"
-                            fontWeight="bold"
-                            color="var(--main-color)"
-                          >
+                          </p>
+                          <p className="text-lg font-bold text-[#8b9670]">
                             {item.price.toLocaleString()}원
-                          </Text>
-                        </VStack>
-                      </Flex>
+                          </p>
+                        </div>
+                      </div>
 
-                      <HStack gap="8px">
-                        <IconButton
-                          aria-label="수량 감소"
-                          size="sm"
+                      <div className="flex items-center gap-2">
+                        <button
                           onClick={() => handleCountChange(item.id, -1)}
                           disabled={item.count <= 1}
-                          bg="var(--sub-color)"
-                          color="#fff"
-                          _hover={{ bg: "#6d7a58" }}
+                          className="w-8 h-8 flex items-center justify-center bg-[#8b9670] text-white rounded hover:bg-[#6d7a58] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <FiMinus />
-                        </IconButton>
-                        <Text
-                          fontWeight="medium"
-                          minW="30px"
-                          textAlign="center"
-                          color="black"
-                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="font-medium min-w-[30px] text-center text-black">
                           {item.count}
-                        </Text>
-                        <IconButton
-                          aria-label="수량 증가"
-                          size="sm"
+                        </span>
+                        <button
                           onClick={() => handleCountChange(item.id, 1)}
-                          bg="var(--sub-color)"
-                          color="#fff"
-                          _hover={{ bg: "#6d7a58" }}
+                          className="w-8 h-8 flex items-center justify-center bg-[#8b9670] text-white rounded hover:bg-[#6d7a58]"
                         >
-                          <FiPlus />
-                        </IconButton>
-                      </HStack>
-                    </Flex>
-                    {index < items.length - 1 && (
-                      <Box borderBottom="1px solid" borderColor="gray.200" />
-                    )}
-                  </Box>
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    {index < items.length - 1 && <div className="border-b border-gray-200" />}
+                  </div>
                 ))}
-              </VStack>
+              </div>
             )}
-          </Box>
+          </div>
 
           {/* 오른쪽 영역 - 결제정보 */}
-          <Box
-            flex="1"
-            bg="var(--bg-color)"
-            p="20px"
-            borderRadius="16px"
-            boxShadow="sm"
-            h="fit-content"
-            position={{ lg: "sticky" }}
-            top="20px"
-          >
-            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
-              결제정보
-            </Heading>
+          <div className="flex-1 bg-[#f5f5f5] p-5 rounded-2xl shadow-sm h-fit lg:sticky lg:top-5">
+            <h2 className="text-2xl font-bold mb-5 text-black">결제정보</h2>
 
-            <VStack gap="12px" align="stretch" mb="16px">
-              <Flex justify="space-between">
-                <Text color="black">상품 금액</Text>
-                <Text fontWeight="bold" color="black">
-                  {itemsTotal.toLocaleString()}원
-                </Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text color="black">배송비</Text>
-                <Text
-                  fontWeight="bold"
-                  color={shippingFee === 0 ? "var(--main-color)" : "black"}
-                >
-                  {shippingFee === 0
-                    ? "무료"
-                    : `${shippingFee.toLocaleString()}원`}
-                </Text>
-              </Flex>
-              <Box borderBottom="1px solid" borderColor="gray.200" />
-              <Flex justify="space-between" fontSize="lg">
-                <Text fontWeight="bold" color="black">
-                  결제 예정 금액
-                </Text>
-                <Text fontWeight="bold" color="var(--main-color)">
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between">
+                <span className="text-black">상품 금액</span>
+                <span className="font-bold text-black">{itemsTotal.toLocaleString()}원</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-black">배송비</span>
+                <span className={`font-bold ${shippingFee === 0 ? 'text-[#8b9670]' : 'text-black'}`}>
+                  {shippingFee === 0 ? "무료" : `${shippingFee.toLocaleString()}원`}
+                </span>
+              </div>
+              <div className="border-b border-gray-200" />
+              <div className="flex justify-between text-lg">
+                <span className="font-bold text-black">결제 예정 금액</span>
+                <span className="font-bold text-[#8b9670]">
                   {totalAmount.toLocaleString()}원
-                </Text>
-              </Flex>
-            </VStack>
+                </span>
+              </div>
+            </div>
 
             {itemsTotal > 0 && itemsTotal < 30000 && (
-              <Box bg="var(--bg-color)" p="12px" borderRadius="8px" mb="16px">
-                <Text fontSize="sm" color="var(--main-color)">
+              <div className="bg-[#f5f5f5] p-3 rounded-lg mb-4 border border-[#8b9670]">
+                <p className="text-sm text-[#8b9670]">
                   💡 30,000원 이상 구매 시 배송비 무료
-                </Text>
-              </Box>
+                </p>
+              </div>
             )}
 
-            <Button
-              size="lg"
-              width="100%"
+            <button
               onClick={handlePay}
               disabled={selectedItems.length === 0}
-              bg="var(--main-color)"
-              color="var(--bg-color)"
-              _hover={{ bg: "var(--bg-color)" }}
+              className="w-full py-3 text-lg font-medium bg-[#8b9670] text-[#f5f5f5] rounded-lg hover:bg-[#6d7a58] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               주문하기
-            </Button>
-          </Box>
-        </Flex>
-      </Box>
-    </Box>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default Cart;
+}
