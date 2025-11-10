@@ -20,7 +20,7 @@ import {
     // Firestore 문서 ID를 쿼리하기 위한 __name__ 필드 참조는
     // 'firebase/firestore'에서 별도 import 없이 where 함수 내에서 문자열로 사용 가능
 } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { db } from "../../lib/firebase";
 
 export const useBookList = ({
     pageSize = 20,

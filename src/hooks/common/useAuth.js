@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword, // ✅ 추가
   updateProfile, // ✅ 이름 저장용
 } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth } from "../../lib/firebase";
 import { useState, useEffect } from "react";
 
 export function useAuth() {
