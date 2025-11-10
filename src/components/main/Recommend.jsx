@@ -20,7 +20,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useMemo, useRef } from "react";
 import ButtonWithIcon from "../../../components/ButtonWithIcon";
-import { useBookList } from "../../../hooks/common/useBookList";
+import { useBookList } from "../../hooks/common/useBookList";
 
 const Recommend = () => {
   const { books, loading } = useBookList({

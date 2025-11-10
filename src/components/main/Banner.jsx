@@ -1,15 +1,15 @@
-import { Box, Image } from '@chakra-ui/react';
-import banner1 from '@/assets/banner1.png';
-import banner2 from '@/assets/banner2.png';
-import banner3 from '@/assets/banner3.png';
-import banner4 from '@/assets/banner4.png';
+import { Box, Image } from "@chakra-ui/react";
+import banner1 from "@/assets/banner1.png";
+import banner2 from "@/assets/banner2.png";
+import banner3 from "@/assets/banner3.png";
+import banner4 from "@/assets/banner4.png";
 
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const Banner = () => {
   return (
@@ -21,7 +21,7 @@ const Banner = () => {
       <Swiper
         className="home-banner"
         style={{
-          '--swiper-theme-color': '#fff',
+          "--swiper-theme-color": "#fff",
         }}
         spaceBetween={50}
         slidesPerView={1}

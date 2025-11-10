@@ -1,23 +1,26 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { Box, Button, Heading, Stack, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Heading, Stack, Flex, Text } from "@chakra-ui/react";
 
-export function PaymentFailPage() {
+export function PaymentFail() {
   const [searchParams] = useSearchParams();
-  
-  const errorCode = searchParams.get('code');
-  const errorMessage = searchParams.get('message');
-  const orderId = searchParams.get('orderId');
+
+  const errorCode = searchParams.get("code");
+  const errorMessage = searchParams.get("message");
+  const orderId = searchParams.get("orderId");
 
   return (
     <Box bg="white" minH="100vh" py="40px">
       <Box maxW="800px" mx="auto" px="20px">
         <Stack gap="32px" align="center">
           {/* 실패 이미지 및 타이틀 */}
-          <Box bg="var(--bg-color)" p="40px" borderRadius="15px" w="100%" textAlign="center">
-            <Box 
-              fontSize="64px" 
-              mb="24px"
-            >
+          <Box
+            bg="var(--bg-color)"
+            p="40px"
+            borderRadius="15px"
+            w="100%"
+            textAlign="center"
+          >
+            <Box fontSize="64px" mb="24px">
               ❌
             </Box>
             <Heading fontSize="28px" color="#C53030" mb="16px">
@@ -34,21 +37,40 @@ export function PaymentFailPage() {
               오류 정보
             </Heading>
             <Stack gap="16px">
-              <Flex justify="space-between" py="12px" borderBottom="1px solid #e2e8f0">
-                <Text fontSize="16px" fontWeight="bold" color="#000">에러 코드</Text>
+              <Flex
+                justify="space-between"
+                py="12px"
+                borderBottom="1px solid #e2e8f0"
+              >
+                <Text fontSize="16px" fontWeight="bold" color="#000">
+                  에러 코드
+                </Text>
                 <Text fontSize="16px" color="#C53030" fontWeight="bold">
-                  {errorCode || '알 수 없음'}
+                  {errorCode || "알 수 없음"}
                 </Text>
               </Flex>
-              <Flex justify="space-between" py="12px" borderBottom="1px solid #e2e8f0">
-                <Text fontSize="16px" fontWeight="bold" color="#000">에러 메시지</Text>
-                <Text fontSize="16px" color="#666" textAlign="right" maxW="500px">
-                  {errorMessage || '알 수 없는 오류가 발생했습니다.'}
+              <Flex
+                justify="space-between"
+                py="12px"
+                borderBottom="1px solid #e2e8f0"
+              >
+                <Text fontSize="16px" fontWeight="bold" color="#000">
+                  에러 메시지
+                </Text>
+                <Text
+                  fontSize="16px"
+                  color="#666"
+                  textAlign="right"
+                  maxW="500px"
+                >
+                  {errorMessage || "알 수 없는 오류가 발생했습니다."}
                 </Text>
               </Flex>
               {orderId && (
                 <Flex justify="space-between" py="12px">
-                  <Text fontSize="16px" fontWeight="bold" color="#000">주문번호</Text>
+                  <Text fontSize="16px" fontWeight="bold" color="#000">
+                    주문번호
+                  </Text>
                   <Text fontSize="16px" color="#666">
                     {orderId}
                   </Text>
@@ -71,7 +93,7 @@ export function PaymentFailPage() {
           </Box>
 
           {/* 버튼 영역 */}
-          <Stack direction={{ base: 'column', md: 'row' }} gap="16px" w="100%">
+          <Stack direction={{ base: "column", md: "row" }} gap="16px" w="100%">
             <Button
               as={Link}
               to="/kt_3team_project_2025/cart"
@@ -80,7 +102,7 @@ export function PaymentFailPage() {
               fontSize="18px"
               h="60px"
               borderRadius="15px"
-              _hover={{ bg: 'var(--main-color)' }}
+              _hover={{ bg: "var(--main-color)" }}
               flex="1"
             >
               다시 결제하기
@@ -94,7 +116,7 @@ export function PaymentFailPage() {
               h="60px"
               borderRadius="15px"
               border="2px solid var(--main-color)"
-              _hover={{ bg: 'var(--bg-color)' }}
+              _hover={{ bg: "var(--bg-color)" }}
               flex="1"
             >
               홈으로 가기
