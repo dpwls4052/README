@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Minus } from 'lucide-react';
+import React, { useState } from "react";
+import { Plus, Minus } from "lucide-react";
 
 // Cart Page Component
 export default function CartPage() {
@@ -66,7 +66,7 @@ export default function CartPage() {
       alert("상품을 선택해주세요");
       return;
     }
-    
+
     // Next.js router를 사용하여 결제 페이지로 이동
     // router.push({
     //   pathname: '/payment',
@@ -77,7 +77,7 @@ export default function CartPage() {
     //     finalPrice: totalAmount
     //   }
     // });
-    
+
     alert("결제 페이지로 이동합니다");
   };
 
@@ -104,7 +104,9 @@ export default function CartPage() {
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={items.length > 0 && selectedItems.length === items.length}
+                  checked={
+                    items.length > 0 && selectedItems.length === items.length
+                  }
                   onChange={handleSelectAll}
                   className="w-4 h-4"
                 />
@@ -182,7 +184,9 @@ export default function CartPage() {
                         </button>
                       </div>
                     </div>
-                    {index < items.length - 1 && <div className="border-b border-gray-200" />}
+                    {index < items.length - 1 && (
+                      <div className="border-b border-gray-200" />
+                    )}
                   </div>
                 ))}
               </div>
@@ -196,12 +200,20 @@ export default function CartPage() {
             <div className="space-y-3 mb-4">
               <div className="flex justify-between">
                 <span className="text-black">상품 금액</span>
-                <span className="font-bold text-black">{itemsTotal.toLocaleString()}원</span>
+                <span className="font-bold text-black">
+                  {itemsTotal.toLocaleString()}원
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-black">배송비</span>
-                <span className={`font-bold ${shippingFee === 0 ? 'text-[#8b9670]' : 'text-black'}`}>
-                  {shippingFee === 0 ? "무료" : `${shippingFee.toLocaleString()}원`}
+                <span
+                  className={`font-bold ${
+                    shippingFee === 0 ? "text-[#8b9670]" : "text-black"
+                  }`}
+                >
+                  {shippingFee === 0
+                    ? "무료"
+                    : `${shippingFee.toLocaleString()}원`}
                 </span>
               </div>
               <div className="border-b border-gray-200" />
