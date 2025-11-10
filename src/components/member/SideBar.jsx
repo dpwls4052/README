@@ -1,37 +1,26 @@
-import { Box, VStack } from "@chakra-ui/react";
 import { USER_TAB } from "@/constants/userMenu";
 
 const SideBar = ({ tabIndex, handleClickTab }) => {
   return (
-    <Box
-      as="aside"
-      w="240px"
-      h="100%"
-      bg="#0A400C"
-      position="sticky"
-      rounded="xl"
-    >
-      <VStack p="10px">
+    <aside className="w-[240px] h-full bg-[#0A400C] sticky top-0 rounded-xl">
+      <div className="flex flex-col p-2.5 space-y-2">
         {USER_TAB.map((tab, idx) => (
-          <Box
+          <div
             key={tab.value}
             onClick={() => handleClickTab(idx)}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            w="100%"
-            h="50px"
-            color="#FFFFFF"
-            fontWeight={tabIndex === idx ? "bold" : "normal"}
-            bg={tabIndex === idx && "#FFFFFF50"}
-            rounded="lg"
-            _hover={{ cursor: "pointer", bg: "#FFFFFF30" }}
+            className={`
+              flex items-center justify-center 
+              w-full h-[50px] text-white rounded-lg
+              ${tabIndex === idx ? "font-bold bg-white/30" : "font-normal"}
+              hover:cursor-pointer hover:bg-white/20
+              transition-colors duration-200
+            `}
           >
             {tab.label}
-          </Box>
+          </div>
         ))}
-      </VStack>
-    </Box>
+      </div>
+    </aside>
   );
 };
 

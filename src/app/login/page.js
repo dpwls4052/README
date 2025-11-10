@@ -1,30 +1,22 @@
 import React from "react";
-import { Box, Flex, Image } from "@chakra-ui/react";
-import LoginForm from "../components/auth/LoginForm";
-import logo from "../assets/logo.png";
+import LoginForm from "@/components/auth/LoginForm";
+import logo from "@/assets/logo.png";
 
 const Login = () => {
   return (
-    <Flex
-      direction="column"
-      align="center"
-      justify="center"
-      width="100vw"
-      height="100vh"
-      bg={"#FEFAE0"}
-    >
-      <Image
+    <div className="flex flex-col items-center justify-center w-screen h-screen bg-[#FEFAE0]">
+      {/* 로고 */}
+      <img
         src={logo}
         alt="README Logo"
-        width="250px"
-        mb="32px"
-        objectFit="contain"
+        className="w-[250px] mb-8 object-contain"
       />
 
-      <Box p="48px 64px" borderRadius="12px" boxShadow="md" bg="white">
+      {/* 로그인 박스 */}
+      <div className="p-12 rounded-xl shadow-md bg-white">
         <LoginForm />
-      </Box>
-    </Flex>
+      </div>
+    </div>
   );
 };
 

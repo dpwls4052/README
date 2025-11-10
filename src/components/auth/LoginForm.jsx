@@ -1,17 +1,7 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Input,
-  Button,
-  VStack,
-  HStack,
-  Link,
-  Text,
-} from "@chakra-ui/react";
-import { Field } from "@chakra-ui/react/field"; // ✅ 올바른 import 위치
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { toaster } from "../ui/toaster";
+import { useAuth } from "@/hooks/useAuth";
+import { toaster } from "@/components/ui/toaster";
 
 const LoginForm = () => {
   const { login, error, loading } = useAuth();
@@ -34,89 +24,70 @@ const LoginForm = () => {
   };
 
   return (
-    <Box
-      as="form"
+    <form
       onSubmit={handleSubmit}
-      width="500px"
-      height="300px"
-      mx="auto"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      gap={6}
+      className="w-[500px] h-[300px] mx-auto flex flex-col justify-center items-center gap-6"
     >
-      <VStack spacing={6} width="100%">
-        {/* 이메일 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">이메일</Field.Label>
-          <Input
-            type="email"
-            placeholder="이메일 주소를 입력하세요"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
-          />
-        </Field.Root>
+      {/* 이메일 입력 */}
+      <div className="w-full">
+        <label className="block text-sm font-semibold mb-1">이메일</label>
+        <input
+          type="email"
+          placeholder="이메일 주소를 입력하세요"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+        />
+      </div>
 
-        {/* 비밀번호 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">비밀번호</Field.Label>
-          <Input
-            type="password"
-            placeholder="비밀번호를 입력하세요"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
-          />
-        </Field.Root>
+      {/* 비밀번호 입력 */}
+      <div className="w-full">
+        <label className="block text-sm font-semibold mb-1">비밀번호</label>
+        <input
+          type="password"
+          placeholder="비밀번호를 입력하세요"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700"
+        />
+      </div>
 
-        {/* 링크 */}
-        <HStack justify="space-between" width="100%">
-          <Link fontSize="sm" color="#0A400C" href="#">
-            아이디 찾기
-          </Link>
-          <Link fontSize="sm" color="#0A400C" href="#">
-            비밀번호 찾기
-          </Link>
-          <Link
-            as={RouterLink}
-            to="/kt_3team_project_2025/signup"
-            fontSize="sm"
-            color="#0A400C"
-          >
-            회원가입
-          </Link>
-        </HStack>
-
-        {/* 로그인 버튼 */}
-        <Button
-          type="submit"
-          width="100%"
-          height="45px"
-          bg="#0A400C"
-          color="white"
-          fontWeight="bold"
-          isLoading={loading}
-          loadingText="로그인 중..."
-          _hover={{ bg: "#13661A" }}
+      {/* 링크 섹션 */}
+      <div className="flex justify-between w-full text-sm text-[#0A400C]">
+        <a href="#" className="hover:underline">
+          아이디 찾기
+        </a>
+        <a href="#" className="hover:underline">
+          비밀번호 찾기
+        </a>
+        <RouterLink
+          to="/kt_3team_project_2025/signup"
+          className="hover:underline"
         >
-          로그인
-        </Button>
+          회원가입
+        </RouterLink>
+      </div>
 
-        {error && (
-          <Text color="red.500" fontSize="sm" mt={2}>
-            {error}
-          </Text>
-        )}
-      </VStack>
-    </Box>
+      {/* 로그인 버튼 */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full h-[45px] bg-[#0A400C] text-white font-bold rounded-md transition-colors ${
+          loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#13661A]"
+        }`}
+      >
+        {loading ? "로그인 중..." : "로그인"}
+      </button>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <p className="text-red-500 text-sm mt-2">
+          {error}
+        </p>
+      )}
+    </form>
   );
 };
 
