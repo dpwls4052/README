@@ -30,7 +30,7 @@ const Bestseller = () => {
 
   return (
     <div className="p-0 my-[100px] max-w-[1200px] mx-auto text-center">
-      <p className="text-[24px] font-semibold">베스트셀러</p>
+      <p className="text-[32px] font-semibold">베스트셀러</p>
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-[30px] my-[80px]">
@@ -42,7 +42,7 @@ const Bestseller = () => {
             {/* 도서 이미지 */}
             <div className="w-full h-[300px] overflow-hidden border border-gray-200">
               <Image
-                src={book.cover || "/no-image.png"}
+                src={book.cover}
                 alt={book.title}
                 width={300}
                 height={300}
@@ -52,9 +52,7 @@ const Bestseller = () => {
 
             {/* 제목 + 찜버튼 */}
             <div className="flex items-start justify-between">
-              <p
-                className="text-[18px] font-bold text-left w-[180px] line-clamp-2"
-              >
+              <p className="text-[18px] font-bold text-left w-[180px] line-clamp-2">
                 {book.title}
               </p>
 
@@ -76,14 +74,14 @@ const Bestseller = () => {
             {/* 버튼 */}
             <div className="flex items-center justify-between gap-2">
               <button
-                className="flex-1 bg-[var(--sub-color)] text-white py-2 rounded"
+                className="flex-1 bg-[var(--sub-color)] text-white py-2 rounded h-[40px] font-normal"
                 onClick={() => setOpenCart(true)}
               >
                 장바구니
               </button>
 
               <button
-                className="flex-1 bg-[var(--main-color)] text-white py-2 rounded"
+                className="flex-1 bg-[var(--main-color)] text-white py-2 rounded h-[40px] font-normal"
                 onClick={handleBuyNow}
               >
                 바로구매

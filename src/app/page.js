@@ -6,11 +6,13 @@ import Recommend from "@/components/main/Recommend";
 
 export default function Main() {
   return (
-    <div className="w-full flex flex-col items-center text-center">
-      <Navigation />
-      <Banner />
-      <Bestseller />
-      <Recommend />
+    <div className=" flex flex-col items-center text-center">
+      <div className="max-w-[1200px] flex flex-col items-center text-center">
+        <Navigation />
+        <Banner />
+        <Bestseller />
+        <Recommend />
+      </div>
     </div>
   );
 }
