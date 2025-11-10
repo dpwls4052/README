@@ -15,7 +15,7 @@ export function WidgetCheckoutPage({
   const [ready, setReady] = useState(false);
   const widgetsRef = useRef(null);
 
-  const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY;
+  const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
   // const clientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq'; // toss test client key
   const customerKey = useRef(generateRandomString()).current;
 
