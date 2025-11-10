@@ -1,25 +1,16 @@
-import { Container } from "@chakra-ui/react";
+// src/features/Main/index.jsx
 import Navigation from "@/components/main/Navigation";
 import Banner from "@/components/main/Banner";
 import Bestseller from "@/components/main/Bestseller";
 import Recommend from "@/components/main/Recommend";
 
-// 메인 페이지
-const Main = () => {
+export default function Main() {
   return (
-    <Container
-      textAlign="center"
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      maxWidth="fit-content"
-    >
+    <div className="w-full flex flex-col items-center text-center">
       <Navigation />
       <Banner />
       <Bestseller />
       <Recommend />
-    </Container>
+    </div>
   );
-};
-
-export default Main;
+}

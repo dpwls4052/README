@@ -1,23 +1,12 @@
-import {
-  Box,
-  Button,
-  CloseButton,
-  Container,
-  Dialog,
-  Flex,
-  Grid,
-  Icon,
-  IconButton,
-  Image,
-  Portal,
-  Text,
-} from "@chakra-ui/react";
+"use client";
+
+import Image from "next/image";
 import { useState } from "react";
 import { IoIosHeartEmpty } from "react-icons/io";
-import { useNavigate } from "react-router";
-import Modal from "../../../components/Modal";
-import { useAuth } from "../../hooks/common/useAuth";
-import { useBookList } from "../../hooks/common/useBookList";
+import { useRouter } from "next/navigation";
+import Modal from "@/components/Modal";
+import { useAuth } from "@/hooks/common/useAuth";
+import { useBookList } from "@/hooks/common/useBookList";
 
 const Bestseller = () => {
   const { books, loading } = useBookList({
@@ -28,138 +17,95 @@ const Bestseller = () => {
 
   const [openCart, setOpenCart] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
 
   const handleBuyNow = () => {
     if (user) {
-      // 로그인되어 있으면 결제 페이지로 이동
-      navigate("/kt_3team_project_2025/pay");
+      router.push("/pay");
     } else {
-      // 로그인 안 되어 있으면 로그인 모달 띄움
       setOpenLogin(true);
     }
   };
 
   return (
-    <Container p="0" margin="100px 0">
-      <Text fontSize="var(--font-larger)" fontWeight="600">
-        베스트셀러
-      </Text>
-      <Grid
-        templateColumns={{
-          base: "repeat(1, 1fr)",
-          md: "repeat(5, 1fr)",
-          lg: "repeat(5, 1fr)",
-        }}
-        gap="30px"
-        margin="80px 0"
-      >
+    <div className="p-0 my-[100px] max-w-[1200px] mx-auto text-center">
+      <p className="text-[24px] font-semibold">베스트셀러</p>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-[30px] my-[80px]">
         {books.map((book) => (
-          <Box
+          <div
             key={book.id}
-            bgColor="var(--bg-color)"
-            p="4"
-            display="flex"
-            flexDirection="column"
-            justifyContent="space-between"
-            gap="12px"
+            className="bg-[var(--bg-color)] p-4 flex flex-col justify-between gap-3"
           >
-            <Box
-              width="100%"
-              height="300px"
-              overflow="hidden"
-              border="1px solid #eee"
-            >
+            {/* 도서 이미지 */}
+            <div className="w-full h-[300px] overflow-hidden border border-gray-200">
               <Image
                 src={book.cover || "/no-image.png"}
                 alt={book.title}
-                w="100%"
-                h="100%"
-                objectFit="cover"
+                width={300}
+                height={300}
+                className="w-full h-full object-cover"
               />
-            </Box>
-            <Flex alignItems="flex-start" justifyContent="space-between">
-              <Text
-                fontSize="var(--font-medium)"
-                fontWeight="bold"
-                textAlign="left"
-                width="180px"
-                css={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "normal",
-                }}
+            </div>
+
+            {/* 제목 + 찜버튼 */}
+            <div className="flex items-start justify-between">
+              <p
+                className="text-[18px] font-bold text-left w-[180px] line-clamp-2"
               >
                 {book.title}
-              </Text>
-              <IconButton
-                variant="ghost"
-                size="sm"
-                aria-label="찜"
-                css={{
-                  _icon: {
-                    width: "4",
-                    height: "4",
-                  },
-                }}
-              >
-                <Icon as={IoIosHeartEmpty} color="red" />
-              </IconButton>
-            </Flex>
-            <Flex alignItems="center" justifyContent="space-between">
-              <Text
-                fontSize="var(--font-small)"
-                textAlign="left"
-                width="150px"
-                css={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "normal",
-                }}
-              >
+              </p>
+
+              <button className="p-2">
+                <IoIosHeartEmpty size={20} className="text-red-500" />
+              </button>
+            </div>
+
+            {/* 작가, 가격 */}
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] text-left w-[150px] truncate">
                 {book.author}
-              </Text>
-              <Text fontSize="var(--font-small)">
+              </p>
+              <p className="text-[14px]">
                 {(book.priceStandard ?? 0).toLocaleString()}원
-              </Text>
-            </Flex>
-            <Flex alignItems="center" justifyContent="space-between" gap="2">
-              <Button
-                bgColor="var(--sub-color)"
-                flex="1"
-                onClick={() => setOpenCart(true)} // ← 클릭 시 열기
+              </p>
+            </div>
+
+            {/* 버튼 */}
+            <div className="flex items-center justify-between gap-2">
+              <button
+                className="flex-1 bg-[var(--sub-color)] text-white py-2 rounded"
+                onClick={() => setOpenCart(true)}
               >
                 장바구니
-              </Button>
+              </button>
 
-              <Button
-                bgColor="var(--main-color)"
-                flex="1"
+              <button
+                className="flex-1 bg-[var(--main-color)] text-white py-2 rounded"
                 onClick={handleBuyNow}
               >
                 바로구매
-              </Button>
+              </button>
+
+              {/* 장바구니 모달 */}
               <Modal
                 title="선택한 상품을 장바구니에 담았어요."
                 open={openCart}
-                onOpenChange={(e) => setOpenCart(e.open)} // Chakra Dialog는 e.open으로 상태 전달
+                onOpenChange={(e) => setOpenCart(e.open)}
                 confirmText="장바구니 이동"
                 cancelText="취소"
                 onConfirm={() => {
-                  navigate("/kt_3team_project_2025/cart");
+                  router.push("/cart");
                   setOpenCart(false);
                 }}
                 size="xl"
               >
                 장바구니 페이지로 이동하시겠습니까?
               </Modal>
+
+              {/* 로그인 모달 */}
               <Modal
                 title="로그인이 필요한 서비스입니다."
                 open={openLogin}
@@ -167,21 +113,18 @@ const Bestseller = () => {
                 confirmText="로그인 페이지로 이동"
                 cancelText="취소"
                 onConfirm={() => {
-                  navigate("/kt_3team_project_2025/login");
+                  router.push("/login");
                   setOpenLogin(false);
                 }}
                 size="md"
               >
                 로그인 페이지로 이동하시겠습니까?
               </Modal>
-            </Flex>
-          </Box>
+            </div>
+          </div>
         ))}
-      </Grid>
-      {/* <Box display="flex" justifyContent="end">
-        <Button bgColor="var(--main-color)">더보기 +</Button>
-      </Box> */}
-    </Container>
+      </div>
+    </div>
   );
 };
 

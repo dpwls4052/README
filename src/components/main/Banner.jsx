@@ -1,4 +1,6 @@
-import { Box, Image } from "@chakra-ui/react";
+"use client";
+
+import Image from "next/image";
 import banner1 from "@/assets/banner1.png";
 import banner2 from "@/assets/banner2.png";
 import banner3 from "@/assets/banner3.png";
@@ -8,16 +10,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const Banner = () => {
+export default function Banner() {
   return (
-    <Box
-      borderRadius="xl" // ✅ 외곽 둥글게
-      overflow="hidden" // ✅ 이미지가 둥근 모서리 밖으로 안 나가게
-      width="1200px"
-    >
+    <div className="w-[1200px] rounded-xl overflow-hidden">
       <Swiper
         className="home-banner"
         style={{
@@ -25,7 +22,6 @@ const Banner = () => {
         }}
         spaceBetween={50}
         slidesPerView={1}
-        navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         modules={[Pagination, Autoplay]}
@@ -35,9 +31,7 @@ const Banner = () => {
           <Image
             src={banner1}
             alt="배너1"
-            w="100%"
-            h="auto"
-            objectFit="cover"
+            className="w-full h-auto object-cover"
           />
         </SwiperSlide>
 
@@ -45,9 +39,7 @@ const Banner = () => {
           <Image
             src={banner2}
             alt="배너2"
-            w="100%"
-            h="auto"
-            objectFit="cover"
+            className="w-full h-auto object-cover"
           />
         </SwiperSlide>
 
@@ -55,9 +47,7 @@ const Banner = () => {
           <Image
             src={banner3}
             alt="배너3"
-            w="100%"
-            h="auto"
-            objectFit="cover"
+            className="w-full h-auto object-cover"
           />
         </SwiperSlide>
 
@@ -65,14 +55,10 @@ const Banner = () => {
           <Image
             src={banner4}
             alt="배너4"
-            w="100%"
-            h="auto"
-            objectFit="cover"
+            className="w-full h-auto object-cover"
           />
         </SwiperSlide>
       </Swiper>
-    </Box>
+    </div>
   );
-};
-
-export default Banner;
+}
