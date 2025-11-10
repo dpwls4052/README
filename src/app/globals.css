@@ -1,36 +1,36 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import "tailwindcss";
-
 @import "pretendard/dist/web/static/pretendard.css";
 
-html, body {
-  font-family: 'Pretendard', sans-serif;
-}
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: "Pretendard";
+    font-weight: 100;
+    line-height: 1;
+    color: black;
+    overflow-x: hidden;
+  }
+  li {
+    list-style: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme {
+  --spacing: 1px;
+  --radius-5: 5px;
+  --radius-15: 15px;
+  --text-12: 12px;
+  --text-14: 14px;
+  --text-16: 16px;
+  --text-18: 18px;
+  --text-20: 20px;
+  --text-24: 24px;
+  --text-32: 32px;
+  --main-color: #0a400c;
+  --sub-color: #819067;
+  --bg-color: #f7f6ed;
 }
