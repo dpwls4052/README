@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper/modules";
+import { useRouter } from "next/navigation";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -13,6 +14,10 @@ import { TfiArrowCircleLeft, TfiArrowCircleRight } from "react-icons/tfi";
 import { useBookList } from "@/hooks/common/useBookList";
 
 export default function Recommend() {
+  const router = useRouter();
+  const goDetail = (id) => {
+    router.push(`/product/detail/${id}`);
+  };
   const { books, loading } = useBookList({
     pageSize: 6,
     orderField: "createdAt",
@@ -93,14 +98,17 @@ export default function Recommend() {
             : randomBooks
           ).map((book) => (
             <SwiperSlide key={book.id}>
-              <div className="w-[200px] h-[280px] rounded-lg overflow-hidden border border-gray-200">
-                {/* <Image
-                  src={book.cover}
+              <div
+                className="w-[200px] h-[280px] rounded-lg overflow-hidden border border-gray-200 hover:cursor-pointer"
+                onClick={() => goDetail(book.id)}
+              >
+                <Image
+                  src={book.cover || "/no-image.png"}
                   alt={book.title || "도서"}
                   className="object-cover w-full h-full"
                   width={200}
                   height={280}
-                /> */}
+                />
               </div>
 
               <div className="flex flex-col items-start mt-4 text-left">
