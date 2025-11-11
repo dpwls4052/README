@@ -22,6 +22,8 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
     closeModal();
   };
 
+  // TODO 숫자 입력 -, e 막기
+
   return (
     <>
       <button
@@ -63,7 +65,7 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
               재고
               <div className="flex gap-0 h-36 border border-[#cccccc] items-center rounded-md">
                 <button
-                  onClick={() => setStock((prev) => prev - 1)}
+                  onClick={() => stock > 0 && setStock((prev) => prev - 1)}
                   className="flex items-center justify-center w-36 h-36 shrink-0 hover:cursor-pointer border-r border-r-[#eeeeee]"
                 >
                   <FaMinus className="w-12 h-12" />
