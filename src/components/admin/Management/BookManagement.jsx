@@ -1,8 +1,8 @@
-import { useBookList } from "@/hooks/useBookList";
-import { Box, Button, Text, ScrollArea, Flex, Image } from "@chakra-ui/react";
+import { useBookList } from "@/hooks/common/useBookList";
 import EditBookModal from "../EditBookModal";
-import { useUpdateBook } from "../../hooks/useUpdateBook";
-import { useDeleteBook } from "../../hooks/useDeleteBook";
+import { useUpdateBook } from "@/hooks/admin/useUpdateBook";
+import { useDeleteBook } from "@/hooks/admin/useDeleteBook";
+import Image from "next/image";
 
 const BookManagement = () => {
   const { books, fetchBooks, hasNext, setBooks } = useBookList({
@@ -29,80 +29,55 @@ const BookManagement = () => {
   };
   const handleDeleteBook = (bookId) => {
     setBooks((prev) => prev.filter((book) => book.id !== bookId));
-    // TODO 서버에 삭제 요청
     deleteBook(bookId);
   };
 
   return (
-    <Box as="section" h="100%" display="flex" flexDirection="column" gap="20px">
-      <Text as="h1" fontSize="32px" color="var(--main-color)">
-        도서 관리
-      </Text>
-      <ScrollArea.Root
-        as="article"
-        flex="1"
-        rounded="xl"
-        variant="hover"
-        bg="var(--bg-color)"
-      >
-        <ScrollArea.Viewport>
-          <ScrollArea.Content paddingEnd="3" textStyle="sm">
-            <>
-              {books.map((book) => (
-                <Flex
-                  key={book.id}
-                  align="center"
-                  justify="space-between"
-                  borderBottom="1px solid"
-                  borderColor="gray.200"
-                  p="10px 20px"
-                  h="120px"
-                  gap="10px"
-                >
-                  <Flex align="center" h="100%" gap="10px">
-                    <Image
-                      src={book.cover || "/no-image.png"}
-                      alt={book.title}
-                      w="62.5px"
-                      h="100px"
-                      borderRadius="md"
-                    />
-                    <Box>
-                      <Text fontWeight="semibold" lineClamp="2">
-                        {book.title}
-                      </Text>
-                      <Text fontSize="sm" color="gray.600" lineClamp="2">
-                        {book.author}
-                      </Text>
-                    </Box>
-                  </Flex>
-                  <Flex align="center" gap="10px" shrink="0">
-                    <Text>재고 : {book.stock}</Text>
-                    <EditBookModal
-                      book={book}
-                      handleUpdateBook={handleUpdateBook}
-                      handleDeleteBook={handleDeleteBook}
-                    />
-                  </Flex>
-                </Flex>
-              ))}
-              {hasNext && (
-                <Box p="20px" textAlign="center">
-                  <Button
-                    bg="var(--main-color)"
-                    borderRadius="full"
-                    onClick={() => fetchBooks()}
-                  >
-                    더보기
-                  </Button>
-                </Box>
-              )}
-            </>
-          </ScrollArea.Content>
-        </ScrollArea.Viewport>
-        <ScrollArea.Scrollbar />
-      </ScrollArea.Root>
-    </Box>
+    <section className="flex flex-col w-full h-full gap-20">
+      <h1 className="text-32 text-(--main-color)">도서 관리</h1>
+      <article className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide">
+        <div className="pe-3">
+          {books.map((book) => (
+            <div
+              key={book.id}
+              className="flex items-center justify-between gap-10 px-20 py-10 border-b h-120 border-b-gray-200"
+            >
+              <Image
+                src={book.cover || "/no-image.png"}
+                alt={book.title}
+                width={62.5}
+                height={100}
+                className="rounded-md shrink-0"
+              />
+              <div className="flex-1">
+                <p className="font-semibold line-clamp-2 leading-24">
+                  {book.title}
+                </p>
+                <p className="line-clamp-2 text-14">{book.author}</p>
+              </div>
+              <div className="flex items-center gap-10 shrink-0">
+                <p className="text-14">재고 : {book.stock}</p>
+                <EditBookModal
+                  book={book}
+                  handleUpdateBook={handleUpdateBook}
+                  handleDeleteBook={handleDeleteBook}
+                />
+              </div>
+            </div>
+          ))}
+          {hasNext && (
+            <div className="p-20 text-center">
+              <button
+                className="bg-(--main-color) rounded-full text-white px-16 py-10 hover:cursor-pointer text-14"
+                onClick={() => fetchBooks()}
+              >
+                더보기
+              </button>
+            </div>
+          )}
+        </div>
+      </article>
+    </section>
   );
 };
 

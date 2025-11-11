@@ -1,37 +1,22 @@
-import { Box, VStack } from "@chakra-ui/react";
 import { ADMIN_TAB } from "@/constants/adminMenu";
 
 const SideBar = ({ tabIndex, handleClickTab }) => {
   return (
-    <Box
-      as="aside"
-      w="240px"
-      h="100%"
-      bg="var(--main-color)"
-      position="sticky"
-      rounded="xl"
-    >
-      <VStack p="10px">
+    <aside className="w-240 h-full bg-(--main-color) sticky rounded-xl shrink-0">
+      <div className="p-10">
         {ADMIN_TAB.map((tab, idx) => (
-          <Box
+          <div
             key={tab.value}
             onClick={() => handleClickTab(idx)}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            w="100%"
-            h="50px"
-            color="#FFFFFF"
-            fontWeight={tabIndex === idx ? "bold" : "normal"}
-            bg={tabIndex === idx && "#FFFFFF50"}
-            rounded="lg"
-            _hover={{ cursor: "pointer" }}
+            className={`flex items-center justify-center w-full h-50 text-white ${
+              tabIndex === idx && "bg-[#FFFFFF50] text-bold"
+            } rounded-lg hover:cursor-pointer`}
           >
             {tab.label}
-          </Box>
+          </div>
         ))}
-      </VStack>
-    </Box>
+      </div>
+    </aside>
   );
 };
 

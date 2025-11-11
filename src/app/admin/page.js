@@ -9,6 +9,8 @@ import {
   FAQManagement,
 } from "@/components/admin/Management";
 
+const NotReady = () => <div>준비 중(스켈레톤)</div>;
+
 const Admin = () => {
   // 탭 상태
   const tabValues = ADMIN_TAB.map((tab) => tab.value);
@@ -22,16 +24,13 @@ const Admin = () => {
   };
 
   // TODO 스켈레톤 만들기
-  const ActiveComponent =
-    TAB_COMPONENTS[tabValues[tabIndex]] ?? (() => <Box>준비 중(스켈레톤)</Box>);
+  const ActiveComponent = TAB_COMPONENTS[tabValues[tabIndex]] ?? NotReady;
 
   return (
-    <main p="20px" h="100dvh" display="flex" gap="20px">
+    <div className="flex gap-20 p-20 h-dvh">
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />
-      <div flex="1">
-        <ActiveComponent />
-      </div>
-    </main>
+      <ActiveComponent />
+    </div>
   );
 };
 

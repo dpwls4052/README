@@ -1,6 +1,7 @@
+"use client";
 import { useState, useCallback } from "react";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/config/firebase"; // firebase 설정을 불러오는 경로는 기존 코드와 동일하게 유지
+import { db } from "@/lib/firebase"; // firebase 설정을 불러오는 경로는 기존 코드와 동일하게 유지
 
 /**
  * Firestore의 'books' 컬렉션에서 특정 도서를 수정하는 커스텀 훅

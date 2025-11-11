@@ -20,22 +20,14 @@ export default function Modal({
 
       <Dialog.Portal>
         {/* ✅ BACKDROP */}
-        <Dialog.Overlay
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-fadeIn"
-        />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm animate-fadeIn" />
 
         {/* ✅ CONTENT CENTER WRAPPER */}
-        <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
-          <Dialog.Content
-            className="
-              bg-white rounded-xl shadow-lg 
-              p-10 relative w-full max-w-sm
-              animate-scaleIn
-            "
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <Dialog.Content className="relative w-full max-w-sm p-10 bg-white shadow-lg  rounded-xl animate-scaleIn">
             {/* ✅ TITLE */}
             {title && (
-              <div className="text-center mb-6">
+              <div className="mb-6 text-center">
                 <Dialog.Title className="text-xl font-semibold">
                   {title}
                 </Dialog.Title>
@@ -43,7 +35,7 @@ export default function Modal({
             )}
 
             {/* ✅ BODY */}
-            <div className="text-center text-base mb-6">{children}</div>
+            <div className="mb-6 text-base text-center">{children}</div>
 
             {/* ✅ FOOTER */}
             {footer ? (
@@ -52,13 +44,7 @@ export default function Modal({
               <div className="flex justify-center gap-3">
                 {/* cancel */}
                 <Dialog.Close asChild>
-                  <button
-                    className="
-                      px-4 py-2 rounded-md border border-gray-300 
-                      bg-white text-gray-700 
-                      hover:bg-gray-100 transition
-                    "
-                  >
+                  <button className="px-4 py-2 text-gray-700 transition bg-white border border-gray-300 rounded-md  hover:bg-gray-100">
                     {cancelText}
                   </button>
                 </Dialog.Close>
@@ -79,12 +65,7 @@ export default function Modal({
 
             {/* ✅ CLOSE BUTTON (우측 상단 X) */}
             <Dialog.Close asChild>
-              <button
-                className="
-                  absolute top-4 right-4
-                  text-gray-500 hover:text-black
-                "
-              >
+              <button className="absolute text-gray-500  top-4 right-4 hover:text-black">
                 <IoClose size={22} />
               </button>
             </Dialog.Close>
