@@ -71,7 +71,7 @@ const LoginForm = () => {
         <Link href="/find-password" className="hover:underline">
           비밀번호 찾기
         </Link>
-        <Link href="/kt_3team_project_2025/signup" className="hover:underline">
+        <Link href="/signup" className="hover:underline">
           회원가입
         </Link>
       </div>

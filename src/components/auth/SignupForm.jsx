@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/common/useAuth";
 import { toaster } from "@/components/ui/toaster";
 
 const SignupForm = () => {

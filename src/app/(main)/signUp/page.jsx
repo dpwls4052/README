@@ -1,15 +1,17 @@
 import React from "react";
 import SignupForm from "@/components/auth/SignupForm";
 import logo from "@/assets/logo.png";
+import Image from "next/image";
 
 const SignupPage = () => {
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-[#FFFAE5]">
-      {/* 로고 */}
-      <img
+      <Image
         src={logo}
         alt="README Logo"
-        className="w-[250px] mb-8 object-contain"
+        width={200}
+        height={200}
+        className="mb-8 object-contain"
       />
 
       {/* 회원가입 폼을 감싸는 카드 */}
