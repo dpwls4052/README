@@ -1,4 +1,6 @@
-import { useTab } from "@/hooks/useTab";
+"use client";
+
+import { useTab } from "@/hooks/common/useTab";
 import SideBar from "@/components/member/SideBar";
 import { USER_TAB } from "@/constants/userMenu";
 
