@@ -1,6 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 
 export default function Modal({
@@ -14,6 +15,20 @@ export default function Modal({
   onOpenChange,
   maxSize,
 }) {
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onConfirm?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onConfirm]);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>

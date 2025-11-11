@@ -3,6 +3,7 @@ import EditBookModal from "../EditBookModal";
 import { useUpdateBook } from "@/hooks/admin/useUpdateBook";
 import { useDeleteBook } from "@/hooks/admin/useDeleteBook";
 import Image from "next/image";
+import DeleteBookModal from "../DeleteBookModal";
 
 const BookManagement = () => {
   const { books, fetchBooks, hasNext, setBooks } = useBookList({
@@ -57,10 +58,13 @@ const BookManagement = () => {
               </div>
               <div className="flex items-center gap-10 shrink-0">
                 <p className="text-14">재고 : {book.stock}</p>
+                <DeleteBookModal
+                  book={book}
+                  handleDeleteBook={handleDeleteBook}
+                />
                 <EditBookModal
                   book={book}
                   handleUpdateBook={handleUpdateBook}
-                  handleDeleteBook={handleDeleteBook}
                 />
               </div>
             </div>
