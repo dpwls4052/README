@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { SlBasket } from "react-icons/sl";
 import { IoIosHeartEmpty, IoIosSearch } from "react-icons/io";
 import Image from "next/image";
@@ -8,16 +9,17 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="flex items-center justify-between gap-4 px-4 py-4 mx-auto max-w-1200">
+        
         {/* 로고 */}
-        <div className="cursor-pointer">
+        <Link href="/" className="cursor-pointer">
           <Image
             src={Logo}
             alt="사이트 로고"
             width={80}
             height={40}
-            objectFit="contain"
+            style={{ objectFit: "contain" }}
           />
-        </div>
+        </Link>
 
         {/* 검색창 */}
         <div className="relative flex-1 max-w-600">
@@ -31,12 +33,23 @@ export default function Header() {
 
         {/* 아이콘 버튼 */}
         <div className="flex items-center gap-4">
-          <button className="p-2 transition rounded-full hover:bg-gray-100">
+          
+          {/* 카트 */}
+          <Link
+            href="/cart"
+            className="p-2 transition rounded-full hover:bg-gray-100"
+          >
             <SlBasket className="text-xl" />
-          </button>
-          <button className="p-2 transition rounded-full hover:bg-gray-100">
+          </Link>
+
+          {/* 위시리스트 */}
+          <Link
+            href="/member/wishlist"
+            className="p-2 transition rounded-full hover:bg-gray-100"
+          >
             <IoIosHeartEmpty className="text-xl text-red-500" />
-          </button>
+          </Link>
+
         </div>
       </div>
     </header>
