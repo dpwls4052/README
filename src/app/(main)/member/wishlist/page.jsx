@@ -1,17 +1,9 @@
+"use client";
+
 import React, { useState } from "react";
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  Image,
-  Button,
-  HStack,
-  VStack,
-  IconButton,
-} from "@chakra-ui/react";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
+import Link from "next/link";
 
 const Wishlist = () => {
   const [items, setItems] = useState([
@@ -48,134 +40,83 @@ const Wishlist = () => {
   const itemsTotal = items.reduce((acc, item) => acc + item.price, 0);
 
   return (
-    <Box minH="100vh" py="40px">
-      <Box maxW="1200px" mx="auto" px="20px">
-        <Flex gap="40px" direction={{ base: "column", lg: "row" }}>
+    <div className="min-h-screen py-10 bg-white">
+      <div className="max-w-[1200px] mx-auto px-5">
+        <div className="flex flex-col lg:flex-row gap-10">
           {/* 왼쪽 영역 - 위시리스트 목록 */}
-          <Box
-            flex="2"
-            bg="var(--bg-color)"
-            p="20px"
-            borderRadius="16px"
-            boxShadow="sm"
-          >
-            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
-              위시리스트
-            </Heading>
+          <div className="flex-2 bg-gray-50 p-5 rounded-xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-5 text-black">위시리스트</h2>
 
             {items.length === 0 ? (
-              <Box textAlign="center" py="40px">
-                <Text color="gray.500" fontSize="lg">
-                  위시리스트가 비어 있습니다.
-                </Text>
-              </Box>
+              <div className="text-center py-20">
+                <p className="text-gray-500 text-lg">위시리스트가 비어 있습니다.</p>
+              </div>
             ) : (
-              <VStack gap="0" align="stretch">
-                {items.map((item, index) => (
-                  <Box key={item.id}>
-                    <Flex justify="space-between" align="center" py="16px">
-                      <Flex align="center" gap="16px">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          boxSize="80px"
-                          borderRadius="8px"
-                          objectFit="cover"
-                        />
-                        <VStack align="start" gap="4px">
-                          <Text fontSize="md" fontWeight="medium" color="black">
-                            {item.name}
-                          </Text>
-                          <Text
-                            fontSize="lg"
-                            fontWeight="bold"
-                            color="var(--main-color)"
-                          >
-                            {item.price.toLocaleString()}원
-                          </Text>
-                        </VStack>
-                      </Flex>
-
-                      <HStack gap="8px">
-                        <IconButton
-                          aria-label="위시리스트에서 제거"
-                          size="md"
-                          onClick={() => handleToggleHeart(item.id, item.name)}
-                          bg="transparent"
-                          color="#e63946"
-                          _hover={{ bg: "rgba(230, 57, 70, 0.1)" }}
-                        >
-                          <FaHeart size={22} />
-                        </IconButton>
-                        <IconButton
-                          aria-label="장바구니에 추가"
-                          size="md"
-                          onClick={() => handleAddToCart(item.name)}
-                          bg="var(--sub-color)"
-                          color="#fff"
-                          _hover={{ bg: "#6d7a58" }}
-                        >
-                          <FiShoppingCart size={20} />
-                        </IconButton>
-                      </HStack>
-                    </Flex>
-                    {index < items.length - 1 && (
-                      <Box borderBottom="1px solid" borderColor="gray.200" />
-                    )}
-                  </Box>
+              <div className="flex flex-col divide-y divide-gray-200">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center py-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-black font-medium">{item.name}</span>
+                        <span className="text-[var(--main-color)] font-bold">
+                          {item.price.toLocaleString()}원
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleToggleHeart(item.id, item.name)}
+                        className="text-red-600 hover:bg-red-100 p-2 rounded"
+                      >
+                        <FaHeart size={20} />
+                      </button>
+                      <button
+                        onClick={() => handleAddToCart(item.name)}
+                        className="bg-[var(--sub-color)] text-white p-2 rounded hover:bg-green-700"
+                      >
+                        <FiShoppingCart size={18} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </VStack>
+              </div>
             )}
-          </Box>
+          </div>
 
           {/* 오른쪽 영역 - 요약 정보 */}
-          <Box
-            flex="1"
-            bg="var(--bg-color)"
-            p="20px"
-            borderRadius="16px"
-            boxShadow="sm"
-            h="fit-content"
-            position={{ lg: "sticky" }}
-            top="20px"
-          >
-            <Heading size="xl" mb="20px" color="black" fontSize={"24px"}>
-              위시리스트 정보
-            </Heading>
+          <div className="flex-1 bg-gray-50 p-5 rounded-xl shadow-sm h-fit lg:sticky lg:top-5">
+            <h2 className="text-2xl font-bold mb-5 text-black">위시리스트 정보</h2>
 
-            <VStack gap="12px" align="stretch" mb="16px">
-              <Flex justify="space-between">
-                <Text color="black">상품 수</Text>
-                <Text fontWeight="bold" color="black">
-                  {items.length}개
-                </Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text color="black">총 금액</Text>
-                <Text fontWeight="bold" color="var(--main-color)">
+            <div className="flex flex-col gap-3 mb-4">
+              <div className="flex justify-between">
+                <span className="text-black">상품 수</span>
+                <span className="font-bold text-black">{items.length}개</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-black">총 금액</span>
+                <span className="font-bold text-[var(--main-color)]">
                   {itemsTotal.toLocaleString()}원
-                </Text>
-              </Flex>
-            </VStack>
+                </span>
+              </div>
+            </div>
 
-            <Box borderBottom="1px solid" borderColor="gray.200" mb="16px" />
+            <div className="border-b border-gray-200 mb-4" />
 
-            <Button
-              size="lg"
-              width="100%"
-              onClick={() =>
-                (window.location.href = "/kt_3team_project_2025/cart")
-              }
-              bg="var(--main-color)"
-              color="var(--bg-color)"
-              _hover={{ bg: "var(--sub-color)" }}
+            <Link
+              href="/cart"
+              className="block w-full text-center py-3 bg-[var(--main-color)] text-white rounded-lg hover:bg-[var(--sub-color)] transition"
             >
               장바구니로 이동
-            </Button>
-          </Box>
-        </Flex>
-      </Box>
-    </Box>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
