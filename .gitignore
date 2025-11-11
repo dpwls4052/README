@@ -15,6 +15,7 @@ out/
 dist/
 build/
 dist-ssr/
+node_modules/
 
 # Tailwind cache
 .tailwindcache/
