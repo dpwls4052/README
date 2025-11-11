@@ -1,45 +1,35 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./useAuth";
 
 export const useDirectPurchase = () => {
   const { user } = useAuth();
   const router = useRouter();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const purchase = (book) => {
     if (user) {
       const orderItem = {
         id: book.id,
         title: book.title,
-        price: book.price,
+        price: book.priceStandard,
         quantity: 1,
-        image: book.image,
+        image: book.cover,
       };
 
       const cartData = {
         orderItems: [orderItem],
-        totalItemPrice: book.price,
-        deliveryFee: 0,
+        totalItemPrice: book.priceStandard,
+        deliveryFee: 3000,
       };
 
       const cartDataString = encodeURIComponent(JSON.stringify(cartData));
       router.push(`/pay?cartData=${cartDataString}`);
+      return true;
     } else {
-      setIsLoginModalOpen(true);
+      return false;
     }
   };
 
-  const closeLoginModal = () => {
-    setIsLoginModalOpen(false);
-  };
-
-  const confirmLoginModal = () => {
-    router.push("/login");
-    setIsLoginModalOpen(false);
-  };
-
-  return { purchase, isLoginModalOpen, closeLoginModal, confirmLoginModal };
+  return { purchase };
 };
