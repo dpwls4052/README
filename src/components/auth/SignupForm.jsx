@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { toaster } from "@/components/ui/toaster";
 
@@ -9,7 +12,7 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +34,7 @@ const SignupForm = () => {
         type: "success",
         duration: 1500,
       });
-      setTimeout(() => navigate("/kt_3team_project_2025/login"), 1500);
+      setTimeout(() => router.push("/kt_3team_project_2025/login"), 1500);
     }
   };
 
@@ -112,13 +115,12 @@ const SignupForm = () => {
         {/* 로그인 이동 */}
         <div className="flex justify-center items-center gap-2 text-sm mt-2">
           <span>이미 계정이 있으신가요?</span>
-          <button
-            type="button"
-            onClick={() => navigate("/kt_3team_project_2025/login")}
+          <Link
+            href="/kt_3team_project_2025/login"
             className="text-[#0A400C] font-medium hover:underline"
           >
             로그인
-          </button>
+          </Link>
         </div>
       </div>
     </form>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/common/useAuth";
 import { toaster } from "@/components/ui/toaster";
 
 const LoginForm = () => {
@@ -71,7 +71,7 @@ const LoginForm = () => {
         <Link href="/find-password" className="hover:underline">
           비밀번호 찾기
         </Link>
-        <Link href="/signUp" className="hover:underline">
+        <Link href="/kt_3team_project_2025/signup" className="hover:underline">
           회원가입
         </Link>
       </div>
