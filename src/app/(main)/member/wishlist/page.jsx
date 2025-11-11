@@ -36,7 +36,7 @@ const Wishlist = () => {
   // 장바구니에 추가
   const handleAddToCart = (name) => {
     alert(`${name}이(가) 장바구니에 추가되었습니다`);
-    // TODO: 실제 장바구니에 추가하는 로직
+    // TODO: 실제 장바구니 추가 로직
   };
 
   const itemsTotal = items.reduce((acc, item) => acc + item.price, 0);

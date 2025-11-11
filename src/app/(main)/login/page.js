@@ -1,31 +1,20 @@
-import React from "react";
-import { Box, Flex, Image } from "@chakra-ui/react";
-import LoginForm from "../components/auth/LoginForm";
-import logo from "../assets/logo.png";
+"use client";
 
-const Login = () => {
+import LoginForm from "@/components/auth/LoginForm";
+import Image from "next/image";
+import logo from "@/assets/logo.png";
+
+export default function LoginPage() {
   return (
-    <Flex
-      direction="column"
-      align="center"
-      justify="center"
-      width="100vw"
-      height="100vh"
-      bg={"#FEFAE0"}
-    >
+    <div className="flex flex-col items-center justify-center h-screen bg-[#FEFAE0]">
       <Image
         src={logo}
         alt="README Logo"
-        width="250px"
-        mb="32px"
-        objectFit="contain"
+        width={200}
+        height={200}
+        className="mb-8 object-contain"
       />
-
-      <Box p="48px 64px" borderRadius="12px" boxShadow="md" bg="white">
-        <LoginForm />
-      </Box>
-    </Flex>
+      <LoginForm />
+    </div>
   );
-};
-
-export default Login;
+}
