@@ -27,11 +27,13 @@ const Wishlist = () => {
     },
   ]);
 
+  // 하트 클릭 시 위시리스트에서 제거
   const handleToggleHeart = (id, name) => {
     setItems(items.filter((item) => item.id !== id));
     alert(`${name}이(가) 위시리스트에서 제거되었습니다`);
   };
 
+  // 장바구니에 추가
   const handleAddToCart = (name) => {
     alert(`${name}이(가) 장바구니에 추가되었습니다`);
     // TODO: 실제 장바구니에 추가하는 로직
@@ -41,10 +43,10 @@ const Wishlist = () => {
 
   return (
     <div className="min-h-screen py-10 bg-white">
-      <div className="max-w-[1200px] mx-auto px-5">
+      <div className="max-w-1200 mx-auto px-5">
         <div className="flex flex-col lg:flex-row gap-10">
           {/* 왼쪽 영역 - 위시리스트 목록 */}
-          <div className="flex-2 bg-gray-50 p-5 rounded-xl shadow-sm">
+          <div className="flex-2 bg-gray-50 p-5 rounded-15 shadow-sm">
             <h2 className="text-2xl font-bold mb-5 text-black">위시리스트</h2>
 
             {items.length === 0 ? (
@@ -63,7 +65,7 @@ const Wishlist = () => {
                       />
                       <div className="flex flex-col">
                         <span className="text-black font-medium">{item.name}</span>
-                        <span className="text-[var(--main-color)] font-bold">
+                        <span className="text-(--main-color) font-bold">
                           {item.price.toLocaleString()}원
                         </span>
                       </div>
@@ -77,7 +79,7 @@ const Wishlist = () => {
                       </button>
                       <button
                         onClick={() => handleAddToCart(item.name)}
-                        className="bg-[var(--sub-color)] text-white p-2 rounded hover:bg-green-700"
+                        className="bg-(--sub-color) text-white p-2 rounded hover:bg-green-700"
                       >
                         <FiShoppingCart size={18} />
                       </button>
@@ -89,7 +91,7 @@ const Wishlist = () => {
           </div>
 
           {/* 오른쪽 영역 - 요약 정보 */}
-          <div className="flex-1 bg-gray-50 p-5 rounded-xl shadow-sm h-fit lg:sticky lg:top-5">
+          <div className="flex-1 bg-gray-50 p-5 rounded-15 shadow-sm h-fit lg:sticky lg:top-5">
             <h2 className="text-2xl font-bold mb-5 text-black">위시리스트 정보</h2>
 
             <div className="flex flex-col gap-3 mb-4">
@@ -99,7 +101,7 @@ const Wishlist = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-black">총 금액</span>
-                <span className="font-bold text-[var(--main-color)]">
+                <span className="font-bold text-(--main-color)">
                   {itemsTotal.toLocaleString()}원
                 </span>
               </div>
@@ -109,7 +111,7 @@ const Wishlist = () => {
 
             <Link
               href="/cart"
-              className="block w-full text-center py-3 bg-[var(--main-color)] text-white rounded-lg hover:bg-[var(--sub-color)] transition"
+              className="block w-full text-center py-3 bg-(--main-color) text-white rounded-lg hover:bg-(--sub-color) transition"
             >
               장바구니로 이동
             </Link>
