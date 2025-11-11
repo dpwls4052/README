@@ -7,21 +7,31 @@ import { useBookList } from "@/hooks/common/useBookList";
 import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
 import { useCart } from "@/hooks/common/useCart";
 import { useModal } from "@/hooks/common/useModal";
+import { useRouter } from "next/navigation";
 
 const Bestseller = () => {
+  const router = useRouter();
+  const goDetail = (id) => {
+    router.push(`/product/detail/${id}`);
+  };
   const { books } = useBookList({
     pageSize: 10,
     orderField: "salesCount",
     orderDirection: "desc",
   });
 
-  const { purchase, isLoginModalOpen, closeLoginModal, confirmLoginModal } =
-    useDirectPurchase();
+  const { purchase } = useDirectPurchase();
   const {
     isModalOpen: isCartModalOpen,
     openModal: openCartModal,
     closeModal: closeCartModal,
     toggleModal: toggleCartModal,
+  } = useModal();
+  const {
+    isModalOpen: isLoginModalOpen,
+    openModal: openLoginModal,
+    closeModal: closeLoginModal,
+    toggleModal: toggleLoginModal,
   } = useModal();
   const { selectedBook, addToCart, goToCart } = useCart();
 
@@ -33,7 +43,15 @@ const Bestseller = () => {
     closeCartModal();
     goToCart();
   };
-
+  const handlePurchase = (book) => {
+    if (!purchase(book)) {
+      openLoginModal();
+    }
+  };
+  const confirmLoginModal = () => {
+    router.push("/login");
+    closeLoginModal();
+  };
   return (
     <div className="p-0 mx-auto text-center my-100 max-w-1200">
       <p className="text-[32px] font-semibold">베스트셀러</p>
@@ -46,9 +64,12 @@ const Bestseller = () => {
             className="bg-[var(--bg-color)] p-8 flex flex-col justify-between gap-8"
           >
             {/* 도서 이미지 */}
-            <div className="w-full overflow-hidden border border-gray-200 h-250">
+            <div
+              className="w-full overflow-hidden border border-gray-200 h-250 hover:cursor-pointer"
+              onClick={() => goDetail(book.id)}
+            >
               <Image
-                src={book.cover}
+                src={book.cover || "/no-image.png"}
                 alt={book.title}
                 width={300}
                 height={300}
@@ -103,7 +124,7 @@ const Bestseller = () => {
               <Modal
                 title="로그인이 필요한 서비스입니다."
                 open={isLoginModalOpen}
-                onOpenChange={closeLoginModal}
+                onOpenChange={toggleLoginModal}
                 confirmText="로그인 페이지로 이동"
                 cancelText="취소"
                 onConfirm={confirmLoginModal}
@@ -114,7 +135,7 @@ const Bestseller = () => {
               </Modal>
               <button
                 className="flex-1 bg-(--main-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
-                onClick={() => purchase(book)}
+                onClick={() => handlePurchase(book)}
               >
                 바로구매
               </button>
