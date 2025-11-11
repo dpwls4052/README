@@ -33,7 +33,7 @@ export default function Recommend() {
   const nextRef = useRef(null);
 
   return (
-    <div className="flex w-full gap-80 mt-12">
+    <div className="flex w-full mt-12 gap-80">
       {/* LEFT AREA */}
       <div className="flex flex-col justify-between">
         <div className="text-right">
@@ -45,7 +45,7 @@ export default function Recommend() {
             더보기 →
           </button>
         </div>
-        <div className="mb-80 flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-80">
           <button
             ref={prevRef}
             className="bg-transparent border-0 cursor-pointer"
@@ -94,16 +94,16 @@ export default function Recommend() {
           ).map((book) => (
             <SwiperSlide key={book.id}>
               <div className="w-[200px] h-[280px] rounded-lg overflow-hidden border border-gray-200">
-                <Image
+                {/* <Image
                   src={book.cover}
                   alt={book.title || "도서"}
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                   width={200}
                   height={280}
-                />
+                /> */}
               </div>
 
-              <div className="mt-4 flex flex-col items-start text-left">
+              <div className="flex flex-col items-start mt-4 text-left">
                 <p
                   className="text-lg font-bold overflow-hidden text-ellipsis w-[180px]
                     line-clamp-2"

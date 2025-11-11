@@ -1,65 +1,71 @@
-import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
+"use client";
+
+import * as Dialog from "@radix-ui/react-dialog";
+import { IoClose } from "react-icons/io5";
 
 export default function Modal({
   title,
   children,
-  trigger,
-  confirmText = "확인",
-  cancelText = "취소",
+  confirmText,
+  cancelText,
   onConfirm,
-  footer,
-  open, // 선택: 컨트롤드 모드
-  onOpenChange, // 선택: 컨트롤드 모드
-  ...contentProps // Dialog.Content에 전달할 추가 props (size 등)
+  onCancel,
+  open,
+  onOpenChange,
+  maxSize,
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      {trigger ? <Dialog.Trigger asChild>{trigger}</Dialog.Trigger> : null}
+      <Dialog.Portal>
+        {/* backdrop */}
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-white/5 backdrop-blur-sm" />
 
-      <Portal>
-        <Dialog.Backdrop bg="rgba(41, 41, 41, 0.14)" />
-        <Dialog.Positioner
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
+        {/* content center wrapper */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <Dialog.Content
-            {...contentProps}
-            boxShadow="0 4px 10px rgba(113, 113, 113, 0.08)"
-            py={10}
+            className={`relative w-full p-20 bg-white shadow-lg rounded-xl ${maxSize}`}
           >
-            {title ? (
-              <Dialog.Header justifyContent="center">
-                <Dialog.Title>{title}</Dialog.Title>
-              </Dialog.Header>
-            ) : null}
-
-            <Dialog.Body fontSize="var(--font-medium)" textAlign="center">
-              {children}
-            </Dialog.Body>
-
-            {footer ? (
-              <Dialog.Footer>{footer}</Dialog.Footer>
-            ) : (
-              <Dialog.Footer marginTop={2} justifyContent="center">
-                {/* 취소: 내부 상태 닫힘 */}
-                <Dialog.ActionTrigger asChild>
-                  <Button variant="outline">{cancelText}</Button>
-                </Dialog.ActionTrigger>
-
-                {/* 확인: onConfirm 호출 후 닫고 싶으면 onConfirm에서 처리 */}
-                <Button onClick={onConfirm} bgColor="var(--main-color)">
-                  {confirmText}
-                </Button>
-              </Dialog.Footer>
+            {/* title */}
+            {title && (
+              <Dialog.Title className="text-xl font-semibold text-center">
+                {title}
+              </Dialog.Title>
             )}
 
-            <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
-            </Dialog.CloseTrigger>
+            {/* body */}
+            <div className="mt-10 text-center">{children}</div>
+
+            <div className="flex justify-center gap-10 mt-20">
+              {/* cancel */}
+              {cancelText && (
+                <button
+                  onClick={onCancel}
+                  className="px-16 py-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:cursor-pointer"
+                >
+                  {cancelText}
+                </button>
+              )}
+
+              {/* confirm */}
+              {confirmText && (
+                <button
+                  onClick={onConfirm}
+                  className="px-16 py-10 rounded-md bg-(--main-color) text-white hover:opacity-90 hover:cursor-pointer"
+                >
+                  {confirmText}
+                </button>
+              )}
+            </div>
+
+            {/* close button(우측 상단) */}
+            <Dialog.Close asChild>
+              <button className="absolute text-gray-500 top-10 right-10 hover:text-black hover:cursor-pointer">
+                <IoClose size={25} />
+              </button>
+            </Dialog.Close>
           </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
+        </div>
+      </Dialog.Portal>
     </Dialog.Root>
   );
 }

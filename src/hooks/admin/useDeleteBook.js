@@ -1,6 +1,7 @@
+"use client";
 import { useState, useCallback } from "react";
 import { doc, deleteDoc } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { db } from "@/lib/firebase";
 
 /**
  * Firestore 'books' 컬렉션에서 특정 도서를 삭제하는 커스텀 훅
