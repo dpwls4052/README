@@ -1,23 +1,20 @@
-import React from "react";
+"use client";
+
 import LoginForm from "@/components/auth/LoginForm";
+import Image from "next/image";
 import logo from "@/assets/logo.png";
 
-const Login = () => {
+export default function LoginPage() {
   return (
-    <div className="flex flex-col items-center justify-center w-screen h-screen bg-[#FEFAE0]">
-      {/* 로고 */}
-      <img
+    <div className="flex flex-col items-center justify-center h-screen bg-[#FEFAE0]">
+      <Image
         src={logo}
         alt="README Logo"
-        className="w-[250px] mb-8 object-contain"
+        width={200}
+        height={200}
+        className="mb-8 object-contain"
       />
-
-      {/* 로그인 박스 */}
-      <div className="p-12 rounded-xl shadow-md bg-white">
-        <LoginForm />
-      </div>
+      <LoginForm />
     </div>
   );
-};
-
-export default Login;
+}
