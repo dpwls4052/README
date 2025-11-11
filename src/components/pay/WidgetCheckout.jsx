@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from 'react';
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 
@@ -5,7 +7,7 @@ function generateRandomString() {
   return window.btoa(Math.random().toString()).slice(0, 20);
 }
 
-export function WidgetCheckoutPage({
+export default function WidgetCheckoutPage({
   amount,
   orderName,
   onReady,
@@ -32,7 +34,7 @@ export function WidgetCheckoutPage({
       }
     }
     fetchPaymentWidgets();
-  }, []);
+  }, [clientKey, customerKey]);
 
   useEffect(() => {
     async function renderPaymentWidgets() {
@@ -62,7 +64,7 @@ export function WidgetCheckoutPage({
       }
     }
     renderPaymentWidgets();
-  }, [widgets]);
+  }, [widgets, amount, onReady]);
 
   // 금액 변경 시 위젯 업데이트
   useEffect(() => {
@@ -79,19 +81,20 @@ export function WidgetCheckoutPage({
     if (triggerPayment && ready && widgetsRef.current) {
       handlePayment();
     }
-  }, [triggerPayment]);
+  }, [triggerPayment, ready]);
 
   const handlePayment = async () => {
-    const baseUrl =
-      import.meta.env.MODE === 'production'
-        ? `${window.location.origin}/kt_3team_project_2025`
-        : window.location.origin;
+    // Next.js에서는 process.env.NODE_ENV 사용
+    const isProduction = process.env.NODE_ENV === 'production';
+    const baseUrl = isProduction
+      ? `${window.location.origin}`
+      : window.location.origin;
 
     try {
       await widgetsRef.current.requestPayment({
         orderId: generateRandomString(),
         orderName: orderName,
-        successUrl: `${window.location.origin}/kt_3team_project_2025/pay/success`,
+        successUrl: `${window.location.origin}/pay/success`,
         failUrl: `${baseUrl}/pay/fail`,
         customerEmail: 'customer123@gmail.com',
         customerName: '김토스',

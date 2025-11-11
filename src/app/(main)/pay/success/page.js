@@ -1,37 +1,25 @@
-import { useEffect, useState } from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
-import {
-  Box,
-  Button,
-  Heading,
-  Stack,
-  Flex,
-  Text,
-  Image,
-} from "@chakra-ui/react";
+"use client";
 
-export function PaymentSuccess() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+
+export default function PaymentSuccess() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [responseData, setResponseData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // false로 변경!
-  const location = useLocation();
-  const [paymentData, setPaymentData] = useState(location.state || null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
 
   useEffect(() => {
-    if (!paymentData) {
+    if (typeof window !== 'undefined') {
       const saved = localStorage.getItem("paymentData");
       if (saved) {
         setPaymentData(JSON.parse(saved));
-        localStorage.removeItem("paymentData"); // 사용 후 삭제
+        localStorage.removeItem("paymentData");
       }
     }
-  }, [paymentData]);
+  }, []);
 
   // 실제 결제 승인이 필요한 경우 아래 주석을 해제하세요
   // useEffect(() => {
@@ -66,183 +54,135 @@ export function PaymentSuccess() {
   //       setIsLoading(false);
   //     })
   //     .catch((error) => {
-  //       navigate(`/kt_3team_project_2025/fail?code=${error.code}&message=${error.message}`);
+  //       router.push(`/fail?code=${error.code}&message=${error.message}`);
   //     });
-  // }, [searchParams]);
+  // }, [searchParams, router]);
 
   if (!paymentData) {
     return (
-      <Box bg="white" minH="100vh" py="40px">
-        <Box maxW="800px" mx="auto" px="20px">
-          <Text textAlign="center" color="gray.500" fontSize="18px">
+      <div className="bg-white min-h-screen py-10">
+        <div className="max-w-[800px] mx-auto px-5">
+          <p className="text-center text-gray-500 text-[18px]">
             결제 정보가 없습니다. 홈으로 돌아가주세요.
-          </Text>
-          <Flex justify="center" mt="24px">
-            <Button
-              as={Link}
-              to="/kt_3team_project_2025"
-              bg="#0A400C"
-              color="#FFFFFF"
-              fontSize="18px"
-              h="50px"
-              px="32px"
-              borderRadius="15px"
-              _hover={{ bg: "#0d5010" }}
+          </p>
+          <div className="flex justify-center mt-6">
+            <Link
+              href="/"
+              className="bg-[var(--main-color)] text-white text-[18px] h-[50px] px-8 rounded-[15px] hover:bg-[#0d5010] flex items-center justify-center transition"
             >
               홈으로 가기
-            </Button>
-          </Flex>
-        </Box>
-      </Box>
+            </Link>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <Box bg="white" minH="100vh" py="40px">
-        <Box maxW="800px" mx="auto" px="20px">
-          <Flex justify="center" align="center" minH="400px">
-            <Text fontSize="20px" color="#666">
+      <div className="bg-white min-h-screen py-10">
+        <div className="max-w-[800px] mx-auto px-5">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <p className="text-[20px] text-gray-600">
               결제 승인 처리 중...
-            </Text>
-          </Flex>
-        </Box>
-      </Box>
+            </p>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box bg="white" minH="100vh" py="40px">
-      <Box maxW="800px" mx="auto" px="20px">
-        <Stack gap="32px" align="center">
+    <div className="bg-white min-h-screen py-10">
+      <div className="max-w-[800px] mx-auto px-5">
+        <div className="flex flex-col gap-8 items-center">
           {/* 성공 이미지 및 타이틀 */}
-          <Box
-            bg="#F7F6ED"
-            p="40px"
-            borderRadius="15px"
-            w="100%"
-            textAlign="center"
-          >
-            <Image
+          <div className="bg-[var(--bg-color)] p-10 rounded-[15px] w-full text-center">
+            <img
               src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
-              w="100px"
-              mx="auto"
-              mb="24px"
+              alt="success"
+              className="w-[100px] mx-auto mb-6"
             />
-            <Heading fontSize="28px" color="#0A400C" mb="16px">
+            <h1 className="text-[28px] font-bold text-[var(--main-color)] mb-4">
               결제가 완료되었습니다
-            </Heading>
-            <Text fontSize="16px" color="#666">
+            </h1>
+            <p className="text-[16px] text-gray-600">
               주문이 정상적으로 처리되었습니다.
-            </Text>
-          </Box>
+            </p>
+          </div>
 
           {/* 결제 정보 */}
-          <Box bg="#F7F6ED" p="32px" borderRadius="15px" w="100%">
-            <Heading fontSize="24px" mb="24px" color="#000">
+          <div className="bg-[var(--bg-color)] p-8 rounded-[15px] w-full">
+            <h2 className="text-[24px] font-bold mb-6 text-black">
               결제 정보
-            </Heading>
-            <Stack gap="16px">
-              <Flex
-                justify="space-between"
-                py="12px"
-                borderBottom="1px solid #e2e8f0"
-              >
-                <Text fontSize="16px" fontWeight="bold" color="#000">
+            </h2>
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between py-3 border-b border-gray-300">
+                <span className="text-[16px] font-bold text-black">
                   결제금액
-                </Text>
-                <Text fontSize="18px" fontWeight="bold" color="#0A400C">
+                </span>
+                <span className="text-[18px] font-bold text-[var(--main-color)]">
                   {paymentData.finalPrice.toLocaleString()}원
-                </Text>
-              </Flex>
-              <Flex
-                justify="space-between"
-                py="12px"
-                borderBottom="1px solid #e2e8f0"
-              >
-                <Text fontSize="16px" fontWeight="bold" color="#000">
+                </span>
+              </div>
+              <div className="flex justify-between py-3 border-b border-gray-300">
+                <span className="text-[16px] font-bold text-black">
                   주문상품
-                </Text>
-                <Text fontSize="16px" color="#666">
+                </span>
+                <span className="text-[16px] text-gray-600">
                   {paymentData.orderName}
-                </Text>
-              </Flex>
-              <Flex
-                justify="space-between"
-                py="12px"
-                borderBottom="1px solid #e2e8f0"
-              >
-                <Text fontSize="16px" fontWeight="bold" color="#000">
+                </span>
+              </div>
+              <div className="flex justify-between py-3 border-b border-gray-300">
+                <span className="text-[16px] font-bold text-black">
                   주문번호
-                </Text>
-                <Text fontSize="16px" color="#666" fontFamily="monospace">
+                </span>
+                <span className="text-[16px] text-gray-600 font-mono">
                   {searchParams.get("orderId")}
-                </Text>
-              </Flex>
-              <Flex justify="space-between" py="12px">
-                <Text fontSize="16px" fontWeight="bold" color="#000">
+                </span>
+              </div>
+              <div className="flex justify-between py-3">
+                <span className="text-[16px] font-bold text-black">
                   결제수단
-                </Text>
-                <Text fontSize="16px" color="#666">
+                </span>
+                <span className="text-[16px] text-gray-600">
                   {searchParams.get("paymentType") === "NORMAL"
                     ? "일반결제"
                     : searchParams.get("paymentType")}
-                </Text>
-              </Flex>
-            </Stack>
-          </Box>
+                </span>
+              </div>
+            </div>
+          </div>
 
           {/* 응답 데이터 (개발용) */}
           {responseData && (
-            <Box bg="#F7F6ED" p="32px" borderRadius="15px" w="100%">
-              <Heading fontSize="24px" mb="16px" color="#000">
+            <div className="bg-[var(--bg-color)] p-8 rounded-[15px] w-full">
+              <h2 className="text-[24px] font-bold mb-4 text-black">
                 Response Data
-              </Heading>
-              <Box
-                bg="white"
-                p="16px"
-                borderRadius="10px"
-                fontSize="14px"
-                fontFamily="monospace"
-                overflowX="auto"
-              >
+              </h2>
+              <div className="bg-white p-4 rounded-lg text-[14px] font-mono overflow-x-auto">
                 <pre>{JSON.stringify(responseData, null, 2)}</pre>
-              </Box>
-            </Box>
+              </div>
+            </div>
           )}
 
           {/* 버튼 영역 */}
-          <Stack direction={{ base: "column", md: "row" }} gap="16px" w="100%">
-            <Button
-              as={Link}
-              to="/kt_3team_project_2025"
-              bg="#0A400C"
-              color="#FFFFFF"
-              fontSize="18px"
-              h="60px"
-              borderRadius="15px"
-              _hover={{ bg: "#0d5010" }}
-              flex="1"
+          <div className="flex flex-col md:flex-row gap-4 w-full">
+            <Link
+              href="/"
+              className="bg-[var(--main-color)] text-white text-[18px] h-[60px] rounded-[15px] hover:bg-[#0d5010] flex-1 flex items-center justify-center transition"
             >
               홈으로 가기
-            </Button>
-            <Button
-              as={Link}
-              to="/kt_3team_project_2025/mypage/orders"
-              bg="white"
-              color="#0A400C"
-              fontSize="18px"
-              h="60px"
-              borderRadius="15px"
-              border="2px solid #0A400C"
-              _hover={{ bg: "#F7F6ED" }}
-              flex="1"
+            </Link>
+            <Link
+              href="/mypage/orders"
+              className="bg-white text-[var(--main-color)] text-[18px] h-[60px] rounded-[15px] border-2 border-[var(--main-color)] hover:bg-[var(--bg-color)] flex-1 flex items-center justify-center transition"
             >
               주문 내역 보기
-            </Button>
-          </Stack>
-        </Stack>
-      </Box>
-    </Box>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

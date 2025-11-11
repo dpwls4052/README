@@ -1,34 +1,17 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Grid,
-  Icon,
-  IconButton,
-  Image,
-  Text,
-  Badge,
-  Avatar,
-  HStack,
-  VStack,
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 
-// 🚨🚨🚨 Element type is invalid 오류 해결을 위해 Named Import 재확인 🚨🚨🚨
-// 만약 이 두 줄에서 오류가 난다면, 중괄호를 빼고 Default Import로 바꿔야 합니다.
-import { useAuth } from "../../../../hooks/common/useAuth";
-import { useBookList } from "../../../../hooks/common/useBookList";
-
-// 📚 상세 정보 페이지 Mock 데이터 (DB 데이터가 없을 때를 대비)
+// Mock 데이터
 const MOCK_DETAIL_TABS_DATA = {
   description: `이 책은 독자들에게 깊은 감동과 인사이트를 제공하는 훌륭한 작품입니다. 
-      저자의 독특한 시각과 섬세한 문체가 돋보이며, 현대 사회의 다양한 이슈들을 
-      예리하게 통찰합니다. 페이지를 넘길 때마다 새로운 발견과 깨달음이 있어 
-      독서의 즐거움을 만끽할 수 있습니다.`,
+저자의 독특한 시각과 섬세한 문체가 돋보이며, 현대 사회의 다양한 이슈들을 
+예리하게 통찰합니다. 페이지를 넘길 때마다 새로운 발견과 깨달음이 있어 
+독서의 즐거움을 만끽할 수 있습니다.`,
   reviews: [
     {
       id: 1,
@@ -64,372 +47,206 @@ const MOCK_DETAIL_TABS_DATA = {
     {
       id: 2,
       question: "반품/교환이 가능한가요?",
-      answer:
-        "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
+      answer: "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
     },
   ],
 };
 
-// 🚨 제공해주신 책 데이터를 구조적으로 정의
+// Mock 책 데이터
 const DEFAULT_BOOK_DATA = {
   author: "조 내버로, 마빈 칼린스 (지은이), 박정길 (옮긴이)",
   categoryName: "국내도서>자기계발>인간관계>교양심리학",
   cover: "https://image.aladin.co.kr/product/772/58/coversum/8901110806_1.jpg",
   description:
-    "전직 FBI요원이자 행동전문가인 조 내버로가 상대방의 몸짓과 표정을 읽음으로써 사람의 마음을 간파해 효과적인 커뮤니케이션을 할 수 있는 기술을 담은 책이다. ...", // 실제 긴 내용은 DetailPage 내에서 MOCK_DETAIL_TABS_DATA.description 대신 사용됨.
+    "전직 FBI요원이자 행동전문가인 조 내버로가 상대방의 몸짓과 표정을 읽음으로써 사람의 마음을 간파해 효과적인 커뮤니케이션을 할 수 있는 기술을 담은 책이다.",
   id: "9788901110806",
-  link: "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=7725851&partner=openAPI&start=api",
   priceStandard: 14000,
   pubDate: "2010-09-13",
   publisher: "리더스북",
-  salesCount: 31,
-  stock: 7,
   title: "FBI 행동의 심리학 - 말보다 정직한 7가지 몸의 단서",
-  // Mock 탭 데이터도 추가
+  stock: 7,
   ...MOCK_DETAIL_TABS_DATA,
 };
 
 const ProductDetail = () => {
-  const { idx } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // useBookList는 실제로 데이터를 불러오지 못할 수 있으므로, 기본 데이터를 사용
-  const { books, loading: dataLoading } = useBookList({
-    pageSize: 1,
-    id: idx,
-  });
-
-  // DB에서 가져온 책 데이터 (첫 번째 요소 사용)
-  const bookFromDB = books?.[0];
-
-  const [isWished, setIsWished] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
+  const [isWished, setIsWished] = useState(false);
 
-  useEffect(() => {
-    if (bookFromDB) {
-      console.log(bookFromDB, "DB에서 불러온 단일 책 데이터");
-    }
-  }, [bookFromDB]);
+  const detailData = DEFAULT_BOOK_DATA;
 
-  // 최종적으로 렌더링에 사용할 데이터 (DB 데이터가 있으면 사용, 없으면 Default Mock 데이터 사용)
-  const detailData = bookFromDB
-    ? {
-        ...bookFromDB,
-        // DB에 탭 정보(reviews, faqs)가 없으면 Mock 데이터를 병합
-        reviews: bookFromDB.reviews || MOCK_DETAIL_TABS_DATA.reviews,
-        faqs: bookFromDB.faqs || MOCK_DETAIL_TABS_DATA.faqs,
-      }
-    : DEFAULT_BOOK_DATA; // 🚨 DB 데이터가 로딩 중이거나 없을 경우 제공해주신 Mock 데이터를 사용
-
-  // 로그인 필요 시 바로 로그인 페이지로 이동
-  const handleBuyNow = () => {
-    if (user) {
-      navigate("/kt_3team_project_2025/pay");
-    } else {
-      navigate("/kt_3team_project_2025/login");
-    }
-  };
-
-  // 장바구니 로직: 로그인 필요 시 바로 로그인 페이지로 이동
-  const handleAddToCart = () => {
-    if (user) {
-      alert(`${detailData.title}이(가) 장바구니에 담겼습니다.`); // 🚨 alert로 대체
-      // TODO: 실제 장바구니에 추가하는 로직
-    } else {
-      navigate("/kt_3team_project_2025/login");
-    }
-  };
-
-  // 찜하기 로직: 로그인 필요 시 바로 로그인 페이지로 이동
-  const toggleWishlist = () => {
-    if (user) {
-      setIsWished(!isWished);
-      // TODO: 실제 위시리스트 추가/제거 로직
-    } else {
-      navigate("/kt_3team_project_2025/login");
-    }
-  };
-
-  // 로딩 상태 처리
-  if (dataLoading && !bookFromDB) {
-    // 데이터 로딩 중이고, 기존 데이터도 없을 때만 로딩 표시
-    return (
-      <Container maxW="1200px" py="100px">
-        <Text fontSize="xl">상품 데이터 로딩 중...</Text>
-      </Container>
-    );
-  }
-
-  // 데이터 없음 처리 (심지어 Mock 데이터도 없을 경우, 이럴 일은 거의 없음)
-  if (!detailData.id) {
-    return (
-      <Container maxW="1200px" py="100px">
-        <Text fontSize="xl">
-          상품 데이터를 불러올 수 없거나 존재하지 않습니다. (ID: {idx})
-        </Text>
-        <Button mt="4" onClick={() => navigate(-1)}>
-          돌아가기
-        </Button>
-      </Container>
-    );
-  }
-
-  const Separator = () => <Box borderBottom="1px solid #e2e8f0" my="24px" />;
-
-  const isReviewDataValid = Array.isArray(detailData.reviews);
-  const totalReviews = isReviewDataValid ? detailData.reviews.length : 0;
-
+  const totalReviews = detailData.reviews?.length || 0;
   const averageRating =
     totalReviews > 0
       ? (
-          detailData.reviews.reduce((sum, review) => sum + review.rating, 0) /
-          totalReviews
+          detailData.reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
         ).toFixed(1)
       : 0;
 
+  const toggleWishlist = () => setIsWished(!isWished);
+
+  const handleAddToCart = () => {
+    alert(`${detailData.title}이(가) 장바구니에 담겼습니다.`);
+  };
+
+  const handleBuyNow = () => {
+    alert(`${detailData.title} 결제가 완료되었습니다.`);
+    router.push("/kt_3team_project_2025/success");
+  };
+
   return (
-    <Container maxW="1200px" p="0" margin="100px auto">
-      {/* 상품 상세 정보 */}
-      <Grid
-        templateColumns={{ base: "1fr", md: "1fr 1fr" }}
-        gap="60px"
-        mb="80px"
-      >
-        {/* 왼쪽: 이미지 */}
-        <Box>
-          <Box
-            width="100%"
-            height="600px"
-            overflow="hidden"
-            border="1px solid #eee"
-            bgColor="var(--bg-color)"
-          >
-            <Image
-              src={detailData.cover || "/no-image.png"}
-              alt={detailData.title}
-              w="100%"
-              h="100%"
-              objectFit="contain"
-            />
-          </Box>
-        </Box>
+    <div className="max-w-6xl mx-auto p-4 mt-20">
+      {/* 상품 정보 영역 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* 이미지 */}
+        <div className="bg-[var(--bg-color)] p-4 border rounded-lg flex justify-center items-center h-[600px]">
+          <Image
+            src={detailData.cover}
+            alt={detailData.title}
+            width={400}
+            height={600}
+            className="object-contain"
+          />
+        </div>
 
-        {/* 오른쪽: 상품 정보 */}
-        <VStack align="stretch" spacing="24px">
-          <Box>
-            <Text fontSize="var(--font-small)" color="gray.600" mb="2">
-              {detailData.categoryName || "도서"}
-            </Text>
-            <Text fontSize="var(--font-larger)" fontWeight="700" mb="3">
-              {detailData.title}
-            </Text>
-            <Text fontSize="var(--font-medium)" color="gray.600">
-              {detailData.author} | {detailData.publisher || "출판사"} |{" "}
-              {detailData.pubDate || "날짜 미상"}
-            </Text>
-          </Box>
+        {/* 정보 */}
+        <div className="flex flex-col space-y-6">
+          <div>
+            <p className="text-sm text-gray-600">{detailData.categoryName}</p>
+            <h1 className="text-2xl font-bold mt-1">{detailData.title}</h1>
+            <p className="text-gray-600 mt-1">
+              {detailData.author} | {detailData.publisher} | {detailData.pubDate}
+            </p>
+          </div>
 
-          <Separator />
+          <div>
+            <p className="text-3xl font-bold text-[var(--main-color)]">
+              {detailData.priceStandard.toLocaleString()}원
+            </p>
+          </div>
 
-          {/* 가격 정보 (priceStandard만 사용) */}
-          <Box>
-            <Flex alignItems="baseline" gap="3" mb="2">
-              <Text fontSize="28px" fontWeight="bold" color="var(--main-color)">
-                {(detailData.priceStandard ?? 0).toLocaleString()}원
-              </Text>
-            </Flex>
-          </Box>
+          <div className="flex justify-between items-center">
+            <span className="font-semibold">재고</span>
+            <span
+              className={`px-3 py-1 rounded ${
+                detailData.stock > 10
+                  ? "bg-[var(--sub-color)]/30 text-[var(--main-color)]"
+                  : "bg-orange-200 text-[var(--main-color)]"
+              }`}
+            >
+              {detailData.stock > 0 ? `${detailData.stock}권 남음` : "품절"}
+            </span>
+          </div>
 
-          <Separator />
+          {/* 버튼 */}
+          <div className="flex space-x-4 pt-4">
+            <button
+              onClick={toggleWishlist}
+              disabled={detailData.stock === 0}
+              className="p-3 border rounded text-red-500 hover:bg-[var(--sub-color)]/20"
+            >
+              {isWished ? <IoIosHeart size={24} /> : <IoIosHeartEmpty size={24} />}
+            </button>
+            <button
+              onClick={handleAddToCart}
+              disabled={detailData.stock === 0}
+              className="flex-1 bg-[var(--sub-color)] text-white px-4 py-3 rounded flex items-center justify-center gap-2 hover:bg-[var(--main-color)]"
+            >
+              <AiOutlineShoppingCart size={20} />
+              장바구니
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={detailData.stock === 0}
+              className="flex-1 bg-[var(--main-color)] text-white px-4 py-3 rounded hover:bg-[var(--sub-color)]"
+            >
+              바로구매
+            </button>
+          </div>
+        </div>
+      </div>
 
-          {/* 재고 정보 */}
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontSize="var(--font-medium)" fontWeight="600">
-              재고
-            </Text>
-            <HStack>
-              <Badge
-                colorScheme={detailData.stock > 10 ? "green" : "orange"}
-                fontSize="md"
-                px="3"
-                py="1"
-              >
-                {detailData.stock > 0 ? `${detailData.stock}권 남음` : "품절"}
-              </Badge>
-            </HStack>
-          </Flex>
-
-          <Separator />
-
-          {/* 버튼 영역 */}
-          <VStack spacing="12px" pt="20px">
-            <Flex gap="12px" width="100%">
-              <IconButton
-                aria-label="찜하기"
-                icon={
-                  <Icon
-                    as={isWished ? IoIosHeart : IoIosHeartEmpty}
-                    boxSize="6"
-                  />
-                }
-                variant="outline"
-                colorScheme="red"
-                size="lg"
-                onClick={toggleWishlist}
-                isDisabled={detailData.stock === 0}
-              />
-              <Button
-                leftIcon={<Icon as={AiOutlineShoppingCart} boxSize="5" />}
-                bgColor="var(--sub-color)"
-                size="lg"
-                flex="1"
-                onClick={handleAddToCart}
-                isDisabled={detailData.stock === 0}
-              >
-                장바구니
-              </Button>
-              <Button
-                bgColor="var(--main-color)"
-                size="lg"
-                flex="1"
-                onClick={handleBuyNow}
-                isDisabled={detailData.stock === 0}
-              >
-                바로구매
-              </Button>
-            </Flex>
-          </VStack>
-        </VStack>
-      </Grid>
-
-      {/* 탭 메뉴 */}
-      <Box borderTop="2px solid var(--main-color)" pt="40px">
-        <Flex gap="20px" mb="40px" borderBottom="1px solid #eee">
+      {/* 탭 */}
+      <div className="mt-16 border-t-4 border-[var(--main-color)] pt-10">
+        <div className="flex space-x-5 border-b">
           {["description", "reviews", "faq"].map((tab) => (
-            <Button
+            <button
               key={tab}
-              variant="ghost"
-              fontSize="var(--font-medium)"
-              fontWeight={activeTab === tab ? "700" : "400"}
-              color={activeTab === tab ? "var(--main-color)" : "gray.600"}
-              borderBottom={
-                activeTab === tab ? "3px solid var(--main-color)" : "none"
-              }
-              borderRadius="0"
-              pb="12px"
+              className={`pb-3 font-medium ${
+                activeTab === tab
+                  ? "font-bold border-b-4 border-[var(--main-color)] text-[var(--main-color)]"
+                  : "text-gray-600"
+              }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === "description"
                 ? "상품설명"
                 : tab === "reviews"
-                ? `리뷰 (${detailData.reviews?.length ?? 0})`
-                : `FAQ (${detailData.faqs?.length ?? 0})`}
-            </Button>
+                ? `리뷰 (${detailData.reviews.length})`
+                : `FAQ (${detailData.faqs.length})`}
+            </button>
           ))}
-        </Flex>
+        </div>
 
-        {/* 상품 설명 / 리뷰 / FAQ 내용 */}
-        {activeTab === "description" && (
-          <Box py="40px">
-            <Text
-              fontSize="var(--font-medium)"
-              lineHeight="1.8"
-              whiteSpace="pre-line"
-            >
-              {detailData.description}
-            </Text>
-          </Box>
-        )}
+        {/* 탭 내용 */}
+        <div className="mt-10 space-y-8">
+          {activeTab === "description" && (
+            <p className="text-base whitespace-pre-line">{detailData.description}</p>
+          )}
 
-        {activeTab === "reviews" && (
-          <VStack spacing="30px" align="stretch" py="40px">
-            <Flex justifyContent="space-between" alignItems="center" mb="20px">
-              <Text fontSize="var(--font-medium)" fontWeight="600">
-                전체 리뷰 {totalReviews}개
-              </Text>
-              <Text fontSize="var(--font-medium)" color="var(--main-color)">
-                평균 ⭐ {averageRating}
-              </Text>
-            </Flex>
-
-            {totalReviews > 0 ? (
-              detailData.reviews.map((review) => (
-                <Box
+          {activeTab === "reviews" && (
+            <div className="space-y-6">
+              <div className="flex justify-between">
+                <span className="font-semibold">전체 리뷰 {totalReviews}개</span>
+                <span className="text-[var(--main-color)]">평균 ⭐ {averageRating}</span>
+              </div>
+              {detailData.reviews.map((review) => (
+                <div
                   key={review.id}
-                  p="24px"
-                  border="1px solid #eee"
-                  borderRadius="8px"
-                  bgColor="var(--bg-color)"
+                  className="p-6 border rounded-lg bg-[var(--bg-color)]"
                 >
-                  <Flex gap="16px" mb="16px">
-                    <Avatar src={review.avatar} size="md" />
-                    <Box flex="1">
-                      <Flex
-                        justifyContent="space-between"
-                        alignItems="center"
-                        mb="8px"
-                      >
-                        <Text fontWeight="600">{review.author}</Text>
-                        <Text fontSize="var(--font-small)" color="gray.500">
-                          {review.date}
-                        </Text>
-                      </Flex>
-                      <Text color="var(--main-color)" mb="8px">
+                  <div className="flex gap-4 mb-4">
+                    <img
+                      src={review.avatar}
+                      alt={review.author}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-semibold">{review.author}</span>
+                        <span className="text-sm text-gray-500">{review.date}</span>
+                      </div>
+                      <span className="text-[var(--main-color)] mb-2">
                         {"⭐".repeat(review.rating)}
-                      </Text>
-                      <Text fontSize="var(--font-medium)" lineHeight="1.6">
-                        {review.content}
-                      </Text>
-                    </Box>
-                  </Flex>
-                </Box>
-              ))
-            ) : (
-              <Text textAlign="center" py="40px" color="gray.500">
-                아직 등록된 리뷰가 없습니다.
-              </Text>
-            )}
-          </VStack>
-        )}
+                      </span>
+                      <p className="text-base">{review.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {activeTab === "faq" && (
-          <VStack spacing="20px" align="stretch" py="40px">
-            {detailData.faqs?.length > 0 ? (
-              detailData.faqs.map((faq) => (
-                <Box
+          {activeTab === "faq" && (
+            <div className="space-y-6">
+              {detailData.faqs.map((faq) => (
+                <div
                   key={faq.id}
-                  p="24px"
-                  border="1px solid #eee"
-                  borderRadius="8px"
-                  bgColor="var(--bg-color)"
+                  className="p-6 border rounded-lg bg-[var(--bg-color)]"
                 >
-                  <Text
-                    fontSize="var(--font-medium)"
-                    fontWeight="600"
-                    mb="12px"
-                    color="var(--main-color)"
-                  >
+                  <p className="font-semibold text-[var(--main-color)] mb-2">
                     Q. {faq.question}
-                  </Text>
-                  <Text
-                    fontSize="var(--font-medium)"
-                    color="gray.700"
-                    pl="16px"
-                  >
-                    A. {faq.answer}
-                  </Text>
-                </Box>
-              ))
-            ) : (
-              <Text textAlign="center" py="40px" color="gray.500">
-                등록된 FAQ가 없습니다.
-              </Text>
-            )}
-          </VStack>
-        )}
-      </Box>
-    </Container>
+                  </p>
+                  <p className="pl-4">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
