@@ -1,17 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
-import {
-  Box,
-  Input,
-  Button,
-  VStack,
-  Text,
-  Link,
-  HStack,
-} from "@chakra-ui/react";
-import { Field } from "@chakra-ui/react/field"; // ✅ v3에서 올바른 import 경로
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { toaster } from "../ui/toaster";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/hooks/common/useAuth";
+import { toaster } from "@/components/ui/toaster";
 
 const SignupForm = () => {
   const { signup, loading, error } = useAuth();
@@ -19,10 +12,11 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       toaster.create({
         title: "비밀번호 불일치",
@@ -40,117 +34,96 @@ const SignupForm = () => {
         type: "success",
         duration: 1500,
       });
-      setTimeout(() => navigate("/kt_3team_project_2025/login"), 1500);
+      setTimeout(() => router.push("/kt_3team_project_2025/login"), 1500);
     }
   };
 
   return (
-    <Box
-      as="form"
+    <form
       onSubmit={handleSubmit}
-      width="500px"
-      height="400px"
-      mx="auto"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      gap={6}
+      className="w-[500px] h-[400px] mx-auto flex flex-col justify-center items-center gap-6"
     >
-      <VStack spacing={8} width="100%">
+      <div className="w-full space-y-6">
         {/* 이름 입력 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">이름</Field.Label>
-          <Input
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">이름</label>
+          <input
+            type="text"
             placeholder="이름을 입력하세요"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-        </Field.Root>
+        </div>
 
         {/* 이메일 입력 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">이메일</Field.Label>
-          <Input
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">이메일</label>
+          <input
             type="email"
             placeholder="이메일 주소를 입력하세요"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-        </Field.Root>
+        </div>
 
         {/* 비밀번호 입력 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">비밀번호</Field.Label>
-          <Input
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">비밀번호</label>
+          <input
             type="password"
             placeholder="비밀번호 (6자 이상)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-        </Field.Root>
+        </div>
 
         {/* 비밀번호 확인 */}
-        <Field.Root required>
-          <Field.Label fontWeight="semibold">비밀번호 확인</Field.Label>
-          <Input
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">비밀번호 확인</label>
+          <input
             type="password"
             placeholder="비밀번호를 다시 입력하세요"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            size="lg"
-            borderRadius="md"
-            boxShadow="sm"
-            bg="white"
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-        </Field.Root>
+        </div>
 
         {/* 회원가입 버튼 */}
-        <Button
+        <button
           type="submit"
-          width="100%"
-          height="45px"
-          bg="#0A400C"
-          color="white"
-          isLoading={loading}
-          loadingText="가입 중..."
-          fontWeight="bold"
-          _hover={{ bg: "#13661A" }}
+          disabled={loading}
+          className={`w-full h-[45px] bg-[#0A400C] text-white font-bold rounded-md transition-colors ${
+            loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#13661A]"
+          }`}
         >
-          회원가입
-        </Button>
+          {loading ? "가입 중..." : "회원가입"}
+        </button>
 
         {/* 에러 메시지 */}
         {error && (
-          <Text color="red.500" fontSize="sm" mt={2} textAlign="center">
-            {error}
-          </Text>
+          <p className="text-red-500 text-sm text-center mt-2">{error}</p>
         )}
 
         {/* 로그인 이동 */}
-        <HStack>
-          <Text fontSize="sm">이미 계정이 있으신가요?</Text>
+        <div className="flex justify-center items-center gap-2 text-sm mt-2">
+          <span>이미 계정이 있으신가요?</span>
           <Link
-            color="#0A400C"
-            onClick={() => navigate("/kt_3team_project_2025/login")}
+            href="/kt_3team_project_2025/login"
+            className="text-[#0A400C] font-medium hover:underline"
           >
             로그인
           </Link>
-        </HStack>
-      </VStack>
-    </Box>
+        </div>
+      </div>
+    </form>
   );
 };
 
