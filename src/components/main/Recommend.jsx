@@ -33,40 +33,46 @@ export default function Recommend() {
   const nextRef = useRef(null);
 
   return (
-    <div style={{ display: "flex", gap: "80px", width: "100%", marginTop: "50px" }}>
+    <div className="flex w-full mt-12 gap-80">
       {/* LEFT AREA */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", width: "250px" }}>
-        <div style={{ marginBottom: "10px" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "700" }}>11월의 추천도서</h2>
+      <div className="flex flex-col justify-between">
+        <div className="text-right">
+          <div className="mb-8">
+            <h2 className="text-[24px] font-semibold">11월의 추천도서</h2>
+          </div>
+
+          <button className="bg-transparent border-0 cursor-pointer mb-8 text-black text-[var(--font-medium)] hover:underline">
+            더보기 →
+          </button>
         </div>
-
-        <button
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: "16px",
-            cursor: "pointer",
-            marginBottom: "30px",
-          }}
-        >
-          더보기 →
-        </button>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <button ref={prevRef} style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <TfiArrowCircleLeft size={40} />
+        <div className="flex items-center gap-2 mb-80">
+          <button
+            ref={prevRef}
+            className="bg-transparent border-0 cursor-pointer"
+          >
+            <TfiArrowCircleLeft size={25} />
           </button>
 
-          <div className="custom-pagination" style={{ width: "60px", height: "20px" }} />
+          <div
+            className="custom-pagination "
+            style={{
+              width: "100px",
+              height: "20px",
+              "--swiper-theme-color": "var(--main-color)",
+            }}
+          />
 
-          <button ref={nextRef} style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <TfiArrowCircleRight size={40} />
+          <button
+            ref={nextRef}
+            className="bg-transparent border-0 cursor-pointer"
+          >
+            <TfiArrowCircleRight size={25} />
           </button>
         </div>
       </div>
 
       {/* RIGHT AREA (SLIDER) */}
-      <div style={{ flex: 1 }}>
+      <div className="contents">
         <Swiper
           modules={[Navigation, Pagination]}
           slidesPerView={4}
@@ -87,40 +93,27 @@ export default function Recommend() {
             : randomBooks
           ).map((book) => (
             <SwiperSlide key={book.id}>
-              <div style={{ width: "100%", height: "300px", borderRadius: "8px", overflow: "hidden", border: "1px solid #eee" }}>
-                <Image
-                  src={book.cover || "/no-image.png"}
+              <div className="w-[200px] h-[280px] rounded-lg overflow-hidden border border-gray-200">
+                {/* <Image
+                  src={book.cover}
                   alt={book.title || "도서"}
-                  width={300}
-                  height={400}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+                  className="object-cover w-full h-full"
+                  width={200}
+                  height={280}
+                /> */}
               </div>
 
-              <div style={{ marginTop: "15px" }}>
+              <div className="flex flex-col items-start mt-4 text-left">
                 <p
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                    overflow: "hidden",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
+                  className="text-lg font-bold overflow-hidden text-ellipsis w-[180px]
+                    line-clamp-2"
                 >
                   {book.title || "제목 미상"}
                 </p>
 
                 <p
-                  style={{
-                    marginTop: "5px",
-                    fontSize: "14px",
-                    color: "#666",
-                    overflow: "hidden",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: "vertical",
-                  }}
+                  className="mt-1 text-sm text-gray-600 overflow-hidden text-ellipsis w-[180px]
+                    line-clamp-1"
                 >
                   {book.author || book.writer || "작자 미상"}
                 </p>

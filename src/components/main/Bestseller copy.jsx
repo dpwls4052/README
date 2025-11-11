@@ -6,7 +6,6 @@ import Modal from "@/components/common/Modal";
 import { useBookList } from "@/hooks/common/useBookList";
 import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
 import { useCart } from "@/hooks/common/useCart";
-import { useModal } from "@/hooks/common/useModal";
 
 const Bestseller = () => {
   const { books } = useBookList({
@@ -17,22 +16,7 @@ const Bestseller = () => {
 
   const { purchase, isLoginModalOpen, closeLoginModal, confirmLoginModal } =
     useDirectPurchase();
-  const {
-    isModalOpen: isCartModalOpen,
-    openModal: openCartModal,
-    closeModal: closeCartModal,
-    toggleModal: toggleCartModal,
-  } = useModal();
-  const { selectedBook, addToCart, goToCart } = useCart();
-
-  const handleAddToCart = (book) => {
-    addToCart(book);
-    openCartModal();
-  };
-  const handleGoToCart = () => {
-    closeCartModal();
-    goToCart();
-  };
+  const { openCart, handleAddToCart, onConfirmCart, onCloseCart } = useCart();
 
   return (
     <div className="p-0 mx-auto text-center my-100 max-w-1200">
@@ -79,41 +63,15 @@ const Bestseller = () => {
 
             {/* 버튼 */}
             <div className="flex items-center justify-between gap-2">
-              {/* 장바구니 모달 */}
-              <Modal
-                title="선택한 상품을 장바구니에 담았어요."
-                open={isCartModalOpen}
-                onOpenChange={toggleCartModal}
-                confirmText="장바구니 이동"
-                cancelText="취소"
-                onConfirm={handleGoToCart}
-                onCancel={closeCartModal}
-                maxSize="max-w-xl"
-              >
-                장바구니 페이지로 이동하시겠습니까?
-              </Modal>
               <button
-                className="flex-1 bg-(--sub-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
+                className="flex-1 bg-[var(--sub-color)] text-white py-2 rounded h-40 font-normal"
                 onClick={() => handleAddToCart(book)}
               >
                 장바구니
               </button>
 
-              {/* 로그인 모달 */}
-              <Modal
-                title="로그인이 필요한 서비스입니다."
-                open={isLoginModalOpen}
-                onOpenChange={closeLoginModal}
-                confirmText="로그인 페이지로 이동"
-                cancelText="취소"
-                onConfirm={confirmLoginModal}
-                onCancel={closeLoginModal}
-                maxSize="max-w-md"
-              >
-                로그인 페이지로 이동하시겠습니까?
-              </Modal>
               <button
-                className="flex-1 bg-(--main-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
+                className="flex-1 bg-[var(--main-color)] text-white py-2 rounded h-40 font-normal"
                 onClick={() => purchase(book)}
               >
                 바로구매
@@ -122,6 +80,31 @@ const Bestseller = () => {
           </div>
         ))}
       </div>
+      {/* 장바구니 모달 */}
+      <Modal
+        title="선택한 상품을 장바구니에 담았어요."
+        open={openCart}
+        onOpenChange={onCloseCart}
+        confirmText="장바구니 이동"
+        cancelText="취소"
+        onConfirm={onConfirmCart}
+        size="xl"
+      >
+        장바구니 페이지로 이동하시겠습니까?
+      </Modal>
+
+      {/* 로그인 모달 */}
+      <Modal
+        title="로그인이 필요한 서비스입니다."
+        open={isLoginModalOpen}
+        onOpenChange={closeLoginModal}
+        confirmText="로그인 페이지로 이동"
+        cancelText="취소"
+        onConfirm={confirmLoginModal}
+        size="md"
+      >
+        로그인 페이지로 이동하시겠습니까?
+      </Modal>
     </div>
   );
 };

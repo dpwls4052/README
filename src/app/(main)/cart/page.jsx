@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Minus } from 'lucide-react';
+import React, { useState } from "react";
+import { Plus, Minus } from "lucide-react";
 
 // Cart Page Component
 export default function CartPage() {
@@ -66,7 +66,7 @@ export default function CartPage() {
       alert("상품을 선택해주세요");
       return;
     }
-    
+
     // Next.js router를 사용하여 결제 페이지로 이동
     // router.push({
     //   pathname: '/payment',
@@ -77,7 +77,7 @@ export default function CartPage() {
     //     finalPrice: totalAmount
     //   }
     // });
-    
+
     alert("결제 페이지로 이동합니다");
   };
 
@@ -93,18 +93,20 @@ export default function CartPage() {
   const totalAmount = itemsTotal + shippingFee;
 
   return (
-    <div className="min-h-screen bg-white py-10">
-      <div className="max-w-7xl mx-auto px-5">
-        <div className="flex flex-col lg:flex-row gap-10">
+    <div className="min-h-screen py-10 bg-white">
+      <div className="px-5 mx-auto max-w-7xl">
+        <div className="flex flex-col gap-10 lg:flex-row">
           {/* 왼쪽 영역 - 장바구니 목록 */}
           <div className="flex-[2] bg-[#f5f5f5] p-5 rounded-2xl shadow-sm">
-            <h1 className="text-2xl font-bold mb-5 text-black">장바구니</h1>
+            <h1 className="mb-5 text-2xl font-bold text-black">장바구니</h1>
 
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center justify-between mb-4">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={items.length > 0 && selectedItems.length === items.length}
+                  checked={
+                    items.length > 0 && selectedItems.length === items.length
+                  }
                   onChange={handleSelectAll}
                   className="w-4 h-4"
                 />
@@ -128,11 +130,11 @@ export default function CartPage() {
               </div>
             </div>
 
-            <div className="border-b border-gray-200 mb-4" />
+            <div className="mb-4 border-b border-gray-200" />
 
             {items.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-gray-500 text-lg">
+              <div className="py-10 text-center">
+                <p className="text-lg text-gray-500">
                   장바구니가 비어 있습니다.
                 </p>
               </div>
@@ -140,7 +142,7 @@ export default function CartPage() {
               <div className="space-y-0">
                 {items.map((item, index) => (
                   <div key={item.id}>
-                    <div className="flex justify-between items-center py-4">
+                    <div className="flex items-center justify-between py-4">
                       <div className="flex items-center gap-4">
                         <input
                           type="checkbox"
@@ -151,7 +153,7 @@ export default function CartPage() {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-20 h-20 rounded-lg object-cover"
+                          className="object-cover w-20 h-20 rounded-lg"
                         />
                         <div className="flex flex-col gap-1">
                           <p className="text-base font-medium text-black">
@@ -182,7 +184,9 @@ export default function CartPage() {
                         </button>
                       </div>
                     </div>
-                    {index < items.length - 1 && <div className="border-b border-gray-200" />}
+                    {index < items.length - 1 && (
+                      <div className="border-b border-gray-200" />
+                    )}
                   </div>
                 ))}
               </div>
@@ -191,17 +195,25 @@ export default function CartPage() {
 
           {/* 오른쪽 영역 - 결제정보 */}
           <div className="flex-1 bg-[#f5f5f5] p-5 rounded-2xl shadow-sm h-fit lg:sticky lg:top-5">
-            <h2 className="text-2xl font-bold mb-5 text-black">결제정보</h2>
+            <h2 className="mb-5 text-2xl font-bold text-black">결제정보</h2>
 
-            <div className="space-y-3 mb-4">
+            <div className="mb-4 space-y-3">
               <div className="flex justify-between">
                 <span className="text-black">상품 금액</span>
-                <span className="font-bold text-black">{itemsTotal.toLocaleString()}원</span>
+                <span className="font-bold text-black">
+                  {itemsTotal.toLocaleString()}원
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-black">배송비</span>
-                <span className={`font-bold ${shippingFee === 0 ? 'text-[#8b9670]' : 'text-black'}`}>
-                  {shippingFee === 0 ? "무료" : `${shippingFee.toLocaleString()}원`}
+                <span
+                  className={`font-bold ${
+                    shippingFee === 0 ? "text-[#8b9670]" : "text-black"
+                  }`}
+                >
+                  {shippingFee === 0
+                    ? "무료"
+                    : `${shippingFee.toLocaleString()}원`}
                 </span>
               </div>
               <div className="border-b border-gray-200" />

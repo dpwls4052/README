@@ -20,8 +20,8 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 
 // 🚨🚨🚨 Element type is invalid 오류 해결을 위해 Named Import 재확인 🚨🚨🚨
 // 만약 이 두 줄에서 오류가 난다면, 중괄호를 빼고 Default Import로 바꿔야 합니다.
-import { useAuth } from "../../../hooks/common/useAuth";
-import { useBookList } from "../../../hooks/common/useBookList";
+import { useAuth } from "../../../../hooks/common/useAuth";
+import { useBookList } from "../../../../hooks/common/useBookList";
 
 // 📚 상세 정보 페이지 Mock 데이터 (DB 데이터가 없을 때를 대비)
 const MOCK_DETAIL_TABS_DATA = {
