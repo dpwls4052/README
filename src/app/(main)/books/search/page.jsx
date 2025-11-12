@@ -1,86 +1,80 @@
 "use client";
 
 import Image from "next/image";
-import { useParams } from "next/navigation";
-import { useBookList } from "@/hooks/common/useBookList";
-import { useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { IoIosHeartEmpty } from "react-icons/io";
 import Navigation from "@/components/main/Navigation";
-import { useRouter } from "next/navigation";
+import { useBookList } from "@/hooks/common/useBookList";
 import noimg from "@/assets/no_image.png";
 
-const CATEGORY_MAP = {
-  domestic: { title: "국내도서", prefix: "국내도서" },
-  foreign: { title: "해외도서", prefix: "외국도서" },
-  season: { title: "계절도서", prefix: null }, //랜덤처리
-  recommend: { title: "이달의 추천도서", prefix: null }, //랜덤처리
-};
-
-const BookList = () => {
+export default function SearchResultPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const goDetail = (id) => {
-    router.push(`/product/detail/${id}`);
-  };
-  const { category } = useParams();
-  const config = CATEGORY_MAP[category] ?? { title: "전체도서", prefix: null };
+  const q = (searchParams.get("q") || "").trim().toLowerCase();
 
-  const wantRandom = category === "recommend" || category === "season";
-
+  // Firestore의 prefix 검색 한계로 인해 클라이언트에서 필터링
   const { books, loading, fetchBooks, hasNext } = useBookList({
-    pageSize: 10,
+    pageSize: 50, // 넉넉히
     category: null,
-    orderField: wantRandom ? "createdAt" : "salesCount",
+    search: null, // ✅ 추가: 서버에서 prefix 검색
+    orderField: "title", // ✅ 검색 시 정렬 기준 통일
     orderDirection: "desc",
   });
 
-  const visibleBooks = useMemo(() => {
-    let list = Array.isArray(books) ? books : [];
+  const filtered = useMemo(() => {
+    if (!q) return [];
+    const list = Array.isArray(books) ? books : [];
+    return list.filter((b) => {
+      const t = (b.title || "").toLowerCase();
+      const a = (b.author || "").toLowerCase();
+      return t.includes(q) || a.includes(q);
+    });
+  }, [books, q]);
 
-    // 접두사 필터 (prefix가 있을 때만)
-    if (config.prefix) {
-      list = list.filter((b) =>
-        (b.categoryName ?? "").startsWith(config.prefix)
-      );
+  const [visibleCount, setVisibleCount] = useState(10);
+  const visibleBooks = filtered.slice(0, visibleCount);
+
+  const goDetail = (id) => router.push(`/product/detail/${id}`);
+
+  const handleLoadMore = () => {
+    if (visibleCount < filtered.length) {
+      setVisibleCount((prev) => prev + 10);
+    } else if (hasNext) {
+      // 이미 불러온 것 다 봤고 서버에 더 있을 때 → Firestore에서 추가 로드
+      fetchBooks();
     }
-
-    if (!list.length) return [];
-
-    if (wantRandom) {
-      const pool = [...list];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      return pool.slice(0, 10);
-    }
-
-    return list;
-  }, [books, config.prefix, wantRandom]);
+  };
 
   return (
     <>
       <Navigation />
-
       <div className="py-80 max-w-1200 mx-auto">
-        <p className="text-2xl font-bold mb-10">{config.title}</p>
+        <p className="text-2xl font-bold mb-10">
+          검색 결과: <span className="text-[var(--main-color)]">“{q}”</span>
+        </p>
 
-        {loading ? (
+        {loading && filtered.length === 0 ? (
           <div className="flex justify-center items-center h-300">
             <p>Loading...</p>
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center text-gray-500 py-40">
+            해당 검색어에 대한 결과가 없습니다.
+          </div>
         ) : (
           <div className="flex flex-col">
-            {visibleBooks.map((book) => (
+            {filtered.map((book) => (
               <div
                 key={book.id}
-                className="py-20 flex w-full justify-between border-b border-solid border-[#ccc] py-8 gap-14"
+                className="flex w-full justify-between border-b border-solid border-[#ccc] py-8 gap-14"
               >
                 <div
-                  className="flex items-start  gap-20 hover:cursor-pointer"
+                  className="flex items-start gap-20 hover:cursor-pointer"
                   onClick={() => goDetail(book.id)}
                 >
                   <Image
-                    src={book.highResCover || noimg}
+                    src={book.highResCover || book.cover || noimg}
                     alt={book.title || "제목 미상"}
                     width={160}
                     height={220}
@@ -108,24 +102,19 @@ const BookList = () => {
                     <IoIosHeartEmpty className="w-25 h-25 text-red-500" />
                   </button>
                   <div className="flex flex-col gap-10 w-200 h-100">
-                    <button
-                      className="bg-[var(--sub-color)] font-medium flex-1 text-white rounded-sm"
-                      // onClick={() => setOpenCart(true)} // ← 클릭 시 열기
-                    >
+                    <button className="bg-[var(--sub-color)] font-medium flex-1 text-white rounded-sm">
                       장바구니
                     </button>
-
-                    <button
-                      className="bg-[var(--main-color)] font-medium flex-1 text-white rounded-sm"
-                      // onClick={handleBuyNow}
-                    >
+                    <button className="bg-[var(--main-color)] font-medium flex-1 text-white rounded-sm">
                       바로구매
                     </button>
                   </div>
                 </div>
               </div>
             ))}
-            {!wantRandom && hasNext && (
+
+            {/* 더보기 버튼 */}
+            {(visibleCount < filtered.length || hasNext) && (
               <div className="p-20 text-center mt-20">
                 <button
                   className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
@@ -140,6 +129,4 @@ const BookList = () => {
       </div>
     </>
   );
-};
-
-export default BookList;
+}

@@ -100,10 +100,14 @@ export const useBookList = ({
         const snapshot = await getDocs(q);
 
         // 문서 데이터 매핑 (doc.id는 Firestore 문서 ID입니다.)
-        const fetchedDocs = snapshot.docs.map((doc) => ({
-          id: doc.id, // 👈 문서 ID를 'id' 필드에 저장
-          ...doc.data(),
-        }));
+        const fetchedDocs = snapshot.docs.map((doc) => {
+          const bookData = doc.data();
+          return {
+            id: doc.id, // 👈 문서 ID를 'id' 필드에 저장
+            ...bookData,
+            highResCover: bookData.cover?.replace(/coversum/gi, "cover500"),
+          };
+        });
 
         if (id) {
           // 단일 ID 검색인 경우
