@@ -1,70 +1,90 @@
-const Profile = () => {
+"use client";
+
+import { useState } from "react";
+import { FaBookOpen, FaGift, FaRegHeart, FaUserEdit, FaSun, FaMoon } from "react-icons/fa";
+
+export default function Profile() {
+  const [darkMode, setDarkMode] = useState(false);
+
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      {/* 내 프로필 */}
-      <section className="mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">내 프로필</h2>
-          <button className="text-sm border border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-50">
-            설정
+    <div className={`w-full min-h-fit py-10 flex justify-center ${darkMode ? "bg-green-900 text-white" : "bg-gray-50 text-gray-800"}`}>
+      <div className={`w-full max-w-5xl ${darkMode ? "bg-green-950" : "bg-white"} rounded-xl shadow-md p-10 space-y-12 transition-all duration-300`}>
+
+        {/* 🎯 1. 상단 회원 정보 */}
+        <section className="flex justify-between items-center border-b pb-6">
+          <div className="flex items-center gap-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-green-800 dark:text-green-100">jhapoy106님</h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
+              </p>
+            </div>
+          </div>
+          <button className="flex items-center gap-2 border border-green-600 text-green-700 px-4 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-800 dark:text-green-100">
+            <FaUserEdit />
+            프로필 수정
           </button>
-        </div>
+        </section>
 
-        <hr className="mb-4 border-gray-300" />
-
-        <div className="flex items-center gap-6">
-          <div className="w-20 h-20 bg-gray-200 rounded-full" />
-          <div>
-            <p><b>닉네임:</b> jhapoy106</p>
-            <p>
-              <b>프로필 주소:</b>{" "}
-              <a
-                href="https://inflearn.com/users/@jhapoy1068947"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                inflearn.com/users/@jhapoy1068947
-              </a>
-            </p>
-            <p><b>자기소개:</b> 나만의 스킬, 깃허브 링크 등으로 소개글을 채워보세요.</p>
+        {/* 🧾 3. 기본 정보 */}
+        <section className="grid grid-cols-3 gap-6 text-center">
+          <div className="border rounded-lg py-5 hover:bg-green-50 dark:hover:bg-green-800 transition">
+            <h3 className="text-xl font-semibold mb-4">기본 정보</h3>
+            <div className="space-y-3">
+              <p><b>이메일:</b> jhapoy106@naver.com</p>
+              <p><b>휴대폰:</b> 인증 완료 (010-****-1234)</p>
+              <p><b>가입일:</b> 2024-09-15</p>
+              <p><b>최근 로그인:</b> 2025-11-10</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 기본 정보 */}
-      <section>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">기본 정보</h2>
-        </div>
-
-        <hr className="mb-4 border-gray-300" />
-
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <p><b>이메일:</b> jhapoy106@naver.com</p>
-            <button className="text-sm border border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-50">
-              설정
-            </button>
+        {/* 📦 4. 나의 활동 */}
+        <section>
+          <h3 className="text-xl font-semibold mb-4">나의 활동</h3>
+          <div className="grid grid-cols-3 gap-6 text-center">
+            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaBookOpen className="mx-auto text-2xl text-green-700 dark:text-green-200 mb-2" />
+              <p className="text-lg font-semibold">5</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">주문 내역</p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaRegHeart className="mx-auto text-2xl text-pink-600 dark:text-pink-300 mb-2" />
+              <p className="text-lg font-semibold">8</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">찜한 도서</p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaGift className="mx-auto text-2xl text-yellow-600 dark:text-yellow-300 mb-2" />
+              <p className="text-lg font-semibold">3</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">리뷰 작성</p>
+            </div>
           </div>
+        </section>
 
-          <div className="flex justify-between items-center">
-            <p><b>비밀번호:</b> ******</p>
-            <button className="text-sm border border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-50">
-              설정
-            </button>
+        {/* 📚 5. 최근 본 도서 */}
+        <section>
+          <h3 className="text-xl font-semibold mb-4">최근 본 도서</h3>
+          <div className="grid grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="border rounded-lg overflow-hidden hover:shadow-md transition">
+                <img src={`https://placehold.co/200x250?text=Book+${i}`} alt={`Book ${i}`} />
+                <div className="p-3 text-sm">
+                  <p className="font-medium">인기 도서 {i}</p>
+                  <p className="text-gray-500 dark:text-gray-300">저자 이름</p>
+                </div>
+              </div>
+            ))}
           </div>
+        </section>
 
-          <div className="flex justify-between items-center">
-            <p><b>휴대폰 번호:</b> 휴대폰 번호를 인증해 주세요.</p>
-            <button className="text-sm border border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-50">
-              설정
-            </button>
-          </div>
-        </div>
-      </section>
+        {/* ⚙️ 6. 개인 설정 */}
+        <section>
+          <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
+          <button className="mt-6 text-sm text-red-500 hover:underline">
+            회원 탈퇴하기
+          </button>
+        </section>
+      </div>
     </div>
   );
-};
-
-export default Profile;
+}

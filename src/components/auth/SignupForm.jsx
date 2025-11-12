@@ -34,7 +34,7 @@ const SignupForm = () => {
         type: "success",
         duration: 1500,
       });
-      setTimeout(() => router.push("/kt_3team_project_2025/login"), 1500);
+      setTimeout(() => router.push("/login"), 1500);
     }
   };
 
@@ -116,7 +116,7 @@ const SignupForm = () => {
         <div className="flex justify-center items-center gap-2 text-sm mt-2">
           <span>이미 계정이 있으신가요?</span>
           <Link
-            href="/kt_3team_project_2025/login"
+            href="/login"
             className="text-[#0A400C] font-medium hover:underline"
           >
             로그인

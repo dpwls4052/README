@@ -8,7 +8,6 @@ import { USER_TAB } from "@/constants/userMenu";
 import Profile from "@/components/member/pages/Profile";
 import Orders from "@/components/member/pages/Orders";
 import Reviews from "@/components/member/pages/Reviews";
-import Settings from "@/components/member/pages/Settings";
 
 const MyPage = () => {
   // 🔹 탭 value 목록 생성 (['profile', 'orders', 'reviews', 'settings'])
@@ -20,7 +19,6 @@ const MyPage = () => {
     profile: Profile,
     orders: Orders,
     reviews: Reviews,
-    settings: Settings,
   };
 
   // 🔹 현재 활성화된 탭 컴포넌트 선택
