@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper/modules";
 import { useRouter } from "next/navigation";
+import noimg from "@/assets/no_image.png";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -99,11 +100,11 @@ export default function Recommend() {
           ).map((book) => (
             <SwiperSlide key={book.id}>
               <div
-                className="w-[200px] h-[280px] rounded-lg overflow-hidden border border-gray-200 hover:cursor-pointer"
+                className="w-[200px] h-[280px] rounded-md border border-gray-300 overflow-hidden  hover:cursor-pointer"
                 onClick={() => goDetail(book.id)}
               >
                 <Image
-                  src={book.cover || "/no-image.png"}
+                  src={book.highResCover || noimg}
                   alt={book.title || "도서"}
                   className="object-cover w-full h-full"
                   width={200}

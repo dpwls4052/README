@@ -8,6 +8,7 @@ import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
 import { useCart } from "@/hooks/common/useCart";
 import { useModal } from "@/hooks/common/useModal";
 import { useRouter } from "next/navigation";
+import noimg from "@/assets/no_image.png";
 
 const Bestseller = () => {
   const router = useRouter();
@@ -65,11 +66,11 @@ const Bestseller = () => {
           >
             {/* 도서 이미지 */}
             <div
-              className="w-full overflow-hidden border border-gray-200 h-250 hover:cursor-pointer"
+              className="w-full overflow-hidden rounded-md border border-gray-300 h-250 hover:cursor-pointer"
               onClick={() => goDetail(book.id)}
             >
               <Image
-                src={book.cover || "/no-image.png"}
+                src={book.highResCover || noimg}
                 alt={book.title}
                 width={300}
                 height={300}
