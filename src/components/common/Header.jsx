@@ -8,6 +8,7 @@ import { FiUser, FiLogOut } from "react-icons/fi";
 import Image from "next/image";
 import Logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/common/useAuth";
+import { HiOutlineDocumentText } from "react-icons/hi";
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
@@ -124,14 +125,14 @@ export default function Header() {
                   {/* 메뉴 아이템 */}
                   <div className="flex flex-col gap-6 p-4">
                     <Link
-                      href="/member/profile"
+                      href="/member?MemberTab=profile"
                       className="flex items-center gap-2 ml-10 gap-15 px-4 py-3 text-black text-base hover:bg-[var(--bg-color)] rounded transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
                       <FiUser className="text-xl" /> 내 정보
                     </Link>
                     <Link
-                      href="/member/orders"
+                      href="/member?MemberTab=orders"
                       className="flex items-center gap-2 ml-10 gap-15 px-4 py-3 text-black text-base hover:bg-[var(--bg-color)] rounded transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
@@ -145,11 +146,11 @@ export default function Header() {
                       <IoIosHeartEmpty className="text-xl text-red-500" /> 위시리스트
                     </Link>
                     <Link
-                      href="/member/settings"
+                      href="/member?MemberTab=reviews"
                       className="flex items-center gap-2 ml-10 gap-15 px-4 py-3 text-black text-base hover:bg-[var(--bg-color)] rounded transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      <SlSettings className="text-xl" /> 설정
+                      <HiOutlineDocumentText className="text-xl" /> 리뷰 관리
                     </Link>
                   </div>
 

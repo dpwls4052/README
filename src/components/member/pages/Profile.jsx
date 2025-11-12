@@ -26,30 +26,16 @@ export default function Profile() {
           </button>
         </section>
 
-        {/* 💎 2. 회원 등급 및 포인트 */}
+        {/* 🧾 3. 기본 정보 */}
         <section className="grid grid-cols-3 gap-6 text-center">
           <div className="border rounded-lg py-5 hover:bg-green-50 dark:hover:bg-green-800 transition">
-            <p className="text-xl font-bold text-green-800 dark:text-green-100">Green</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">회원 등급</p>
-          </div>
-          <div className="border rounded-lg py-5 hover:bg-green-50 dark:hover:bg-green-800 transition">
-            <p className="text-xl font-bold text-green-800 dark:text-green-100">3,240P</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">보유 포인트</p>
-          </div>
-          <div className="border rounded-lg py-5 hover:bg-green-50 dark:hover:bg-green-800 transition">
-            <p className="text-xl font-bold text-green-800 dark:text-green-100">2개</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">사용 가능한 쿠폰</p>
-          </div>
-        </section>
-
-        {/* 🧾 3. 기본 정보 */}
-        <section>
-          <h3 className="text-xl font-semibold mb-4">기본 정보</h3>
-          <div className="space-y-3">
-            <p><b>이메일:</b> jhapoy106@naver.com</p>
-            <p><b>휴대폰:</b> 인증 완료 (010-****-1234)</p>
-            <p><b>가입일:</b> 2024-09-15</p>
-            <p><b>최근 로그인:</b> 2025-11-10</p>
+            <h3 className="text-xl font-semibold mb-4">기본 정보</h3>
+            <div className="space-y-3">
+              <p><b>이메일:</b> jhapoy106@naver.com</p>
+              <p><b>휴대폰:</b> 인증 완료 (010-****-1234)</p>
+              <p><b>가입일:</b> 2024-09-15</p>
+              <p><b>최근 로그인:</b> 2025-11-10</p>
+            </div>
           </div>
         </section>
 
@@ -94,8 +80,6 @@ export default function Profile() {
         {/* ⚙️ 6. 개인 설정 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
-
-
           <button className="mt-6 text-sm text-red-500 hover:underline">
             회원 탈퇴하기
           </button>
