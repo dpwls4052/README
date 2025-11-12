@@ -8,6 +8,7 @@ import { FiUser, FiLogOut } from "react-icons/fi";
 import Image from "next/image";
 import Logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/common/useAuth";
+import SearchBar from "./SearchBar";
 import { HiOutlineDocumentText } from "react-icons/hi";
 
 export default function Header() {
@@ -35,7 +36,6 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-[1400px]">
-
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
           <Image
@@ -48,14 +48,7 @@ export default function Header() {
         </Link>
 
         {/* 검색창 */}
-        <div className="relative flex-1 max-w-[600px]">
-          <input
-            type="text"
-            placeholder="검색어를 입력하세요."
-            className="w-full h-40 pl-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--main-color)]"
-          />
-          <IoIosSearch className="absolute text-2xl text-gray-400 right-4 top-1/2 -translate-y-1/2" />
-        </div>
+        <SearchBar />
 
         {/* 아이콘 버튼 */}
         <div className="flex items-center gap-6">
@@ -143,7 +136,8 @@ export default function Header() {
                       className="flex items-center gap-2 ml-10 gap-15 px-4 py-3 text-black text-base hover:bg-[var(--bg-color)] rounded transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      <IoIosHeartEmpty className="text-xl text-red-500" /> 위시리스트
+                      <IoIosHeartEmpty className="text-xl text-red-500" />{" "}
+                      위시리스트
                     </Link>
                     <Link
                       href="/member?MemberTab=reviews"
