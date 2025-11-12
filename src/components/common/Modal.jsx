@@ -48,7 +48,7 @@ export default function Modal({
             )}
 
             {/* body */}
-            <div className="mt-10 text-center">{children}</div>
+            {children}
 
             <div className="flex justify-center gap-10 mt-20">
               {/* cancel */}

@@ -4,6 +4,7 @@ import { useUpdateBook } from "@/hooks/admin/useUpdateBook";
 import { useDeleteBook } from "@/hooks/admin/useDeleteBook";
 import Image from "next/image";
 import DeleteBookModal from "../DeleteBookModal";
+import AddBookModal from "../AddBookModal";
 
 const BookManagement = () => {
   const { books, fetchBooks, hasNext, setBooks } = useBookList({
@@ -35,7 +36,10 @@ const BookManagement = () => {
 
   return (
     <section className="flex flex-col w-full h-full gap-20">
-      <h1 className="text-32 text-(--main-color)">도서 관리</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-32 text-(--main-color)">도서 관리</h1>
+        <AddBookModal fetchBooks={fetchBooks} />
+      </div>
       <article className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide">
         <div className="pe-3">
           {books.map((book) => (
