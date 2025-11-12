@@ -134,6 +134,8 @@ const ProductDetail = () => {
       ? (bookData.reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
       : 0;
 
+  const highResCover = bookData.cover.replace(/coversum/gi, 'cover500');
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 mt-20">
 
@@ -146,7 +148,7 @@ const ProductDetail = () => {
           className="bg-(--bg-color) p-8 border border-(--sub-color)/20 flex justify-center items-center min-h-[600px]"
         >
           <Image
-            src={bookData.cover}
+            src={highResCover}
             alt={bookData.title}
             width={400}
             height={600}

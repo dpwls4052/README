@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import WidgetCheckoutPage from './../../../components/pay/WidgetCheckout';
+import WidgetCheckoutPage from '@/components/pay/WidgetCheckout';
+import AddressInput from '@/components/common/AddressInput';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -112,239 +114,219 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen py-10">
-      <div className="max-w-1200 mx-auto px-20">
-        <h1 className="text-32 font-bold mb-8 text-black">
-          주문 / 결제
-        </h1>
+    <ProtectedRoute>
+      <div className="bg-white min-h-screen py-10">
+        <div className="max-w-1200 mx-auto px-20">
+          <h1 className="text-32 font-bold mb-8 text-black">
+            주문 / 결제
+          </h1>
 
-        <div className="flex flex-col lg:flex-row gap-5">
-          <div className="flex-7 flex flex-col gap-6">
-            {/* 주문 고객 */}
-            <div className="bg-(--bg-color) p-6 rounded-15">
-              <h2 className="text-24 font-bold mb-4 text-black">
-                주문 고객
-              </h2>
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center mb-2">
-                  <span className="min-w-60 text-right mr-2 text-black">
-                    이름 
-                  </span>
-                  <input
-                    placeholder="이름"
-                    className="bg-white px-4 py-2 text-16 rounded-15 w-64 border border-gray-200 focus:outline-none focus:border-(--main-color)"
-                  />
-                </div>
-
-                <div className="flex items-center mb-2">
-                  <span className="min-w-60 text-right mr-2 text-black">
-                    연락처  
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={phone1}
-                      onChange={(e) => setPhone1(e.target.value.replace(/[^0-9]/g, ""))}
-                      maxLength={3}
-                      className="w-60 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
-                    />
-                    <span className="text-black">-</span>
-                    <input
-                      value={phone2}
-                      onChange={(e) => setPhone2(e.target.value.replace(/[^0-9]/g, ""))}
-                      maxLength={4}
-                      className="w-70 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
-                    />
-                    <span className="text-black">-</span>
-                    <input
-                      value={phone3}
-                      onChange={(e) => setPhone3(e.target.value.replace(/[^0-9]/g, ""))}
-                      maxLength={4}
-                      className="w-70 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <span className="min-w-60 text-right mr-2 text-black">
-                    이메일 
-                  </span>
-                  <input
-                    placeholder="이메일"
-                    className="bg-white px-4 py-2 text-16 rounded-15 w-64 border border-gray-200 focus:outline-none focus:border-(--main-color)"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 배송지 */}
-            <div className="bg-(--bg-color) p-6 rounded-15">
-              <h2 className="text-24 font-bold mb-4 text-black">
-                배송지
-              </h2>
-
-              <div className="flex gap-6 mb-4">
-                <button 
-                  onClick={() => setAddressType('existing')} 
-                  className={`px-4 py-2 rounded-lg transition ${
-                    addressType==='existing'
-                    ? 'bg-(--main-color) text-white'
-                    : 'bg-white text-black border border-gray-200'
-                  }`}
-                >
-                  등록된 배송지
-                </button>
-                <button 
-                  onClick={() => setAddressType('new')} 
-                  className={`px-4 py-2 rounded-lg transition ${
-                    addressType==='new'
-                    ? 'bg-(--main-color) text-white'
-                    : 'bg-white text-black border border-gray-200'
-                  }`}
-                >
-                  신규 입력
-                </button>
-              </div>
-
-              {addressType === 'new' && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2">
-                    <input 
-                      placeholder="우편번호" 
-                      value={postcode} 
-                      readOnly 
-                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg bg-gray-100"
-                    />
-                    <button 
-                      onClick={handlePostcode} 
-                      className="px-4 py-2 bg-(--main-color) text-white rounded-lg hover:bg-(--sub-color) transition"
-                    >
-                      주소찾기
-                    </button>
-                  </div>
-                  <input 
-                    placeholder="주소" 
-                    value={address} 
-                    readOnly 
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100"
-                  />
-                  <input 
-                    id="detailAddress" 
-                    placeholder="상세주소" 
-                    value={detailAddress} 
-                    onChange={(e)=>setDetailAddress(e.target.value)} 
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* 결제방법 선택 */}
-            <div className="bg-(--bg-color) p-6 rounded-15">
-              <h2 className="text-24 font-bold mb-4 text-black">
-                결제방법 선택
-              </h2>
-              <WidgetCheckoutPage
-                amount={finalPrice}
-                orderName={orderName}
-                onReady={setWidgetReady}
-                triggerPayment={triggerPayment}
-              />
-            </div>
-          </div>
-
-          {/* 우측 영역 */}
-          <div className={`flex-3 ${isSticky ? 'sticky top-5' : 'relative'} h-fit`}> 
-            <div className="flex flex-col gap-6">
-              {/* 주문정보 */}
-              <div className="bg-(--bg-color) p-6 rounded-15"> 
-                <h2 className="text-24 font-bold mb-4 text-black">주문정보</h2> 
-                <div className="flex flex-col gap-4">
-                  {orderItems.map((item) => ( 
-                    <div key={item.id} className="flex gap-4 items-start"> 
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-20 h-20 rounded-lg object-cover"
-                      /> 
-                      <div className="flex flex-col gap-1 flex-1"> 
-                        <p className="text-16 font-bold text-black"> 
-                          {item.title} 
-                        </p>
-                        <p className="text-14 text-gray-600"> 
-                          {item.quantity}권 
-                        </p> 
-                        <p className="text-16 text-black"> 
-                          {item.price.toLocaleString()}원 
-                        </p> 
-                        <p className="text-16 font-bold text-(--main-color)"> 
-                          총 {(item.price * item.quantity).toLocaleString()}원 
-                        </p> 
-                      </div>
-                    </div>
-                  ))}
-                </div> 
-              </div>
-
-              {/* 최종 결제 금액 */}
-              <div className="bg-(--bg-color) p-6 rounded-15"> 
-                <h2 className="text-24 font-bold mb-4 text-black">최종 결제 금액</h2> 
-                <div className="flex flex-col gap-3"> 
-                  <div className="flex justify-between"> 
-                    <span className="text-16 text-black">상품금액</span> 
-                    <span className="text-16 text-black">{totalItemPrice.toLocaleString()}원</span> 
-                  </div> 
-                  <div className="flex justify-between"> 
-                    <span className="text-16 text-black">배송비</span> 
-                    <span className="text-16 text-black">{deliveryFee === 0 ? '무료' : `+${deliveryFee.toLocaleString()}원`}</span> 
-                  </div>
-                  {isRemote && (
-                    <div className="flex justify-between">
-                      <span className="text-16 text-black">도서산간</span> 
-                      <span className="text-16 text-black">+{remoteFee.toLocaleString()}원</span>
-                    </div>
-                  )}
-                  <div className="h-px bg-(--sub-color) my-2" /> 
-                  <div className="flex justify-between">
-                    <span className="text-24 font-bold text-black">최종 결제 금액</span> 
-                    <span className="text-24 font-bold text-(--main-color)">{finalPrice.toLocaleString()}원</span> 
-                  </div>
-                </div>
-              </div>
-
-              {/* 구매 조건 */}
+          <div className="flex flex-col lg:flex-row gap-5">
+            <div className="flex-7 flex flex-col gap-6">
+              {/* 주문 고객 */}
               <div className="bg-(--bg-color) p-6 rounded-15">
-                <label className="flex items-center gap-2 text-16 mb-4 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="w-18 h-18" 
-                    checked={agreed} 
-                    onChange={(e) => setAgreed(e.target.checked)} 
-                  /> 
-                  <span className="text-black">구매 조건 및 결제 진행 동의</span>
-                </label>
-                <div className="bg-white p-4 rounded-lg text-14 text-gray-600 space-y-1">
-                  <p>• 전자상거래법 제8조에 따른 구매조건 확인</p>
-                  <p>• 개인정보 제3자 제공 동의</p>
-                  <p>• 전자금융거래 이용약관 동의</p>
+                <h2 className="text-24 font-bold mb-4 text-black">
+                  주문 고객
+                </h2>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center mb-2">
+                    <span className="min-w-60 text-right mr-2 text-black">
+                      이름 
+                    </span>
+                    <input
+                      placeholder="이름"
+                      className="bg-white px-4 py-2 text-16 rounded-15 w-64 border border-gray-200 focus:outline-none focus:border-(--main-color)"
+                    />
+                  </div>
+
+                  <div className="flex items-center mb-2">
+                    <span className="min-w-60 text-right mr-2 text-black">
+                      연락처  
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={phone1}
+                        onChange={(e) => setPhone1(e.target.value.replace(/[^0-9]/g, ""))}
+                        maxLength={3}
+                        className="w-60 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
+                      />
+                      <span className="text-black">-</span>
+                      <input
+                        value={phone2}
+                        onChange={(e) => setPhone2(e.target.value.replace(/[^0-9]/g, ""))}
+                        maxLength={4}
+                        className="w-70 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
+                      />
+                      <span className="text-black">-</span>
+                      <input
+                        value={phone3}
+                        onChange={(e) => setPhone3(e.target.value.replace(/[^0-9]/g, ""))}
+                        maxLength={4}
+                        className="w-70 px-2 py-2 text-center border border-gray-200 rounded-lg focus:outline-none focus:border-(--main-color)"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <span className="min-w-60 text-right mr-2 text-black">
+                      이메일 
+                    </span>
+                    <input
+                      placeholder="이메일"
+                      className="bg-white px-4 py-2 text-16 rounded-15 w-64 border border-gray-200 focus:outline-none focus:border-(--main-color)"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* 결제 버튼 */}
-              <button 
-                onClick={handlePaymentClick} 
-                disabled={!agreed || !widgetReady}
-                className={`w-full text-24 font-semibold h-60 rounded-15 transition ${
-                  agreed && widgetReady 
-                    ? 'bg-(--main-color) text-white hover:bg-(--sub-color) cursor-pointer' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              > 
-                {widgetReady ? '결제하기' : '결제 준비 중...'} 
-              </button>
+              {/* 배송지 */}
+              <div className="bg-(--bg-color) p-6 rounded-15">
+                <h2 className="text-24 font-bold mb-4 text-black">
+                  배송지
+                </h2>
+
+                <div className="flex gap-6 mb-4">
+                  <button 
+                    onClick={() => setAddressType('existing')} 
+                    className={`px-4 py-2 rounded-lg transition ${
+                      addressType==='existing'
+                      ? 'bg-(--main-color) text-white'
+                      : 'bg-white text-black border border-gray-200'
+                    }`}
+                  >
+                    등록된 배송지
+                  </button>
+                  <button 
+                    onClick={() => setAddressType('new')} 
+                    className={`px-4 py-2 rounded-lg transition ${
+                      addressType==='new'
+                      ? 'bg-(--main-color) text-white'
+                      : 'bg-white text-black border border-gray-200'
+                    }`}
+                  >
+                    신규 입력
+                  </button>
+                </div>
+
+                {addressType === 'new' && (
+                  <AddressInput
+                    postcode={postcode}
+                    address={address}
+                    detailAddress={detailAddress}
+                    onDetailAddressChange={setDetailAddress}
+                    onPostcodeSearch={handlePostcode}
+                  />
+                )}
+              </div>
+
+              {/* 결제방법 선택 */}
+              <div className="bg-(--bg-color) p-6 rounded-15">
+                <h2 className="text-24 font-bold mb-4 text-black">
+                  결제방법 선택
+                </h2>
+                <WidgetCheckoutPage
+                  amount={finalPrice}
+                  orderName={orderName}
+                  onReady={setWidgetReady}
+                  triggerPayment={triggerPayment}
+                />
+              </div>
+            </div>
+
+            {/* 우측 영역 */}
+            <div className={`flex-3 ${isSticky ? 'sticky top-5' : 'relative'} h-fit`}> 
+              <div className="flex flex-col gap-6">
+                {/* 주문정보 */}
+                <div className="bg-(--bg-color) p-6 rounded-15"> 
+                  <h2 className="text-24 font-bold mb-4 text-black">주문정보</h2> 
+                  <div className="flex flex-col gap-4">
+                    {orderItems.map((item) => ( 
+                      <div key={item.id} className="flex gap-4 items-start"> 
+                        <img 
+                          src={item.image} 
+                          alt={item.title}
+                          className="w-20 h-20 rounded-lg object-cover"
+                        /> 
+                        <div className="flex flex-col gap-1 flex-1"> 
+                          <p className="text-16 font-bold text-black"> 
+                            {item.title} 
+                          </p>
+                          <p className="text-14 text-gray-600"> 
+                            {item.quantity}권 
+                          </p> 
+                          <p className="text-16 text-black"> 
+                            {item.price.toLocaleString()}원 
+                          </p> 
+                          <p className="text-16 font-bold text-(--main-color)"> 
+                            총 {(item.price * item.quantity).toLocaleString()}원 
+                          </p> 
+                        </div>
+                      </div>
+                    ))}
+                  </div> 
+                </div>
+
+                {/* 최종 결제 금액 */}
+                <div className="bg-(--bg-color) p-6 rounded-15"> 
+                  <h2 className="text-24 font-bold mb-4 text-black">최종 결제 금액</h2> 
+                  <div className="flex flex-col gap-3"> 
+                    <div className="flex justify-between"> 
+                      <span className="text-16 text-black">상품금액</span> 
+                      <span className="text-16 text-black">{totalItemPrice.toLocaleString()}원</span> 
+                    </div> 
+                    <div className="flex justify-between"> 
+                      <span className="text-16 text-black">배송비</span> 
+                      <span className="text-16 text-black">{deliveryFee === 0 ? '무료' : `+${deliveryFee.toLocaleString()}원`}</span> 
+                    </div>
+                    {isRemote && (
+                      <div className="flex justify-between">
+                        <span className="text-16 text-black">도서산간</span> 
+                        <span className="text-16 text-black">+{remoteFee.toLocaleString()}원</span>
+                      </div>
+                    )}
+                    <div className="h-px bg-(--sub-color) my-2" /> 
+                    <div className="flex justify-between">
+                      <span className="text-24 font-bold text-black">최종 결제 금액</span> 
+                      <span className="text-24 font-bold text-(--main-color)">{finalPrice.toLocaleString()}원</span> 
+                    </div>
+                  </div>
+                </div>
+
+                {/* 구매 조건 */}
+                <div className="bg-(--bg-color) p-6 rounded-15">
+                  <label className="flex items-center gap-2 text-16 mb-4 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="w-18 h-18" 
+                      checked={agreed} 
+                      onChange={(e) => setAgreed(e.target.checked)} 
+                    /> 
+                    <span className="text-black">구매 조건 및 결제 진행 동의</span>
+                  </label>
+                  <div className="bg-white p-4 rounded-lg text-14 text-gray-600 space-y-1">
+                    <p>• 전자상거래법 제8조에 따른 구매조건 확인</p>
+                    <p>• 개인정보 제3자 제공 동의</p>
+                    <p>• 전자금융거래 이용약관 동의</p>
+                  </div>
+                </div>
+
+                {/* 결제 버튼 */}
+                <button 
+                  onClick={handlePaymentClick} 
+                  disabled={!agreed || !widgetReady}
+                  className={`w-full text-24 font-semibold h-60 rounded-15 transition ${
+                    agreed && widgetReady 
+                      ? 'bg-(--main-color) text-white hover:bg-(--sub-color) cursor-pointer' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                > 
+                  {widgetReady ? '결제하기' : '결제 준비 중...'} 
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
