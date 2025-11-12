@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 export default function PaymentSuccess() {
   const router = useRouter();
@@ -96,6 +97,7 @@ export default function PaymentSuccess() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="bg-white min-h-screen py-10">
       <div className="max-w-800 mx-auto px-20">
         <div className="flex flex-col gap-8 items-center">
@@ -187,5 +189,7 @@ export default function PaymentSuccess() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
+
   );
 }
