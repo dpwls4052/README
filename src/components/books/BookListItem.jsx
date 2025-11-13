@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
 import { IoIosHeartEmpty } from "react-icons/io";
 import noimg from "@/assets/no_image.png";
 
-const BookListItem = () => {
+const BookListItem = ({ book, goDetail }) => {
   return (
     <div
       key={book.id}
