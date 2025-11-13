@@ -30,6 +30,7 @@ export const useBookList = ({
   id = null, // 🚨 새로운 옵션: 단일 도서 ID
   orderField = "createdAt",
   orderDirection = "desc",
+  coverResolution = "500", // 이미지 커버 사이즈
 }) => {
   const [books, setBooks] = useState([]);
 
@@ -38,6 +39,26 @@ export const useBookList = ({
 
   const [loading, setLoading] = useState(false);
   const [hasNext, setHasNext] = useState(true);
+
+  // ✅ 허용 가능한 사이즈만 사용하도록 정규화 함수
+  const normalizeCoverSize = (input) => {
+    const VALID_SIZES = ["coversum", "cover", "cover200", "cover500"];
+
+    if (!input) return "cover500";
+    if (VALID_SIZES.includes(input)) return input;
+
+    // 숫자나 별칭으로 들어왔을 때도 대충 맞춰줌
+    const lowered = String(input).toLowerCase();
+
+    if (lowered === "sum" || lowered === "thumb") return "coversum";
+    if (lowered === "default" || lowered === "normal") return "cover";
+    if (lowered === "200" || lowered === "small") return "cover200";
+    if (lowered === "500" || lowered === "big" || lowered === "large")
+      return "cover500";
+
+    // 이상한 값 들어오면 그냥 가장 큰 걸로
+    return "cover500";
+  };
 
   // 책 데이터를 불러오는 함수. reset 플래그를 통해 커서를 초기화
   const fetchBooks = useCallback(
@@ -99,13 +120,26 @@ export const useBookList = ({
         const q = query(ref, ...queryConstraints);
         const snapshot = await getDocs(q);
 
+        const size = normalizeCoverSize(coverResolution);
+
         // 문서 데이터 매핑 (doc.id는 Firestore 문서 ID입니다.)
         const fetchedDocs = snapshot.docs.map((doc) => {
           const bookData = doc.data();
+          const originalCover = bookData.cover;
+
+          let highResCover = originalCover;
+          if (originalCover) {
+            // ✅ coversum / cover / cover200 / cover500 중 하나를 원하는 사이즈로 통째 교체
+            highResCover = originalCover.replace(
+              /coversum|cover200|cover500|cover/gi,
+              size
+            );
+          }
+
           return {
-            id: doc.id, // 👈 문서 ID를 'id' 필드에 저장
+            id: doc.id,
             ...bookData,
-            highResCover: bookData.cover?.replace(/coversum/gi, "cover500"),
+            highResCover,
           };
         });
 
@@ -135,7 +169,15 @@ export const useBookList = ({
         setLoading(false);
       }
     },
-    [pageSize, category, search, id, orderField, orderDirection] // id를 종속성 배열에 추가
+    [
+      pageSize,
+      category,
+      search,
+      id,
+      orderField,
+      orderDirection,
+      coverResolution,
+    ] // id를 종속성 배열에 추가
   );
 
   // 카테고리/검색/정렬/ID 조건이 변경될 때 데이터를 초기화하고 다시 불러오기
