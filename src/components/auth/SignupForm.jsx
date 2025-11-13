@@ -12,6 +12,8 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -26,7 +28,7 @@ const SignupForm = () => {
       return;
     }
 
-    const isSuccess = await signup(name, email, password);
+    const isSuccess = await signup(name, email, password, phone, address);
     if (isSuccess) {
       toaster.create({
         title: "회원가입 완료",
@@ -91,6 +93,32 @@ const SignupForm = () => {
             placeholder="비밀번호를 다시 입력하세요"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+          />
+        </div>
+
+        {/* 전화번호 입력 */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">전화번호</label>
+          <input
+            type="text"
+            placeholder="010-0000-0000"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+          />
+        </div>
+
+        {/* 주소 입력 */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold mb-1">주소</label>
+          <input
+            type="text"
+            placeholder="주소를 입력하세요"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             required
             className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
