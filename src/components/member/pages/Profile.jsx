@@ -41,7 +41,6 @@ export default function Profile() {
   const ref = doc(firestore, "users", user.uid);
   await updateDoc(ref, { [field]: value });
 
-  // UI 즉시 반영
   setUserInfo((prev) => ({ ...prev, [field]: value }));
   setEditField(null);
 }
@@ -67,7 +66,7 @@ const renderEditRow = (label, field) => (
     <div className={`w-full min-h-fit py-10 flex justify-center `}>
       <div className={`w-full max-w-5xl rounded-xl shadow-md p-10 space-y-12 transition-all duration-300`}>
 
-        {/* 🎯 1. 상단 회원 정보 */}
+        {/* 1. 상단 회원 정보 */}
         <section className="flex justify-between items-center border-b pb-6">
           <div className="flex items-center gap-6">
             <div>
@@ -79,7 +78,7 @@ const renderEditRow = (label, field) => (
           </div>
         </section>
 
-        {/* 🧾 3. 기본 정보 */}
+        {/*  2. 기본 정보 */}
         <section className="grid col-span-3 gap-6 text-left">
           <div className="border rounded-lg py-30 pl-15 pr-15 mt-15">
             <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
@@ -162,7 +161,7 @@ const renderEditRow = (label, field) => (
           </div>
         </section>
 
-        {/* 📦 4. 나의 활동 */}
+        {/* 3. 나의 활동 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">나의 활동</h3>
           <div className="grid grid-cols-3 gap-6 text-center">
@@ -184,7 +183,7 @@ const renderEditRow = (label, field) => (
           </div>
         </section>
 
-        {/* 📚 5. 최근 본 도서 */}
+        {/* 4. 최근 본 도서 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">최근 본 도서</h3>
           <div className="grid grid-cols-4 gap-5">
@@ -200,7 +199,7 @@ const renderEditRow = (label, field) => (
           </div>
         </section>
 
-        {/* ⚙️ 6. 개인 설정 */}
+        {/* 5. 개인 설정 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
           <button className="mt-6 text-sm text-red-500 hover:underline">
