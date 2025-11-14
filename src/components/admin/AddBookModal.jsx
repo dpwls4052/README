@@ -78,6 +78,7 @@ const AddBookModal = ({ fetchBooks }) => {
         onConfirm={handleSaveBook}
         onCancel={closeModal}
         maxSize="max-w-full flex flex-col h-dvh"
+        bodyClassName="overflow-y-auto"
       >
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center w-full h-50 px-20 mx-auto border border-(--main-color) rounded-full max-w-600 shrink-0 mt-10">

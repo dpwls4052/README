@@ -16,7 +16,7 @@ const Bestseller = () => {
     router.push(`/product/detail/${id}`);
   };
   const { books } = useBookList({
-    pageSize: 10,
+    pageSize: 8,
     orderField: "salesCount",
     orderDirection: "desc",
   });
@@ -58,15 +58,15 @@ const Bestseller = () => {
       <p className="text-[32px] font-semibold">베스트셀러</p>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-30 my-80">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-40 my-80">
         {books.map((book) => (
           <div
             key={book.id}
-            className="bg-[var(--bg-color)] p-8 flex flex-col justify-between gap-8"
+            className="bg-[var(--bg-color)] p-8 flex flex-col justify-between gap-15 "
           >
             {/* 도서 이미지 */}
             <div
-              className="w-full overflow-hidden rounded-md border border-gray-300 h-250 hover:cursor-pointer"
+              className="w-250 h-320 overflow-hidden rounded-md border border-gray-300 hover:cursor-pointer"
               onClick={() => goDetail(book.id)}
             >
               <Image
@@ -80,7 +80,7 @@ const Bestseller = () => {
 
             {/* 제목 + 찜버튼 */}
             <div className="flex items-start justify-between">
-              <p className="font-bold text-left text-14 w-180 line-clamp-2">
+              <p className="font-semibold text-left text-16/20 w-180 line-clamp-2">
                 {book.title}
               </p>
 
@@ -91,10 +91,10 @@ const Bestseller = () => {
 
             {/* 작가, 가격 */}
             <div className="flex items-center justify-between">
-              <p className="font-semibold text-left truncate text-12 w-140">
+              <p className="font-normal text-left truncate text-14 w-140">
                 {book.author}
               </p>
-              <p className="text-14">
+              <p className="text-16 font-normal">
                 {(book.priceStandard ?? 0).toLocaleString()}원
               </p>
             </div>
@@ -110,7 +110,8 @@ const Bestseller = () => {
                 cancelText="취소"
                 onConfirm={handleGoToCart}
                 onCancel={closeCartModal}
-                maxSize="max-w-xl"
+                maxSize="max-w-md"
+                bodyClassName="text-center text-16 font-normal"
               >
                 장바구니 페이지로 이동하시겠습니까?
               </Modal>
@@ -131,6 +132,7 @@ const Bestseller = () => {
                 onConfirm={confirmLoginModal}
                 onCancel={closeLoginModal}
                 maxSize="max-w-md"
+                bodyClassName="text-center text-16 font-normal"
               >
                 로그인 페이지로 이동하시겠습니까?
               </Modal>

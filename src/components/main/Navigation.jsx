@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Navigation() {
   return (
-    <nav className="py-3 w-full mt-20 mb-5 z-10">
+    <nav className="py-3 w-full mt-20 z-10 mb-20">
       <ul className="max-w-[1200px] mx-auto flex justify-center gap-[120px]">
         <li>
           <Link
