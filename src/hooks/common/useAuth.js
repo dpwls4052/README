@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
@@ -5,32 +6,62 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-
 import { auth } from "../../lib/firebase";
-import { useState, useEffect } from "react";
-
-// 🔥 Firestore 추가
-import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(() => {
+    // 초기값으로 localStorage에 저장된 값 가져오기
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userId") || null;
+    }
+    return null;
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        fetchUserId(currentUser.uid, currentUser.email);
+      } else {
+        setUserId(null);
+        localStorage.removeItem("userId");
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
-  // 🔥 로그인
+  const fetchUserId = async (uid, email) => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid, email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.user_id) {
+        setUserId(data.user_id);
+        if (typeof window !== "undefined") localStorage.setItem("userId", data.user_id);
+        console.log("유저아이디 (fetchUserId):", data.user_id);
+      } else {
+        console.error("user_id fetch failed:", data);
+      }
+    } catch (err) {
+      console.error("user_id fetch error:", err);
+    }
+  };
+
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await fetchUserId(userCredential.user.uid, userCredential.user.email); // 로그인 직후 Supabase user_id 가져오기
       return true;
     } catch (err) {
       setError(err.message);
@@ -40,33 +71,14 @@ export function useAuth() {
     }
   };
 
-  // 🔥🔥 회원가입 (Firestore 저장 포함)
   const signup = async (name, email, password, phone, address) => {
     setLoading(true);
     setError(null);
-
     try {
-      // 1) Firebase Auth 사용자 생성
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const createdUser = userCredential.user;
-
-      // 2) Firebase Auth displayName 업데이트
-      await updateProfile(createdUser, { displayName: name });
-
-      // 3) Firestore users/{uid} 저장
-      const firestore = getFirestore();
-      await setDoc(doc(firestore, "users", createdUser.uid), {
-        name,
-        email,
-        phone,
-        address,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      });
-
+      await updateProfile(userCredential.user, { displayName: name });
       return true;
     } catch (err) {
-      console.error("회원가입 에러:", err);
       setError(err.message);
       return false;
     } finally {
@@ -74,11 +86,12 @@ export function useAuth() {
     }
   };
 
-  // 🔥 로그아웃
   const logout = async () => {
     await signOut(auth);
     setUser(null);
+    setUserId(null);
+    if (typeof window !== "undefined") localStorage.removeItem("userId");
   };
 
-  return { user, loading, error, login, signup, logout };
+  return { user, userId, loading, error, login, signup, logout };
 }
