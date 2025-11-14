@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 //{
 //   "email": "test@gmail.com",
 //   "phone_number": "01011112222",
+// 'password : '1234'
 //   "name": "이름"
 // }
 
