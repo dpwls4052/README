@@ -7,6 +7,9 @@ import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import WishListButton from "@/components/common/WishListButton";
+
+const userId = 4
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -200,13 +203,47 @@ const ProductDetail = () => {
           {/* 버튼 */}
           <div className="flex gap-4 pt-6">
             <button
-              onClick={toggleWishlist}
+              onClick={async () => {
+                if (!bookData || !userId) return;
+
+                try {
+                  // UI 즉시 반응
+                  setIsWished(prev => !prev);
+
+                  console.log(userId, bookData.id, '값')
+
+                  // DB 요청
+                  const res = await fetch("/api/member/wishlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      user_id: userId,
+                      book_id: bookData.id,
+                    }),
+                  });
+
+                  const data = await res.json();
+
+                  if (!res.ok) {
+                    console.error("Wishlist API error:", data);
+                    // 실패 시 UI 되돌리기
+                    setIsWished(prev => !prev);
+                  }
+                } catch (err) {
+                  console.error("Wishlist toggle failed:", err);
+                  // 실패 시 UI 되돌리기
+                  setIsWished(prev => !prev);
+                }
+              }}
               disabled={bookData.stock === 0}
               style={{ borderRadius: 'var(--radius-15)' }}
               className="p-4 border-2 border-(--sub-color) text-red-500 hover:bg-(--bg-color) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isWished ? <IoIosHeart size={28} /> : <IoIosHeartEmpty size={28} />}
             </button>
+
+
+            
 
             <button
               onClick={handleAddToCart}
