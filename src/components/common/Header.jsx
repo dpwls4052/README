@@ -34,8 +34,8 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-[1400px]">
+    <header className="sticky top-0 z-40 px-100 backdrop-blur-3xl shadow-[0_4px_10px_rgba(153,153,153,0.25)]">
+      <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-1200">
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
           <Image
@@ -51,7 +51,7 @@ export default function Header() {
         <SearchBar />
 
         {/* 아이콘 버튼 */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-20">
           {/* 카트 */}
           <Link
             href="/cart"

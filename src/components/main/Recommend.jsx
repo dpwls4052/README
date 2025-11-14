@@ -47,7 +47,10 @@ export default function Recommend() {
             <h2 className="text-[24px] font-semibold">11월의 추천도서</h2>
           </div>
 
-          <button className="bg-transparent border-0 cursor-pointer mb-8 text-black text-[var(--font-medium)] hover:underline">
+          <button
+            className="bg-transparent border-0 cursor-pointer mb-8 text-black text-[var(--font-medium)] hover:underline"
+            onClick={() => router.push("/books/recommend")}
+          >
             더보기 →
           </button>
         </div>
@@ -100,7 +103,7 @@ export default function Recommend() {
           ).map((book) => (
             <SwiperSlide key={book.id}>
               <div
-                className="w-[200px] h-[280px] rounded-md border border-gray-300 overflow-hidden  hover:cursor-pointer"
+                className="w-[200px] h-[280px] rounded-md overflow-hidden  hover:cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
                 onClick={() => goDetail(book.id)}
               >
                 <Image
