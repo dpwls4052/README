@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import WishListButton from "@/components/common/WishListButton";
 import { useAuth } from "@/hooks/common/useAuth";
 
@@ -69,17 +67,16 @@ const ProductDetail = () => {
 
       try {
         setLoading(true);
-        const docRef = doc(db, "books", bookId);
-        const docSnap = await getDoc(docRef);
+        const res = await fetch(`/api/books/${bookId}`);
+        const data = await res.json();
 
-        if (docSnap.exists()) {
+        if (res.ok) {
           setBookData({
-            id: docSnap.id,
-            ...docSnap.data(),
+            ...data,
             ...MOCK_DETAIL_TABS_DATA,
           });
         } else {
-          setError("책 정보를 찾을 수 없습니다.");
+          setError(data.error || "책 정보를 찾을 수 없습니다.");
         }
       } catch (err) {
         console.error("Error fetching book:", err);
@@ -138,7 +135,7 @@ const ProductDetail = () => {
         ).toFixed(1)
       : 0;
 
-  const highResCover = bookData.cover.replace(/coversum/gi, "cover500");
+  const highResCover = bookData.cover?.replace(/coversum/gi, "cover500") || bookData.cover;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 mt-50">
@@ -204,7 +201,7 @@ const ProductDetail = () => {
           <div className="flex gap-6 py-20">
             <WishListButton 
               userId={userId} 
-              bookId={bookData.id} 
+              bookId={bookData.bookId} 
               stock={bookData.stock} 
             />
 

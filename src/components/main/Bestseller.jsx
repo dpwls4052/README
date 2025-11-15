@@ -1,25 +1,62 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { IoIosHeartEmpty } from "react-icons/io";
 import Modal from "@/components/common/Modal";
-import { useBookList } from "@/hooks/common/useBookList";
+import WishListButton from "@/components/common/WishListButton";
 import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
 import { useCart } from "@/hooks/common/useCart";
 import { useModal } from "@/hooks/common/useModal";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/common/useAuth";
 import noimg from "@/assets/no_image.png";
 
 const Bestseller = () => {
   const router = useRouter();
+  const { userId } = useAuth();
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // 베스트셀러 데이터 가져오기
+  useEffect(() => {
+    const fetchBestsellers = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/books/bestseller?limit=8");
+        const data = await res.json();
+        
+        if (res.ok) {
+          // Supabase 필드명을 Firebase 형식으로 매핑
+          const mappedBooks = data.map(book => ({
+            id: book.book_id,
+            bookId: book.book_id,
+            title: book.title,
+            author: book.author,
+            publisher: book.publisher,
+            priceStandard: book.price_standard,
+            cover: book.cover,
+            highResCover: book.cover?.replace(/coversum/gi, "cover500"),
+            stock: book.stock,
+            salesCount: book.sales_count,
+          }));
+          setBooks(mappedBooks);
+        } else {
+          console.error("Failed to fetch bestsellers:", data);
+        }
+      } catch (err) {
+        console.error("Bestseller fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBestsellers();
+  }, []);
+
   const goDetail = (id) => {
     router.push(`/product/detail/${id}`);
   };
-  const { books } = useBookList({
-    pageSize: 8,
-    orderField: "salesCount",
-    orderDirection: "desc",
-  });
 
   const { purchase } = useDirectPurchase();
   const {
@@ -34,25 +71,40 @@ const Bestseller = () => {
     closeModal: closeLoginModal,
     toggleModal: toggleLoginModal,
   } = useModal();
-  const { selectedBook, addToCart, goToCart } = useCart();
+  const { addToCart, goToCart } = useCart();
 
   const handleAddToCart = (book) => {
     addToCart(book);
     openCartModal();
   };
+
   const handleGoToCart = () => {
     closeCartModal();
     goToCart();
   };
+
   const handlePurchase = (book) => {
     if (!purchase(book)) {
       openLoginModal();
     }
   };
+
   const confirmLoginModal = () => {
     router.push("/login");
     closeLoginModal();
   };
+
+  if (loading) {
+    return (
+      <div className="p-0 mx-auto text-center my-100 max-w-1200">
+        <p className="text-[32px] font-semibold">베스트셀러</p>
+        <div className="flex justify-center items-center h-400">
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-0 mx-auto text-center my-100 max-w-1200">
       <p className="text-[32px] font-semibold">베스트셀러</p>
@@ -84,9 +136,11 @@ const Bestseller = () => {
                 {book.title}
               </p>
 
-              <button className="p-2">
-                <IoIosHeartEmpty size={20} className="text-red-500" />
-              </button>
+              <WishListButton 
+                userId={userId} 
+                bookId={book.bookId} 
+                stock={book.stock} 
+              />
             </div>
 
             {/* 작가, 가격 */}
