@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FaHeart } from "react-icons/fa";
 import AddToCartButton from "@/components/common/AddToCartButton";
 import { useAuth } from "@/hooks/common/useAuth";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 const Wishlist = () => {
   const [items, setItems] = useState([]);
@@ -60,7 +61,8 @@ const Wishlist = () => {
   if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
 
   return (
-    <div className="min-h-screen py-10 bg-white">
+    <ProtectedRoute>
+          <div className="min-h-screen py-10 bg-white">
       <div className="max-w-1200 mx-auto px-5">
         <div className="flex flex-col lg:flex-row gap-10">
           <div className="flex-2 bg-gray-50 p-5 rounded-15 shadow-sm">
@@ -108,6 +110,8 @@ const Wishlist = () => {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
+
   );
 };
 
