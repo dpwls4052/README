@@ -9,12 +9,17 @@ export async function GET(req) {
     const { data: books, error } = await supabase
       .from('book')
       .select('*')
+      .eq('status', true) // status true인 것만 조회
       .order('sales_count', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
 
-    return new Response(JSON.stringify(books || []), { status: 200 });
+    if (!books || books.length === 0) {
+      return new Response(JSON.stringify({ message: "활성화된 책이 없습니다." }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify(books), { status: 200 });
   } catch (err) {
     console.error("Bestseller API error:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });

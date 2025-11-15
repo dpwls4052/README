@@ -16,6 +16,7 @@ export async function GET(req, { params }) {
       .from('book')
       .select('*')
       .eq('book_id', id)
+      .eq('status', true) 
       .single();
 
     if (error) {

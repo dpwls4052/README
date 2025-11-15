@@ -16,7 +16,7 @@ export async function POST(req) {
       .select('*')
       .eq('user_id', user_id)
       .eq('book_id', book_id)
-      .maybeSingle();
+      .maybeSingle(); // POST는 status 상관없이 조회
 
     if (selectError) throw selectError;
 
@@ -59,8 +59,6 @@ export async function GET(req) {
     const user_id = searchParams.get('user_id');
     const book_id = searchParams.get('book_id');
 
-    console.log("GET wishlist - user_id:", user_id, "book_id:", book_id);
-
     if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400 });
 
     // 특정 book의 wishlist 상태만 확인
@@ -72,16 +70,12 @@ export async function GET(req) {
         .eq('book_id', book_id)
         .maybeSingle();
 
-      if (wishlistError) {
-        console.error("Wishlist query error:", wishlistError);
-        throw wishlistError;
-      }
+      if (wishlistError) throw wishlistError;
 
-      console.log("Wishlist status result:", wishlist);
       return new Response(JSON.stringify({ status: wishlist?.status || false }), { status: 200 });
     }
 
-    // 전체 wishlist 조회
+    // 전체 wishlist 조회 (status true)
     const { data: wishlist, error: wishlistError } = await supabase
       .from('wishlist')
       .select('book_id, status')
@@ -90,28 +84,31 @@ export async function GET(req) {
 
     if (wishlistError) throw wishlistError;
 
-    // book 정보 조회
     const bookIds = wishlist.map((w) => w.book_id);
-    
     if (bookIds.length === 0) {
       return new Response(JSON.stringify([]), { status: 200 });
     }
 
+    // book.status = true 필터 추가
     const { data: books, error: booksError } = await supabase
       .from('book')
       .select('*')
-      .in('book_id', bookIds);
+      .in('book_id', bookIds)
+      .eq('status', true);
 
     if (booksError) throw booksError;
 
-    // 최종 mapping
-    const result = wishlist.map((w) => {
-      const book = books.find((b) => b.book_id === w.book_id);
-      return {
-        ...book,
-        status: w.status,
-      };
-    });
+    // 최종 mapping (wishlist와 book 매칭)
+    const result = wishlist
+      .map((w) => {
+        const book = books.find((b) => b.book_id === w.book_id);
+        if (!book) return null; // status false인 책은 제외
+        return {
+          ...book,
+          status: w.status,
+        };
+      })
+      .filter(Boolean); // null 제거
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (err) {
