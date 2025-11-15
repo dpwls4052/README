@@ -4,35 +4,25 @@ import React, { useState, useEffect } from "react";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import Link from "next/link";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "@/hooks/common/useAuth";
 
 const Wishlist = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const auth = getAuth();
-  const [uid, setUid] = useState(null);
-
-  // Firebase 로그인 상태 확인
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) setUid(user.uid);
-      else {
-        setUid(null);
-        setItems([]);
-      }
-    });
-    return () => unsubscribe();
-  }, [auth]);
+  const { userId } = useAuth();
 
   // wishlist 조회
   useEffect(() => {
-    if (!uid) return;
+    if (!userId) {
+      setLoading(false);
+      setItems([]);
+      return;
+    }
 
     const fetchWishlist = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/user/wishlist?uid=${uid}`);
+        const res = await fetch(`/api/user/wishlist?user_id=${userId}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch wishlist");
 
@@ -50,10 +40,10 @@ const Wishlist = () => {
     };
 
     fetchWishlist();
-  }, [uid]);
+  }, [userId]);
 
   const handleToggleHeart = async (bookId) => {
-    if (!uid) return alert("로그인이 필요합니다.");
+    if (!userId) return alert("로그인이 필요합니다.");
 
     setItems((prev) => prev.filter((item) => item.id !== bookId));
 
@@ -61,7 +51,7 @@ const Wishlist = () => {
       const res = await fetch("/api/user/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid, book_id: bookId }),
+        body: JSON.stringify({ user_id: userId, book_id: bookId }),
       });
       const data = await res.json();
       if (!res.ok) console.error(data);
@@ -77,7 +67,7 @@ const Wishlist = () => {
   const itemsTotal = items.reduce((acc, item) => acc + item.price, 0);
 
   if (loading) return <p className="text-center mt-20">로딩 중...</p>;
-  if (!uid) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
+  if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
 
   return (
     <div className="min-h-screen py-10 bg-white">

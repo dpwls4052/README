@@ -3,13 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import WishListButton from "@/components/common/WishListButton";
-
-const userId = 4;
+import { useAuth } from "@/hooks/common/useAuth";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -58,9 +56,9 @@ const ProductDetail = () => {
   const router = useRouter();
   const params = useParams();
   const bookId = params?.id;
+  const { userId } = useAuth();
 
   const [activeTab, setActiveTab] = useState("description");
-  const [isWished, setIsWished] = useState(false);
   const [bookData, setBookData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -93,8 +91,6 @@ const ProductDetail = () => {
 
     fetchBookData();
   }, [bookId]);
-
-  const toggleWishlist = () => setIsWished(!isWished);
 
   const handleAddToCart = () => {
     alert(`${bookData.title}이(가) 장바구니에 담겼습니다.`);
@@ -206,48 +202,11 @@ const ProductDetail = () => {
 
           {/* 버튼 */}
           <div className="flex gap-6 py-20">
-            <button
-              onClick={async () => {
-                if (!bookData || !userId) return;
-
-                try {
-                  // UI 즉시 반응
-                  setIsWished((prev) => !prev);
-
-                  console.log(userId, bookData.id, "값");
-
-                  // DB 요청
-                  const res = await fetch("/api/member/wishlist", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      user_id: userId,
-                      book_id: bookData.id,
-                    }),
-                  });
-
-                  const data = await res.json();
-
-                  if (!res.ok) {
-                    console.error("Wishlist API error:", data);
-                    // 실패 시 UI 되돌리기
-                    setIsWished((prev) => !prev);
-                  }
-                } catch (err) {
-                  console.error("Wishlist toggle failed:", err);
-                  // 실패 시 UI 되돌리기
-                  setIsWished((prev) => !prev);
-                }
-              }}
-              disabled={bookData.stock === 0}
-              className="p-4  text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isWished ? (
-                <IoIosHeart size={28} />
-              ) : (
-                <IoIosHeartEmpty size={28} />
-              )}
-            </button>
+            <WishListButton 
+              userId={userId} 
+              bookId={bookData.id} 
+              stock={bookData.stock} 
+            />
 
             <button
               onClick={handleAddToCart}

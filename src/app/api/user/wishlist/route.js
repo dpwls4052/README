@@ -4,23 +4,11 @@ import { supabase } from '@/lib/supabaseClient';
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { uid, book_id } = body;
+    const { user_id, book_id } = body;
 
-    if (!uid || !book_id) {
-      return new Response(JSON.stringify({ error: "uid and book_id required" }), { status: 400 });
+    if (!user_id || !book_id) {
+      return new Response(JSON.stringify({ error: "user_id and book_id required" }), { status: 400 });
     }
-
-    // uid -> user_id 조회
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('uid', uid)
-      .maybeSingle();
-
-    if (userError) throw userError;
-    if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
-
-    const user_id = user.user_id;
 
     // 기존 wishlist 조회
     const { data: existing, error: selectError } = await supabase
@@ -64,27 +52,36 @@ export async function POST(req) {
   }
 }
 
-// GET: 활성 wishlist + book 정보 조회
+// GET: 활성 wishlist + book 정보 조회 OR 특정 book의 wishlist 상태 확인
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const uid = searchParams.get('uid');
+    const user_id = searchParams.get('user_id');
+    const book_id = searchParams.get('book_id');
 
-    if (!uid) return new Response(JSON.stringify({ error: "uid required" }), { status: 400 });
+    console.log("GET wishlist - user_id:", user_id, "book_id:", book_id);
 
-    // uid -> user_id 조회
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('uid', uid)
-      .maybeSingle();
+    if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400 });
 
-    if (userError) throw userError;
-    if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
+    // 특정 book의 wishlist 상태만 확인
+    if (book_id) {
+      const { data: wishlist, error: wishlistError } = await supabase
+        .from('wishlist')
+        .select('status')
+        .eq('user_id', user_id)
+        .eq('book_id', book_id)
+        .maybeSingle();
 
-    const user_id = user.user_id;
+      if (wishlistError) {
+        console.error("Wishlist query error:", wishlistError);
+        throw wishlistError;
+      }
 
-    // wishlist 조회
+      console.log("Wishlist status result:", wishlist);
+      return new Response(JSON.stringify({ status: wishlist?.status || false }), { status: 200 });
+    }
+
+    // 전체 wishlist 조회
     const { data: wishlist, error: wishlistError } = await supabase
       .from('wishlist')
       .select('book_id, status')
@@ -95,6 +92,11 @@ export async function GET(req) {
 
     // book 정보 조회
     const bookIds = wishlist.map((w) => w.book_id);
+    
+    if (bookIds.length === 0) {
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+
     const { data: books, error: booksError } = await supabase
       .from('book')
       .select('*')
@@ -113,7 +115,7 @@ export async function GET(req) {
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("GET wishlist error:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
