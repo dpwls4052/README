@@ -1,0 +1,95 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Modal from "@/components/common/Modal";
+import { useAuth } from "@/hooks/common/useAuth";
+import { useCart } from "@/hooks/common/useCart";
+
+export default function AddToCartButton({ book }) {
+  const router = useRouter();
+  const { userId } = useAuth();
+  const { goToCart } = useCart();
+
+  const [isCartModalOpen, setCartModalOpen] = useState(false);
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async () => {
+    if (!userId) {
+      setLoginModalOpen(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/user/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, book_id: book.bookId, amount: 1 }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
+
+      setCartModalOpen(true);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoToCart = () => {
+    setCartModalOpen(false);
+    goToCart();
+  };
+
+  const handleConfirmLogin = () => {
+    router.push("/login");
+    setLoginModalOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        className="flex-1 bg-[var(--sub-color)] text-white py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"
+        onClick={handleAddToCart}
+        disabled={loading}
+      >
+        {loading ? "추가중..." : "장바구니"}
+      </button>
+
+      {/* 장바구니 모달 */}
+      <Modal
+        title="선택한 상품을 장바구니에 담았어요."
+        open={isCartModalOpen}
+        onOpenChange={setCartModalOpen}
+        confirmText="장바구니 이동"
+        cancelText="취소"
+        onConfirm={handleGoToCart}
+        onCancel={() => setCartModalOpen(false)}
+        maxSize="max-w-md"
+        bodyClassName="text-center text-16 font-normal"
+      >
+        장바구니 페이지로 이동하시겠습니까?
+      </Modal>
+
+      {/* 로그인 모달 */}
+      <Modal
+        title="로그인이 필요한 서비스입니다."
+        open={isLoginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        confirmText="로그인 페이지로 이동"
+        cancelText="취소"
+        onConfirm={handleConfirmLogin}
+        onCancel={() => setLoginModalOpen(false)}
+        maxSize="max-w-md"
+        bodyClassName="text-center text-16 font-normal"
+      >
+        로그인 페이지로 이동하시겠습니까?
+      </Modal>
+    </>
+  );
+}

@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { IoIosHeartEmpty } from "react-icons/io";
-import Modal from "@/components/common/Modal";
 import WishListButton from "@/components/common/WishListButton";
+import Modal from "@/components/common/Modal";
 import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
 import { useCart } from "@/hooks/common/useCart";
 import { useModal } from "@/hooks/common/useModal";
 import { useAuth } from "@/hooks/common/useAuth";
 import noimg from "@/assets/no_image.png";
+import AddToCartButton from "../common/AddToCartButton";
 
 const Bestseller = () => {
   const router = useRouter();
@@ -25,9 +25,8 @@ const Bestseller = () => {
         setLoading(true);
         const res = await fetch("/api/books/bestseller?limit=8");
         const data = await res.json();
-        
+
         if (res.ok) {
-          // Supabase 필드명을 Firebase 형식으로 매핑
           const mappedBooks = data.map(book => ({
             id: book.book_id,
             bookId: book.book_id,
@@ -59,23 +58,42 @@ const Bestseller = () => {
   };
 
   const { purchase } = useDirectPurchase();
+  const { addToCart, goToCart } = useCart();
+  
+  // 기존 모달 훅 재사용
   const {
     isModalOpen: isCartModalOpen,
     openModal: openCartModal,
     closeModal: closeCartModal,
     toggleModal: toggleCartModal,
   } = useModal();
+
   const {
     isModalOpen: isLoginModalOpen,
     openModal: openLoginModal,
     closeModal: closeLoginModal,
     toggleModal: toggleLoginModal,
   } = useModal();
-  const { addToCart, goToCart } = useCart();
 
-  const handleAddToCart = (book) => {
-    addToCart(book);
-    openCartModal();
+  const handleAddToCart = async (book) => {
+    if (!userId) {
+      openLoginModal();
+      return;
+    }
+    try {
+      const res = await fetch("/api/user/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, book_id: book.bookId, amount: 1 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
+      // 모달 열기
+      openCartModal();
+    } catch (err) {
+      console.error(err);
+      alert(err.message); // 에러만 alert
+    }
   };
 
   const handleGoToCart = () => {
@@ -109,12 +127,11 @@ const Bestseller = () => {
     <div className="p-0 mx-auto text-center my-100 max-w-1200">
       <p className="text-[32px] font-semibold">베스트셀러</p>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-40 my-80">
         {books.map((book) => (
           <div
             key={book.id}
-            className="bg-[var(--bg-color)] p-8 flex flex-col justify-between gap-15 "
+            className="bg-[var(--bg-color)] p-8 flex flex-col justify-between gap-15"
           >
             {/* 도서 이미지 */}
             <div
@@ -130,17 +147,20 @@ const Bestseller = () => {
               />
             </div>
 
-            {/* 제목 + 찜버튼 */}
+            {/* 제목 + 버튼 영역 */}
             <div className="flex items-start justify-between">
               <p className="font-semibold text-left text-16/20 w-180 line-clamp-2">
                 {book.title}
               </p>
 
-              <WishListButton 
-                userId={userId} 
-                bookId={book.bookId} 
-                stock={book.stock} 
-              />
+              <div className="flex gap-2 items-center">
+                <WishListButton 
+                  userId={userId} 
+                  bookId={book.bookId} 
+                  stock={book.stock} 
+                />
+                
+              </div>
             </div>
 
             {/* 작가, 가격 */}
@@ -153,10 +173,10 @@ const Bestseller = () => {
               </p>
             </div>
 
-            {/* 버튼 */}
+            {/* 바로구매 버튼 */}
             <div className="flex items-center justify-between gap-2">
               {/* 장바구니 모달 */}
-              <Modal
+              {/* <Modal
                 title="선택한 상품을 장바구니에 담았어요."
                 open={isCartModalOpen}
                 onOpenChange={toggleCartModal}
@@ -168,13 +188,7 @@ const Bestseller = () => {
                 bodyClassName="text-center text-16 font-normal"
               >
                 장바구니 페이지로 이동하시겠습니까?
-              </Modal>
-              <button
-                className="flex-1 bg-(--sub-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
-                onClick={() => handleAddToCart(book)}
-              >
-                장바구니
-              </button>
+              </Modal> */}
 
               {/* 로그인 모달 */}
               <Modal
@@ -190,6 +204,15 @@ const Bestseller = () => {
               >
                 로그인 페이지로 이동하시겠습니까?
               </Modal>
+              
+              <AddToCartButton book={book} />
+              {/* <button
+                  className="flex-1 bg-(--sub-color) text-white py-2 h-40 rounded hover:cursor-pointer"
+                  onClick={() => handleAddToCart(book)}
+                >
+                  장바구니
+              </button> */}
+
               <button
                 className="flex-1 bg-(--main-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
                 onClick={() => handlePurchase(book)}
