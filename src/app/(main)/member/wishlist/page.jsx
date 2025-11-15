@@ -82,19 +82,19 @@ const Wishlist = () => {
             ) : (
               <div className="flex flex-col divide-y divide-gray-200">
                 {items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center py-4">
-                    <div className="flex items-center gap-4">
-                      <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
+                  <div key={item.id} className="flex justify-between items-center py-10">
+                    <div className="flex items-center gap-20">
+                      <img src={item.image} alt={item.name} className="w-100 h-auto object-cover rounded-lg" />
                       <div className="flex flex-col">
                         <span className="text-black font-medium">{item.name}</span>
                         <span className="text-(--main-color) font-bold">{item.price.toLocaleString()}원</span>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleToggleHeart(item.id)} className="text-red-600 hover:bg-red-100 p-2 rounded">
+                    <div className="flex gap-10">
+                      <button onClick={() => handleToggleHeart(item.id)} className="text-red-600 hover:bg-red-100 p-5 rounded">
                         <FaHeart size={20} />
                       </button>
-                      <button onClick={() => handleAddToCart(item.name)} className="bg-(--sub-color) text-white p-2 rounded hover:bg-green-700">
+                      <button onClick={() => handleAddToCart(item.name)} className="bg-(--sub-color) text-white p-5 rounded hover:bg-green-700">
                         <FiShoppingCart size={18} />
                       </button>
                     </div>
@@ -117,7 +117,7 @@ const Wishlist = () => {
               </div>
             </div>
             <div className="border-b border-gray-200 mb-4" />
-            <Link href="/cart" className="block w-full text-center py-3 bg-(--main-color) text-white rounded-lg hover:bg-(--sub-color) transition">
+            <Link href="/cart" className="block w-full text-center py-15 bg-(--main-color) text-white rounded-lg hover:bg-(--sub-color) transition">
               장바구니로 이동
             </Link>
           </div>
