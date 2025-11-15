@@ -1,8 +1,6 @@
-// API (Supabase)
-
 import { supabase } from '@/lib/supabaseClient';
 
-// GET: 활성 장바구니 + book 정보 조회
+// GET: 장바구니 조회 (최신순)
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -14,8 +12,9 @@ export async function GET(req) {
       .select('*')
       .eq('user_id', user_id)
       .eq('status', true)
-      .order('created_at', { ascending: false }); 
+      .order('created_at', { ascending: false }); // 최신순 정렬
     if (cartError) throw cartError;
+
     if (!cartItems || cartItems.length === 0) return new Response(JSON.stringify([]), { status: 200 });
 
     const bookIds = cartItems.map(c => c.book_id);
@@ -31,7 +30,8 @@ export async function GET(req) {
       return {
         ...book,
         amount: c.amount,
-        cartId: c.cart_id,
+        cart_id: c.cart_id,
+        created_at: c.created_at,
       };
     });
 
@@ -42,7 +42,7 @@ export async function GET(req) {
   }
 }
 
-// POST: 장바구니 추가 / 재추가
+// POST: 장바구니 추가 / 수량 증가
 export async function POST(req) {
   try {
     const { user_id, book_id } = await req.json();
@@ -57,16 +57,15 @@ export async function POST(req) {
     if (selectError) throw selectError;
 
     if (existing) {
-      // 재추가
+      // 이미 존재하면 amount 1 증가
       const { error: updateError } = await supabase
         .from('cart')
-        .update({ status: true, amount: 1 })
+        .update({ amount: existing.amount + 1, status: true })
         .eq('cart_id', existing.cart_id);
       if (updateError) throw updateError;
 
-      return new Response(JSON.stringify({ message: "Cart re-added", amount: 1 }), { status: 200 });
+      return new Response(JSON.stringify({ message: "Cart amount increased", amount: existing.amount + 1 }), { status: 200 });
     } else {
-      // 새로 추가
       const { error: insertError } = await supabase
         .from('cart')
         .insert({ user_id, book_id, amount: 1, status: true, created_at: new Date().toISOString() });
@@ -115,16 +114,18 @@ export async function PATCH(req) {
 // DELETE: 선택 삭제 / 전체 삭제
 export async function DELETE(req) {
   try {
-    const { cartIds } = await req.json(); // array of cart_id
-    if (!cartIds || cartIds.length === 0) return new Response(JSON.stringify({ error: "cartIds required" }), { status: 400 });
+    const { cartIds } = await req.json();
+    if (!cartIds || cartIds.length === 0) 
+      return new Response(JSON.stringify({ error: "cartIds required" }), { status: 400 });
 
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('cart')
-      .update({ status: false, amount: 0 })
+      .delete()
       .in('cart_id', cartIds);
 
-    if (error) throw error;
-    return new Response(JSON.stringify({ message: "Cart items removed" }), { status: 200 });
+    if (deleteError) throw deleteError;
+
+    return new Response(JSON.stringify({ message: "삭제 완료" }), { status: 200 });
   } catch (err) {
     console.error(err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });

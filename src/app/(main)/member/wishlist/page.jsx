@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { FiShoppingCart } from "react-icons/fi";
+import { useState, useEffect } from "react";
 import { FaHeart } from "react-icons/fa";
-import Link from "next/link";
+import AddToCartButton from "@/components/common/AddToCartButton";
 import { useAuth } from "@/hooks/common/useAuth";
 
 const Wishlist = () => {
@@ -11,7 +10,6 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
   const { userId } = useAuth();
 
-  // wishlist 조회
   useEffect(() => {
     if (!userId) {
       setLoading(false);
@@ -24,9 +22,9 @@ const Wishlist = () => {
         setLoading(true);
         const res = await fetch(`/api/user/wishlist?user_id=${userId}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch wishlist");
+        if (!res.ok) throw new Error(data.error || "위시리스트 조회 실패");
 
-        setItems(data.map((item) => ({
+        setItems(data.map(item => ({
           id: item.book_id,
           name: item.title || `도서 ${item.book_id}`,
           price: item.price_standard || 0,
@@ -44,8 +42,7 @@ const Wishlist = () => {
 
   const handleToggleHeart = async (bookId) => {
     if (!userId) return alert("로그인이 필요합니다.");
-
-    setItems((prev) => prev.filter((item) => item.id !== bookId));
+    setItems(prev => prev.filter(item => item.id !== bookId));
 
     try {
       const res = await fetch("/api/user/wishlist", {
@@ -53,18 +50,11 @@ const Wishlist = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId, book_id: bookId }),
       });
-      const data = await res.json();
-      if (!res.ok) console.error(data);
+      if (!res.ok) console.error(await res.json());
     } catch (err) {
       console.error(err);
     }
   };
-
-  const handleAddToCart = (name) => {
-    alert(`${name}이(가) 장바구니에 추가되었습니다`);
-  };
-
-  const itemsTotal = items.reduce((acc, item) => acc + item.price, 0);
 
   if (loading) return <p className="text-center mt-20">로딩 중...</p>;
   if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
@@ -81,7 +71,7 @@ const Wishlist = () => {
               </div>
             ) : (
               <div className="flex flex-col divide-y divide-gray-200">
-                {items.map((item) => (
+                {items.map(item => (
                   <div key={item.id} className="flex justify-between items-center py-10">
                     <div className="flex items-center gap-20">
                       <img src={item.image} alt={item.name} className="w-100 h-auto object-cover rounded-lg" />
@@ -94,9 +84,7 @@ const Wishlist = () => {
                       <button onClick={() => handleToggleHeart(item.id)} className="text-red-600 hover:bg-red-100 p-5 rounded">
                         <FaHeart size={20} />
                       </button>
-                      <button onClick={() => handleAddToCart(item.name)} className="bg-(--sub-color) text-white p-5 rounded hover:bg-green-700">
-                        <FiShoppingCart size={18} />
-                      </button>
+                      <AddToCartButton book={{ bookId: item.id }} iconMode={true} />
                     </div>
                   </div>
                 ))}
@@ -113,13 +101,9 @@ const Wishlist = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-black">총 금액</span>
-                <span className="font-bold text-(--main-color)">{itemsTotal.toLocaleString()}원</span>
+                <span className="font-bold text-(--main-color)">{items.reduce((acc, i) => acc + i.price, 0).toLocaleString()}원</span>
               </div>
             </div>
-            <div className="border-b border-gray-200 mb-4" />
-            <Link href="/cart" className="block w-full text-center py-15 bg-(--main-color) text-white rounded-lg hover:bg-(--sub-color) transition">
-              장바구니로 이동
-            </Link>
           </div>
         </div>
       </div>

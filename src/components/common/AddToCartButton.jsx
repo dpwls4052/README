@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Modal from "@/components/common/Modal";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useCart } from "@/hooks/common/useCart";
+import { FiShoppingCart } from "react-icons/fi";
 
-export default function AddToCartButton({ book }) {
+export default function AddToCartButton({ book, iconMode = false }) {
   const router = useRouter();
   const { userId } = useAuth();
   const { goToCart } = useCart();
@@ -26,12 +27,13 @@ export default function AddToCartButton({ book }) {
       const res = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, book_id: book.bookId, amount: 1 }),
+        body: JSON.stringify({ user_id: userId, book_id: book.bookId }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
 
+      // 모달 항상 표시
       setCartModalOpen(true);
     } catch (err) {
       console.error(err);
@@ -54,14 +56,16 @@ export default function AddToCartButton({ book }) {
   return (
     <>
       <button
-        className="flex-1 bg-[var(--sub-color)] text-white py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"
+        className={iconMode
+          ? "p-2 text-white bg-(--sub-color) rounded hover:bg-green-700"
+          : "flex-1 bg-[var(--sub-color)] text-white py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"}
         onClick={handleAddToCart}
         disabled={loading}
       >
-        {loading ? "추가중..." : "장바구니"}
+        {loading ? (iconMode ? <FiShoppingCart /> : "추가중...") : (iconMode ? <FiShoppingCart /> : "장바구니")}
       </button>
 
-      {/* 장바구니 모달 */}
+      {/* 모달 항상 표시 */}
       <Modal
         title="선택한 상품을 장바구니에 담았어요."
         open={isCartModalOpen}
@@ -76,7 +80,6 @@ export default function AddToCartButton({ book }) {
         장바구니 페이지로 이동하시겠습니까?
       </Modal>
 
-      {/* 로그인 모달 */}
       <Modal
         title="로그인이 필요한 서비스입니다."
         open={isLoginModalOpen}

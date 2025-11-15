@@ -205,7 +205,7 @@ const Bestseller = () => {
                 로그인 페이지로 이동하시겠습니까?
               </Modal>
               
-              <AddToCartButton book={book} />
+              <AddToCartButton book={{ bookId: book.id }} iconMode={false} />
               {/* <button
                   className="flex-1 bg-(--sub-color) text-white py-2 h-40 rounded hover:cursor-pointer"
                   onClick={() => handleAddToCart(book)}

@@ -1,4 +1,3 @@
-// Cart Component (React)
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,15 +33,17 @@ const Cart = () => {
       const res = await fetch(`/api/user/cart?user_id=${userId}`);
       if (!res.ok) throw new Error("장바구니 조회 실패");
       const data = await res.json();
-      const mappedItems = data.map(item => ({
-        id: item.book_id,
-        cartId: item.cartId,
-        name: item.title,
-        price: item.price_standard,
-        count: item.amount,
-        image: item.cover,
-        selected: true,
-      }));
+      const mappedItems = data
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 최신순 정렬
+        .map(item => ({
+          id: item.book_id,
+          cartId: item.cart_id,
+          name: item.title,
+          price: item.price_standard,
+          count: item.amount,
+          image: item.cover,
+          selected: true,
+        }));
       setItems(mappedItems);
     } catch (err) {
       console.error(err);
@@ -54,7 +55,6 @@ const Cart = () => {
   useEffect(() => { fetchCart(); }, [userId]);
 
   const selectedItems = items.filter(item => item.selected);
-
   const itemsTotal = selectedItems.reduce((acc, item) => acc + item.price * item.count, 0);
   const shippingFee = itemsTotal > 0 && itemsTotal < 30000 ? 3000 : 0;
   const totalAmount = itemsTotal + shippingFee;
@@ -68,13 +68,12 @@ const Cart = () => {
     setItems(items.map(item => item.id === id ? { ...item, selected: !item.selected } : item));
   };
 
-  // 수량 변경
   const handleCountChange = async (item, delta) => {
     try {
       await fetch('/api/user/cart', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartId: item.cartId, delta })
+        body: JSON.stringify({ cartId: item.cartId, delta }),
       });
       fetchCart();
     } catch (err) {
@@ -83,7 +82,6 @@ const Cart = () => {
     }
   };
 
-  // 선택삭제
   const handleDeleteSelected = async () => {
     const selected = items.filter(item => item.selected);
     if (selected.length === 0) return alert("선택된 상품이 없습니다");
@@ -92,7 +90,7 @@ const Cart = () => {
       await fetch('/api/user/cart', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartIds: selected.map(item => item.cartId) })
+        body: JSON.stringify({ cartIds: selected.map(i => i.cartId) }),
       });
       fetchCart();
     } catch (err) {
@@ -101,14 +99,13 @@ const Cart = () => {
     }
   };
 
-  // 전체삭제
   const handleDeleteAll = async () => {
     if (items.length === 0) return;
     try {
       await fetch('/api/user/cart', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartIds: items.map(item => item.cartId) })
+        body: JSON.stringify({ cartIds: items.map(i => i.cartId) }),
       });
       fetchCart();
     } catch (err) {
@@ -117,7 +114,6 @@ const Cart = () => {
     }
   };
 
-  // 결제
   const handlePay = () => {
     if (selectedItems.length === 0) return alert("상품을 선택해주세요");
 
@@ -172,8 +168,8 @@ const Cart = () => {
                     </span>
                   </label>
                   <div className="flex gap-2">
-                    <button onClick={handleDeleteSelected} className="px-4 py-2 text-sm bg-(--sub-color) text-white rounded-lg hover:opacity-90">선택삭제</button>
-                    <button onClick={handleDeleteAll} className="px-4 py-2 text-sm bg-(--sub-color) text-white rounded-lg hover:opacity-90">전체삭제</button>
+                    <button onClick={handleDeleteSelected} className="px-4 py-2 text-sm bg-[var(--sub-color)] text-white rounded-lg hover:opacity-90">선택삭제</button>
+                    <button onClick={handleDeleteAll} className="px-4 py-2 text-sm bg-[var(--sub-color)] text-white rounded-lg hover:opacity-90">전체삭제</button>
                   </div>
                 </div>
 
@@ -189,21 +185,21 @@ const Cart = () => {
                       <img src={item.image} alt={item.name} className="w-100 h-auto rounded-lg object-cover" />
                       <div className="flex flex-col gap-1 flex-1">
                         <p className="text-base font-medium text-black">{item.name}</p>
-                        <p className="text-lg font-bold text-(--main-color)">{item.price.toLocaleString()}원</p>
+                        <p className="text-lg font-bold text-[var(--main-color)]">{item.price.toLocaleString()}원</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleCountChange(item, -1)}
                         disabled={item.count <= 1}
-                        className="p-2 bg-(--sub-color) text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+                        className="p-2 bg-[var(--sub-color)] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
                       >
                         <Minus />
                       </button>
                       <span className="font-medium min-w-[40px] text-center text-black">{item.count}</span>
                       <button
                         onClick={() => handleCountChange(item, 1)}
-                        className="p-2 bg-(--sub-color) text-white rounded-lg hover:opacity-90"
+                        className="p-2 bg-[var(--sub-color)] text-white rounded-lg hover:opacity-90"
                       >
                         <Plus />
                       </button>
@@ -214,7 +210,7 @@ const Cart = () => {
 
               {/* 우측 - 결제 정보 */}
               <div className="flex-[1] lg:sticky lg:top-5 h-fit">
-                <div className="bg-(--bg-color) p-6 rounded-15 shadow-sm">
+                <div className="bg-[var(--bg-color)] p-6 rounded-15 shadow-sm">
                   <h2 className="text-xl font-bold mb-4 text-black">결제 정보</h2>
                   <div className="flex flex-col gap-3 mb-4">
                     <div className="flex justify-between text-black">
@@ -228,12 +224,12 @@ const Cart = () => {
                     <div className="border-b border-gray-200 my-2" />
                     <div className="flex justify-between text-lg font-bold text-black">
                       <span>결제 예정 금액</span>
-                      <span className="text-(--main-color)">{totalAmount.toLocaleString()}원</span>
+                      <span className="text-[var(--main-color)]">{totalAmount.toLocaleString()}원</span>
                     </div>
                   </div>
                   <button
                     onClick={handlePay}
-                    className="w-full py-3 bg-(--main-color) text-white rounded-15 font-semibold hover:opacity-90 transition"
+                    className="w-full py-3 bg-[var(--main-color)] text-white rounded-15 font-semibold hover:opacity-90 transition"
                   >
                     주문하기
                   </button>
