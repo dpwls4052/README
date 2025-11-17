@@ -1,15 +1,14 @@
-import { useBookList } from "@/hooks/common/useBookList";
 import EditBookModal from "../EditBookModal";
 import { useUpdateBook } from "@/hooks/admin/useUpdateBook";
 import { useDeleteBook } from "@/hooks/admin/useDeleteBook";
 import Image from "next/image";
 import DeleteBookModal from "../DeleteBookModal";
 import AddBookModal from "../AddBookModal";
+import { useBooks } from "@/hooks/book/useBooks";
 
 const BookManagement = () => {
-  const { books, fetchBooks, hasNext, setBooks } = useBookList({
-    pageSize: 20,
-  });
+  const { books, fetchBooks, fetchMoreBooks, loading, hasNext } = useBooks();
+
   const {
     updateBook,
     loading: updateLoading,
@@ -44,7 +43,7 @@ const BookManagement = () => {
         <div className="pe-3">
           {books.map((book) => (
             <div
-              key={book.id}
+              key={book.isbn}
               className="flex items-center justify-between gap-10 px-20 py-10 border-b h-120 border-b-gray-200"
             >
               <Image
@@ -77,7 +76,7 @@ const BookManagement = () => {
             <div className="p-20 text-center">
               <button
                 className="bg-(--main-color) rounded-full text-white px-16 py-10 hover:cursor-pointer text-14"
-                onClick={() => fetchBooks()}
+                onClick={fetchMoreBooks}
               >
                 더보기
               </button>

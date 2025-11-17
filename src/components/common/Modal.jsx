@@ -16,19 +16,20 @@ export default function Modal({
   maxSize,
   bodyClassName,
 }) {
-  useEffect(() => {
-    if (!open) return;
+  // 모달에서 엔터 키 입력 시 onConfirm 호출
+  // useEffect(() => {
+  //   if (!open) return;
 
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        onConfirm?.();
-      }
-    };
+  //   const handleKeyDown = (e) => {
+  //     if (e.key === "Enter") {
+  //       e.preventDefault();
+  //       onConfirm?.();
+  //     }
+  //   };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onConfirm]);
+  //   window.addEventListener("keydown", handleKeyDown);
+  //   return () => window.removeEventListener("keydown", handleKeyDown);
+  // }, [open, onConfirm]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
