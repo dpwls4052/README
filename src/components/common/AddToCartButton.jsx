@@ -56,13 +56,25 @@ export default function AddToCartButton({ book, iconMode = false }) {
   return (
     <>
       <button
-        className={iconMode
-          ? "p-2 text-white bg-(--sub-color) rounded hover:bg-green-700"
-          : "flex-1 bg-[var(--sub-color)] text-white py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"}
+        className={
+          iconMode
+            ? "p-2 text-white  bg-(--sub-color) rounded hover:bg-green-700 hover:cursor-pointer"
+            : "flex-1 bg-[var(--sub-color)] text-white font-normal py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"
+        }
         onClick={handleAddToCart}
         disabled={loading}
       >
-        {loading ? (iconMode ? <FiShoppingCart /> : "추가중...") : (iconMode ? <FiShoppingCart /> : "장바구니")}
+        {loading ? (
+          iconMode ? (
+            <FiShoppingCart />
+          ) : (
+            "추가중..."
+          )
+        ) : iconMode ? (
+          <FiShoppingCart />
+        ) : (
+          "장바구니"
+        )}
       </button>
 
       {/* 모달 항상 표시 */}
