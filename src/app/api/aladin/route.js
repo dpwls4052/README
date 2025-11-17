@@ -32,6 +32,7 @@ export async function GET(req) {
       categoryName: book.categoryName || "기타",
       pubDate: book.pubDate,
       priceStandard: book.priceStandard,
+      priceSales: book.priceSales,
       cover: book.cover,
       description: book.description,
       link: book.link,
