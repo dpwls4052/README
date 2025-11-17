@@ -13,7 +13,9 @@ export default function WishListButton({ userId, bookId, stock }) {
 
     const checkWishlistStatus = async () => {
       try {
-        const res = await fetch(`/api/user/wishlist?user_id=${userId}&book_id=${bookId}`);
+        const res = await fetch(
+          `/api/user/wishlist?user_id=${userId}&book_id=${bookId}`
+        );
         const data = await res.json();
         if (res.ok) {
           setIsWished(data.status || false);
@@ -36,7 +38,7 @@ export default function WishListButton({ userId, bookId, stock }) {
 
     try {
       setLoading(true);
-      
+
       // UI 즉시 반응
       setIsWished((prev) => !prev);
 
@@ -73,7 +75,7 @@ export default function WishListButton({ userId, bookId, stock }) {
     <button
       onClick={toggleWishlist}
       disabled={loading || stock === 0}
-      className="p-4 text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="p-4 text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
     >
       {isWished ? <IoIosHeart size={28} /> : <IoIosHeartEmpty size={28} />}
     </button>

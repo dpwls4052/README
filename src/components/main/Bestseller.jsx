@@ -27,7 +27,7 @@ const Bestseller = () => {
         const data = await res.json();
 
         if (res.ok) {
-          const mappedBooks = data.map(book => ({
+          const mappedBooks = data.map((book) => ({
             id: book.book_id,
             bookId: book.book_id,
             title: book.title,
@@ -59,7 +59,7 @@ const Bestseller = () => {
 
   const { purchase } = useDirectPurchase();
   const { addToCart, goToCart } = useCart();
-  
+
   // 기존 모달 훅 재사용
   const {
     isModalOpen: isCartModalOpen,
@@ -84,7 +84,11 @@ const Bestseller = () => {
       const res = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, book_id: book.bookId, amount: 1 }),
+        body: JSON.stringify({
+          user_id: userId,
+          book_id: book.bookId,
+          amount: 1,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
@@ -154,12 +158,11 @@ const Bestseller = () => {
               </p>
 
               <div className="flex gap-2 items-center">
-                <WishListButton 
-                  userId={userId} 
-                  bookId={book.bookId} 
-                  stock={book.stock} 
+                <WishListButton
+                  userId={userId}
+                  bookId={book.bookId}
+                  stock={book.stock}
                 />
-                
               </div>
             </div>
 
@@ -204,7 +207,7 @@ const Bestseller = () => {
               >
                 로그인 페이지로 이동하시겠습니까?
               </Modal>
-              
+
               <AddToCartButton book={{ bookId: book.id }} iconMode={false} />
               {/* <button
                   className="flex-1 bg-(--sub-color) text-white py-2 h-40 rounded hover:cursor-pointer"
