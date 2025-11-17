@@ -4,23 +4,11 @@ import { supabase } from '@/lib/supabaseClient';
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { uid, book_id } = body;
+    const { user_id, book_id } = body;
 
-    if (!uid || !book_id) {
-      return new Response(JSON.stringify({ error: "uid and book_id required" }), { status: 400 });
+    if (!user_id || !book_id) {
+      return new Response(JSON.stringify({ error: "user_id and book_id required" }), { status: 400 });
     }
-
-    // uid -> user_id 조회
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('uid', uid)
-      .maybeSingle();
-
-    if (userError) throw userError;
-    if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
-
-    const user_id = user.user_id;
 
     // 기존 wishlist 조회
     const { data: existing, error: selectError } = await supabase
@@ -28,7 +16,7 @@ export async function POST(req) {
       .select('*')
       .eq('user_id', user_id)
       .eq('book_id', book_id)
-      .maybeSingle();
+      .maybeSingle(); // POST는 status 상관없이 조회
 
     if (selectError) throw selectError;
 
@@ -64,27 +52,30 @@ export async function POST(req) {
   }
 }
 
-// GET: 활성 wishlist + book 정보 조회
+// GET: 활성 wishlist + book 정보 조회 OR 특정 book의 wishlist 상태 확인
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const uid = searchParams.get('uid');
+    const user_id = searchParams.get('user_id');
+    const book_id = searchParams.get('book_id');
 
-    if (!uid) return new Response(JSON.stringify({ error: "uid required" }), { status: 400 });
+    if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400 });
 
-    // uid -> user_id 조회
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('uid', uid)
-      .maybeSingle();
+    // 특정 book의 wishlist 상태만 확인
+    if (book_id) {
+      const { data: wishlist, error: wishlistError } = await supabase
+        .from('wishlist')
+        .select('status')
+        .eq('user_id', user_id)
+        .eq('book_id', book_id)
+        .maybeSingle();
 
-    if (userError) throw userError;
-    if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
+      if (wishlistError) throw wishlistError;
 
-    const user_id = user.user_id;
+      return new Response(JSON.stringify({ status: wishlist?.status || false }), { status: 200 });
+    }
 
-    // wishlist 조회
+    // 전체 wishlist 조회 (status true)
     const { data: wishlist, error: wishlistError } = await supabase
       .from('wishlist')
       .select('book_id, status')
@@ -93,27 +84,35 @@ export async function GET(req) {
 
     if (wishlistError) throw wishlistError;
 
-    // book 정보 조회
     const bookIds = wishlist.map((w) => w.book_id);
+    if (bookIds.length === 0) {
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+
+    // book.status = true 필터 추가
     const { data: books, error: booksError } = await supabase
       .from('book')
       .select('*')
-      .in('book_id', bookIds);
+      .in('book_id', bookIds)
+      .eq('status', true);
 
     if (booksError) throw booksError;
 
-    // 최종 mapping
-    const result = wishlist.map((w) => {
-      const book = books.find((b) => b.book_id === w.book_id);
-      return {
-        ...book,
-        status: w.status,
-      };
-    });
+    // 최종 mapping (wishlist와 book 매칭)
+    const result = wishlist
+      .map((w) => {
+        const book = books.find((b) => b.book_id === w.book_id);
+        if (!book) return null; // status false인 책은 제외
+        return {
+          ...book,
+          status: w.status,
+        };
+      })
+      .filter(Boolean); // null 제거
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("GET wishlist error:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }

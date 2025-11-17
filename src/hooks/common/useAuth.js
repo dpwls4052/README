@@ -12,13 +12,7 @@ export function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(() => {
-    // 초기값으로 localStorage에 저장된 값 가져오기
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("userId") || null;
-    }
-    return null;
-  });
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -29,7 +23,6 @@ export function useAuth() {
         fetchUserId(currentUser.uid, currentUser.email);
       } else {
         setUserId(null);
-        localStorage.removeItem("userId");
       }
     });
 
@@ -46,7 +39,6 @@ export function useAuth() {
       const data = await res.json();
       if (res.ok && data.user_id) {
         setUserId(data.user_id);
-        if (typeof window !== "undefined") localStorage.setItem("userId", data.user_id);
         console.log("유저아이디 (fetchUserId):", data.user_id);
       } else {
         console.error("user_id fetch failed:", data);
@@ -61,7 +53,7 @@ export function useAuth() {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await fetchUserId(userCredential.user.uid, userCredential.user.email); // 로그인 직후 Supabase user_id 가져오기
+      await fetchUserId(userCredential.user.uid, userCredential.user.email);
       return true;
     } catch (err) {
       setError(err.message);
@@ -90,7 +82,6 @@ export function useAuth() {
     await signOut(auth);
     setUser(null);
     setUserId(null);
-    if (typeof window !== "undefined") localStorage.removeItem("userId");
   };
 
   return { user, userId, loading, error, login, signup, logout };
