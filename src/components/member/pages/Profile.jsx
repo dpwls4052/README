@@ -3,7 +3,7 @@
 import { FaBookOpen, FaGift, FaRegHeart } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Profile() {
   const [userInfo, setUserInfo] = useState(null);
