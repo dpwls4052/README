@@ -65,10 +65,10 @@ const LoginForm = () => {
 
       {/* 링크들 */}
       <div className="flex justify-between text-sm text-green-800 font-medium">
-        <Link href="/find-id" className="hover:underline">
+        <Link href="/findId" className="hover:underline">
           아이디 찾기
         </Link>
-        <Link href="/find-password" className="hover:underline">
+        <Link href="/findPW" className="hover:underline">
           비밀번호 찾기
         </Link>
         <Link href="/signUp" className="hover:underline">
