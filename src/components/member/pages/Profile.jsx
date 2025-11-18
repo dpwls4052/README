@@ -1,205 +1,555 @@
 "use client";
 
-import { FaBookOpen, FaGift, FaRegHeart, FaUserEdit, FaSun, FaMoon } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-
-
+import { FaBookOpen, FaGift, FaRegHeart } from "react-icons/fa";
+import { useAuth } from "@/hooks/common/useAuth";
+import Modal from "@/components/common/Modal";
+import AddressInput from "@/components/common/AddressInput";
 
 export default function Profile() {
-  const [darkMode, setDarkMode] = useState(false);
+  const { userId } = useAuth();
+  
+  console.log("Profile 렌더링 - userId:", userId);
+  
   const [userInfo, setUserInfo] = useState(null);
-  const [editField, setEditField] = useState(null);
-  const [editValue, setEditValue] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalField, setModalField] = useState("");
+  const [modalValue, setModalValue] = useState("");
 
+  // 주소 관리 상태
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [addressList, setAddressList] = useState([]);
+  const [editingAddressIdx, setEditingAddressIdx] = useState(null);
+  const [editForm, setEditForm] = useState({
+    nickname: "",
+    postcode: "",
+    address: "",
+    detailAddress: "",
+  });
+  const [newAddressForm, setNewAddressForm] = useState({
+    nickname: "",
+    postcode: "",
+    address: "",
+    detailAddress: "",
+  });
+
+  // 다음 우편번호 API 스크립트 로드
   useEffect(() => {
-  async function fetchUser() {
-    const auth = getAuth();
-    const firestore = getFirestore();
+    const script = document.createElement("script");
+    script.src =
+      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
 
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const ref = doc(firestore, "users", user.uid);
-    const snap = await getDoc(ref);
-
-    if (snap.exists()) {
-      setUserInfo(snap.data());
-    }
-  }
-
-  fetchUser();
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
   }, []);
 
-  async function updateUserField(field, value) {
-  const auth = getAuth();
-  const firestore = getFirestore();
-  const user = auth.currentUser;
-  if (!user) return;
+  // 기본 주소 가져오기
+  useEffect(() => {
+  if (!userId) return;
+  fetchAddressList(); // 페이지 처음 렌더링 시 주소 목록 가져오기
+}, [userId]);
 
-  const ref = doc(firestore, "users", user.uid);
-  await updateDoc(ref, { [field]: value });
+  // 사용자 정보 조회
+  useEffect(() => {
+    if (!userId) return;
 
-  setUserInfo((prev) => ({ ...prev, [field]: value }));
-  setEditField(null);
-}
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/user/getUser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
 
-const renderEditRow = (label, field) => (
-  <div className="space-y-15 mt-3">
-    <input
-      className="w-full p-2 border rounded-md"
-      value={editValue}
-      onChange={(e) => setEditValue(e.target.value)}
-    />
-    <button
-      onClick={() => updateUserField(field, editValue)}
-      className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800"
-    >
-      저장
-    </button>
-  </div>
-);
+        if (!res.ok) throw new Error("사용자 정보 불러오기 실패");
+        const data = await res.json();
+        setUserInfo(data.user);
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
+    fetchUser();
+  }, [userId]);
+
+  // 주소 목록 조회
+  const fetchAddressList = async () => {
+    if (!userId) return;
+
+    try {
+      const res = await fetch("/api/user/address/getAddressList", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        console.log("조회된 주소 목록:", data.addresses);
+        setAddressList(data.addresses);
+      }
+    } catch (err) {
+      console.error("주소 목록 조회 실패:", err);
+    }
+  };
+
+  // 주소 모달 열 때 목록 불러오기
+  useEffect(() => {
+    if (addressModalOpen && userId) {
+      fetchAddressList();
+      setEditingAddressIdx(null);
+    }
+  }, [addressModalOpen, userId]);
+
+  // 필드 수정 API
+  const updateUserField = async () => {
+    if (!modalField || !modalValue) return;
+
+    try {
+      const endpointMap = {
+        name: "updateName",
+        phone: "updatePhone",
+        email: "updateEmail",
+      };
+
+      const payload = { userId };
+      if (modalField === "name") payload.newName = modalValue;
+      else if (modalField === "phone") payload.newPhone = modalValue;
+      else if (modalField === "email") payload.newEmail = modalValue;
+
+      const res = await fetch(`/api/user/${endpointMap[modalField]}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.errorMessage || "수정 실패");
+
+      setUserInfo((prev) => ({
+        ...prev,
+        [modalField === "phone" ? "phone_number" : modalField]: modalValue,
+      }));
+
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  // 주소 모달 열기
+  const openAddressModal = () => {
+    setAddressModalOpen(true);
+    setEditingAddressIdx(null);
+    setNewAddressForm({
+      nickname: "",
+      postcode: "",
+      address: "",
+      detailAddress: "",
+    });
+  };
+
+  // 주소 수정 시작
+  const startEditAddress = (addr) => {
+    setEditingAddressIdx(addr.address_id);
+    setEditForm({
+      nickname: addr.nickname,
+      postcode: addr.postcode,
+      address: addr.road_address,
+      detailAddress: addr.detail_address || "",
+    });
+  };
+
+  // 수정 취소
+  const cancelEdit = () => {
+    setEditingAddressIdx(null);
+    setEditForm({
+      nickname: "",
+      postcode: "",
+      address: "",
+      detailAddress: "",
+    });
+  };
+
+  // 주소 저장 (수정)
+  const saveAddress = async (addressIdx) => {
+    console.log("=== saveAddress 호출 ===");
+    console.log("전달받은 addressIdx:", addressIdx);
+    console.log("현재 userId:", userId);
+    console.log("현재 addressList:", addressList);
+
+    if (!userId) {
+      alert("userId가 없습니다. 다시 로그인해주세요.");
+      return;
+    }
+
+    if (!addressIdx) {
+      alert("addressIdx가 없습니다.");
+      return;
+    }
+
+    if (!editForm.nickname.trim()) {
+      alert("주소 닉네임을 입력해주세요.");
+      return;
+    }
+    if (!editForm.postcode.trim()) {
+      alert("우편번호를 입력해주세요.");
+      return;
+    }
+    if (!editForm.address.trim()) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const currentAddr = addressList.find((a) => a.address_id === addressIdx);
+
+      // console.log("=== 수정 요청 데이터 ===");
+      // console.log("userId:", userId);
+      // console.log("addressIdx:", addressIdx);
+      // console.log("addressList:", addressList);
+      // console.log("currentAddr:", currentAddr);
+
+      if (!currentAddr) {
+        alert("주소를 찾을 수 없습니다.");
+        return;
+      }
+
+      const requestBody = {
+        userId: userId,
+        addressIdx: addressIdx,
+        nickname: editForm.nickname.trim(),
+        postcode: editForm.postcode.trim(),
+        roadAddress: editForm.address.trim(),
+        detailAddress: editForm.detailAddress.trim(),
+        isDefault: currentAddr?.is_default || false,
+      };
+
+      console.log("=== 수정 요청 body ===", requestBody);
+
+      const res = await fetch("/api/user/address/updateAddress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("=== 수정 응답 status ===", res.status);
+
+      const data = await res.json();
+      console.log("=== 수정 응답 data ===", data);
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.errorMessage || "수정 실패");
+      }
+
+      alert("주소가 수정되었습니다.");
+      cancelEdit();
+      fetchAddressList();
+    } catch (err) {
+      console.error("수정 에러:", err);
+      alert(err.message || "주소 수정에 실패했습니다.");
+    }
+  };
+
+  // 주소 삭제
+  const deleteAddress = async (addressIdx) => {
+    if (!userId || !addressIdx) {
+      alert("userId 또는 addressIdx가 없습니다.");
+      console.error("userId:", userId, "addressIdx:", addressIdx);
+      return;
+    }
+
+const targetAddr = addressList.find((a) => a.address_id === addressIdx);
+
+
+    // console.log("=== 삭제 시도 ===");
+    // console.log("userId:", userId);
+    // console.log("addressIdx:", addressIdx);
+    // console.log("찾은 주소:", targetAddr);
+    // console.log("is_default 값:", targetAddr?.is_default);
+
+    // is_default가 true인 경우만 삭제 불가
+    if (targetAddr && targetAddr.is_default === true) {
+      alert(
+        "기본 배송지는 삭제할 수 없습니다.\n다른 주소를 기본으로 설정한 후 삭제해주세요."
+      );
+      return;
+    }
+
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      console.log("=== 삭제 API 호출 ===");
+      const res = await fetch("/api/user/address/deleteAddress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          addressIdx: addressIdx,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errorMessage);
+
+      alert("주소가 삭제되었습니다.");
+      fetchAddressList();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "주소 삭제에 실패했습니다.");
+    }
+  };
+
+  // 기본 배송지 설정
+  const setDefaultAddress = async (addressIdx) => {
+    if (!userId || !addressIdx) {
+      alert("userId 또는 addressIdx가 없습니다.");
+      console.error("userId:", userId, "addressIdx:", addressIdx);
+      return;
+    }
+
+    try {
+      const targetAddr = addressList.find((a) => a.address_id === addressIdx);
+
+      // console.log("=== 기본 배송지 설정 시도 ===");
+      // console.log("userId:", userId);
+      // console.log("addressIdx:", addressIdx);
+      // console.log("찾은 주소:", targetAddr);
+
+      if (targetAddr?.is_default === true) {
+        alert("이미 기본 배송지입니다.");
+        return;
+      }
+
+      const res = await fetch("/api/user/address/updateAddress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          addressIdx: addressIdx,
+          nickname: targetAddr.nickname,
+          postcode: targetAddr.postcode,
+          roadAddress: targetAddr.road_address,
+          detailAddress: targetAddr.detail_address || "",
+          isDefault: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errorMessage);
+
+      alert("기본 배송지로 설정되었습니다.");
+      fetchAddressList();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "기본 배송지 설정에 실패했습니다.");
+    }
+  };
+
+  // 새 주소 추가
+  const addNewAddress = async () => {
+    if (!newAddressForm.nickname.trim()) {
+      alert("주소 닉네임을 입력해주세요.");
+      return;
+    }
+    if (!newAddressForm.postcode.trim()) {
+      alert("우편번호를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
+      return;
+    }
+    if (!newAddressForm.address.trim()) {
+      alert("주소를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/user/address/addAddress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          nickname: newAddressForm.nickname.trim(),
+          postcode: newAddressForm.postcode.trim(),
+          roadAddress: newAddressForm.address.trim(),
+          detailAddress: newAddressForm.detailAddress.trim(),
+          isDefault: false,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.errorMessage);
+
+      alert("주소가 추가되었습니다.");
+      setNewAddressForm({
+        nickname: "",
+        postcode: "",
+        address: "",
+        detailAddress: "",
+      });
+      fetchAddressList();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "주소 추가에 실패했습니다.");
+    }
+  };
+
+  // 우편번호 검색 (수정용)
+  const handlePostcodeSearchForEdit = () => {
+    if (!window.daum || !window.daum.Postcode) {
+      alert(
+        "주소 검색 서비스를 불러오는 중입니다.\n잠시 후 다시 시도해주세요."
+      );
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        setEditForm((prev) => ({
+          ...prev,
+          postcode: data.zonecode,
+          address: data.address,
+        }));
+      },
+    }).open();
+  };
+
+  // 우편번호 검색 (신규 추가용)
+  const handlePostcodeSearchForNew = () => {
+    if (!window.daum || !window.daum.Postcode) {
+      alert(
+        "주소 검색 서비스를 불러오는 중입니다.\n잠시 후 다시 시도해주세요."
+      );
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        setNewAddressForm((prev) => ({
+          ...prev,
+          postcode: data.zonecode,
+          address: data.address,
+        }));
+      },
+    }).open();
+  };
+
+  if (!userInfo) return <p>Loading...</p>;
+
+  const defaultAddress = addressList.find((addr) => addr.is_default);
+  const displayAddress = defaultAddress
+    ? `${defaultAddress.road_address} ${defaultAddress.detail_address || ""}`
+    : "등록된 배송지가 없습니다.";
+
+  const fields = [
+    { label: "이름", field: "name", value: userInfo.name },
+    { label: "이메일", field: "email", value: userInfo.email },
+    { label: "전화번호", field: "phone", value: userInfo.phone_number },
+  ];
 
   return (
-    <div className={`w-full min-h-fit py-10 flex justify-center `}>
-      <div className={`w-full max-w-5xl rounded-xl shadow-md p-10 space-y-12 transition-all duration-300`}>
-
-        {/* 1. 상단 회원 정보 */}
+    <div className="w-full min-h-fit py-10 flex justify-center">
+      <div className="w-full max-w-5xl rounded-xl shadow-md p-10 space-y-12">
+        {/* 상단 정보 */}
         <section className="flex justify-between items-center border-b pb-6">
-          <div className="flex items-center gap-6">
-            <div>
-              <h2 className="text-2xl font-semibold text-[#0A400C] mb-20">jhapoy106님</h2>
-              <p className="text-black-900 font-semibold mb-10">
-                나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
+          <div>
+            <h2 className="text-2xl font-semibold text-[#0A400C] mb-2">
+              {userInfo.name}님
+            </h2>
+            <p className="text-black-900 font-semibold mb-2">
+              나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
+            </p>
+          </div>
+        </section>
+
+        {/* 기본 정보 */}
+        <section className="border rounded-lg py-6 px-6 mt-6">
+          <h3 className="text-2xl font-semibold mb-4">기본 정보</h3>
+          <div className="space-y-3 text-xl font-normal">
+            {fields.map(({ label, field, value }) => (
+              <div
+                key={field}
+                className="flex justify-between items-center mt-2"
+              >
+                <p>
+                  <b>{label} :</b> {value}
+                </p>
+                <button
+                  className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                  onClick={() => {
+                    setModalField(field);
+                    setModalValue(value);
+                    setModalOpen(true);
+                  }}
+                >
+                  {label} 수정
+                </button>
+              </div>
+            ))}
+            {/* 배송주소 */}
+            <div className="flex justify-between items-center mt-2">
+              <p>
+                <b>배송주소 :</b> {displayAddress}
               </p>
+              <button
+                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                onClick={openAddressModal}
+              >
+                배송주소 관리
+              </button>
             </div>
           </div>
         </section>
 
-        {/*  2. 기본 정보 */}
-        <section className="grid col-span-3 gap-6 text-left">
-          <div className="border rounded-lg py-30 pl-15 pr-15 mt-15">
-            <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
-
-            <div className="space-y-3 text-xl font-normal">
-
-
-              <div className="flex justify-between items-center">
-                <p className="mb-15"><b>이름 :</b> {userInfo?.name}</p>
-                <button 
-                onClick={() => {
-                  if (editField === "name") {
-                    setEditField(null);   // 이미 열려있으면 닫기
-                  } else {
-                    setEditField("name"); // 아니면 열기
-                    setEditValue(userInfo?.name);
-                  }
-                }}
-                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition">
-                  이름 수정
-                </button>
-              </div>
-              {editField === "name" && renderEditRow("이름", "name")}
-              {/* {ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ} */}
-
-              <div className="flex justify-between items-center">
-                <p className="mb-15 mt-15"><b>이메일 :</b> {userInfo?.email}</p>
-                <button 
-                onClick={() => {
-                  if (editField === "email") {
-                    setEditField(null);   // 이미 열려있으면 닫기
-                  } else {
-                    setEditField("email"); // 아니면 열기
-                    setEditValue(userInfo?.name);
-                  }
-                }}
-                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition">
-                  이메일 수정
-                </button>
-              </div>
-              {editField === "email" && renderEditRow("이메일", "email")}
-              {/* {ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ} */}
-
-              <div className="flex justify-between items-center">
-                <p className="mb-15 mt-15"><b>전화번호 :</b> {userInfo?.phone}</p>
-                <button 
-                onClick={() => {
-                  if (editField === "phone") {
-                    setEditField(null);   // 이미 열려있으면 닫기
-                  } else {
-                    setEditField("phone"); // 아니면 열기
-                    setEditValue(userInfo?.name);
-                  }
-                }}
-                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition">
-                  전화번호 수정
-                </button>
-              </div>
-              {editField === "phone" && renderEditRow("전화번호", "phone")}          
-              {/* {ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ} */}
-
-              <div className="flex justify-between items-center">
-                <p className="mb-15 mt-15"><b>배송주소 :</b> {userInfo?.address}</p>
-                <button 
-                onClick={() => {
-                  if (editField === "address") {
-                    setEditField(null);   // 이미 열려있으면 닫기
-                  } else {
-                    setEditField("address"); // 아니면 열기
-                    setEditValue(userInfo?.address);
-                  }
-                }}
-                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition">
-                  배송주소 수정
-                </button>
-              </div>
-              {editField === "address" && renderEditRow("전화번호", "address")}          
-              {/* {ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ} */}
-            </div>
-          </div>
-        </section>
-
-        {/* 3. 나의 활동 */}
+        {/* 나의 활동 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">나의 활동</h3>
           <div className="grid grid-cols-3 gap-6 text-center">
-            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaBookOpen className="mx-auto text-2xl text-green-700 dark:text-green-200 mb-2" />
+            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaBookOpen className="mx-auto text-2xl text-green-700 mb-2" />
               <p className="text-lg font-semibold">5</p>
-              <p className="text-sm text-gray-500 dark:text-gray-300">주문 내역</p>
+              <p className="text-sm text-gray-500">주문 내역</p>
             </div>
-            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaRegHeart className="mx-auto text-2xl text-pink-600 dark:text-pink-300 mb-2" />
+            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaRegHeart className="mx-auto text-2xl text-pink-600 mb-2" />
               <p className="text-lg font-semibold">8</p>
-              <p className="text-sm text-gray-500 dark:text-gray-300">찜한 도서</p>
+              <p className="text-sm text-gray-500">찜한 도서</p>
             </div>
-            <div className="bg-green-50 dark:bg-green-800 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaGift className="mx-auto text-2xl text-yellow-600 dark:text-yellow-300 mb-2" />
+            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
+              <FaGift className="mx-auto text-2xl text-yellow-600 mb-2" />
               <p className="text-lg font-semibold">3</p>
-              <p className="text-sm text-gray-500 dark:text-gray-300">리뷰 작성</p>
+              <p className="text-sm text-gray-500">리뷰 작성</p>
             </div>
           </div>
         </section>
 
-        {/* 4. 최근 본 도서 */}
+        {/* 최근 본 도서 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">최근 본 도서</h3>
           <div className="grid grid-cols-4 gap-5">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="border rounded-lg overflow-hidden hover:shadow-md transition">
-                <img src={`https://placehold.co/200x250?text=Book+${i}`} alt={`Book ${i}`} />
+              <div
+                key={i}
+                className="border rounded-lg overflow-hidden hover:shadow-md transition"
+              >
+                <img
+                  src={`https://placehold.co/200x250?text=Book+${i}`}
+                  alt={`Book ${i}`}
+                />
                 <div className="p-3 text-sm">
                   <p className="font-medium">인기 도서 {i}</p>
-                  <p className="text-gray-500 dark:text-gray-300">저자 이름</p>
+                  <p className="text-gray-500">저자 이름</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* 5. 개인 설정 */}
+        {/* 개인 설정 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
           <button className="mt-6 text-sm text-red-500 hover:underline">
@@ -207,6 +557,179 @@ const renderEditRow = (label, field) => (
           </button>
         </section>
       </div>
+
+      {/* 기본 수정 모달 */}
+      <Modal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        title={`${modalField} 수정`}
+        confirmText="저장"
+        cancelText="취소"
+        onConfirm={updateUserField}
+        onCancel={() => setModalOpen(false)}
+      >
+        <input
+          type="text"
+          className="w-full p-2 border rounded-md"
+          value={modalValue}
+          onChange={(e) => setModalValue(e.target.value)}
+          autoFocus
+        />
+      </Modal>
+
+      {/* 배송주소 관리 모달 */}
+      <Modal
+        open={addressModalOpen}
+        onOpenChange={setAddressModalOpen}
+        title="배송주소 관리"
+        maxSize="max-w-3xl"
+        bodyClassName="max-h-[600px] overflow-y-auto"
+      >
+        <div className="space-y-6">
+          {/* 기존 주소 목록 */}
+          {addressList.length > 0 ? (
+            addressList.map((addr) => {
+              const isEditing = editingAddressIdx === addr.address_id;
+              
+              return (
+                <div
+                  key={addr.address_id}
+                  className="border rounded-lg p-4 bg-gray-50 space-y-3"
+                >
+                  {isEditing ? (
+                    // 수정 모드
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          주소 닉네임 <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          placeholder="예: 집, 회사"
+                          value={editForm.nickname}
+                          onChange={(e) =>
+                            setEditForm((prev) => ({ ...prev, nickname: e.target.value }))
+                          }
+                          className="w-full px-4 py-2 border border-gray-200 rounded-sm"
+                        />
+                      </div>
+                      <AddressInput
+                        postcode={editForm.postcode}
+                        address={editForm.address}
+                        detailAddress={editForm.detailAddress}
+                        onDetailAddressChange={(value) =>
+                          setEditForm((prev) => ({ ...prev, detailAddress: value }))
+                        }
+                        onPostcodeSearch={handlePostcodeSearchForEdit}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => saveAddress(addr.address_id)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        >
+                          저장
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // 보기 모드
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold text-lg">{addr.nickname}</span>
+                          {addr.is_default && (
+                            <span className="px-2 py-1 text-xs bg-green-600 text-white rounded">
+                              기본
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          [{addr.postcode}] {addr.road_address}
+                        </p>
+                        {addr.detail_address && (
+                          <p className="text-sm text-gray-600">{addr.detail_address}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {!addr.is_default && (
+                          <button
+                            onClick={() => setDefaultAddress(addr.address_id)}
+                            className="text-sm px-3 py-1 border rounded-md hover:bg-green-100 transition"
+                          >
+                            기본설정
+                          </button>
+                        )}
+                        <button
+                          onClick={() => startEditAddress(addr)}
+                          className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => deleteAddress(addr.address_id)}
+                          className="text-sm px-3 py-1 border rounded-md hover:bg-red-600 hover:text-white transition"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-center text-gray-500 py-6">등록된 배송지가 없습니다.</p>
+          )}
+
+          {/* 새 주소 추가 */}
+          {editingAddressIdx === null && (
+            <div className="border-t pt-6">
+              <h4 className="font-semibold mb-3">새 배송지 추가</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    주소 닉네임 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    placeholder="예: 집, 회사"
+                    value={newAddressForm.nickname}
+                    onChange={(e) =>
+                      setNewAddressForm((prev) => ({
+                        ...prev,
+                        nickname: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-200 rounded-sm"
+                  />
+                </div>
+                <AddressInput
+                  postcode={newAddressForm.postcode}
+                  address={newAddressForm.address}
+                  detailAddress={newAddressForm.detailAddress}
+                  onDetailAddressChange={(value) =>
+                    setNewAddressForm((prev) => ({
+                      ...prev,
+                      detailAddress: value,
+                    }))
+                  }
+                  onPostcodeSearch={handlePostcodeSearchForNew}
+                />
+                <button
+                  onClick={addNewAddress}
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  주소 추가
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -10,7 +10,8 @@ export async function POST(request) {
     const body = await request.json();
     const { userId, nickname, postcode, roadAddress, detailAddress, isDefault } = body;
 
-    // 필수 값 검증
+    console.log("받은 데이터:", { userId, nickname, postcode, roadAddress, detailAddress, isDefault });
+
     if (!userId || !roadAddress) {
       return Response.json(
         { success: false, errorMessage: "userId와 roadAddress는 필수입니다." },
@@ -18,8 +19,22 @@ export async function POST(request) {
       );
     }
 
-    // 기본 배송지로 설정하는 경우, 기존 기본 배송지를 false로 변경
-    if (isDefault) {
+    // 기존 주소 개수 확인
+    const { data: existingAddresses, error: countError } = await supabase
+      .from("address")
+      .select("address_id")
+      .eq("user_id", userId)
+      .eq("status", true);
+
+    if (countError) {
+      console.error("주소 개수 확인 오류:", countError);
+    }
+
+    // 첫 번째 주소이거나 isDefault가 true인 경우
+    const shouldBeDefault = isDefault || !existingAddresses || existingAddresses.length === 0;
+
+    if (shouldBeDefault) {
+      // 모든 기존 주소의 is_default를 false로 변경
       await supabase
         .from("address")
         .update({ is_default: false })
@@ -36,7 +51,7 @@ export async function POST(request) {
           postcode: postcode || "",
           road_address: roadAddress,
           detail_address: detailAddress || "",
-          is_default: isDefault || false,
+          is_default: shouldBeDefault,
           status: true,
         },
       ])
@@ -49,6 +64,8 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+
+    console.log("추가된 주소:", data);
 
     return Response.json({
       success: true,
