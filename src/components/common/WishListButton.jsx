@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
+import { toast } from "sonner";
 
 export default function WishListButton({ userId, bookId, stock }) {
   const [isWished, setIsWished] = useState(false);
@@ -61,6 +62,11 @@ export default function WishListButton({ userId, bookId, stock }) {
       } else {
         // 서버에서 받은 실제 status로 업데이트
         setIsWished(data.status);
+        toast.success(
+          data.status
+            ? "위시리스트에 추가했습니다."
+            : "위시리스트에서 제거했습니다."
+        );
       }
     } catch (err) {
       console.error("Wishlist toggle failed:", err);

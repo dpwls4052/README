@@ -11,10 +11,7 @@ const BookListItem = ({ book, goDetail }) => {
   const { userId } = useAuth();
 
   return (
-    <div
-      key={book.id}
-      className="flex w-full justify-between border-b border-solid border-[#ccc] py-15 gap-14"
-    >
+    <div className="flex w-full justify-between border-b border-solid border-[#ccc] py-15 gap-14">
       <div
         className="flex items-start gap-20 hover:cursor-pointer"
         onClick={() => goDetail(book.id)}
@@ -50,7 +47,7 @@ const BookListItem = ({ book, goDetail }) => {
           stock={book.stock}
         />
         <div className="flex flex-col gap-10 w-200 h-100">
-          <AddToCartButton book={{ bookId: book.bookid }} iconMode={false} />
+          <AddToCartButton book={book} iconMode={false} />
           <button className="bg-[var(--main-color)] font-medium flex-1 text-white rounded-sm">
             바로구매
           </button>
