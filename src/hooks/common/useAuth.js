@@ -9,8 +9,9 @@ import {
 import { auth } from "../../lib/firebase";
 import { useState, useEffect } from "react";
 
-// 🔥 Firestore 추가
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+
+
+import { supabase } from "@/lib/supabaseClient";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -50,19 +51,27 @@ export function useAuth() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const createdUser = userCredential.user;
 
-      // 2) Firebase Auth displayName 업데이트
+      // 2) Firebase displayName 업데이트
       await updateProfile(createdUser, { displayName: name });
 
-      // 3) Firestore users/{uid} 저장
-      const firestore = getFirestore();
-      await setDoc(doc(firestore, "users", createdUser.uid), {
-        name,
-        email,
-        phone,
-        address,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      });
+      // 3) Supabase users 테이블에 저장
+const { data, error: supabaseError } = await supabase.from("users").insert({
+  user_id: createdUser.uid,
+  email,
+  name,
+  phone_number: phone,
+  address_id_default: null,
+  cart_count: 0,
+});
+
+if (supabaseError) {
+  console.error("🔥 Supabase Insert Error:", supabaseError.message);
+  console.error("📌 Supabase Details:", supabaseError.details);
+  console.error("📌 Supabase Hint:", supabaseError.hint);
+  console.error("📌 Supabase Code:", supabaseError.code);
+  throw new Error("Supabase 저장 실패");
+}
+
 
       return true;
     } catch (err) {
@@ -73,6 +82,7 @@ export function useAuth() {
       setLoading(false);
     }
   };
+
 
   // 🔥 로그아웃
   const logout = async () => {
