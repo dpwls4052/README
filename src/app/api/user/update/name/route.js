@@ -1,35 +1,50 @@
+// app/api/user/updateName/route.js
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(req) {
   try {
-    const { user_id, newName } = await req.json();
+    const { userId, newName } = await req.json();
 
-    if (!user_id || !newName) {
-      return NextResponse.json({ error: "user_id와 newName이 필요합니다." }, { status: 400 });
+    // 필수 값 체크
+    if (!userId || !newName) {
+      return NextResponse.json(
+        { errorMessage: "userId와 newName은 필수입니다." },
+        { status: 400 }
+      );
     }
 
-    // status: true인 사용자만 조회
+    // status가 true인 사용자만 조회
     const { data: user, error: fetchError } = await supabase
       .from("users")
       .select("user_id")
-      .eq("user_id", user_id)
+      .eq("user_id", userId)
       .eq("status", true)
       .maybeSingle();
 
     if (fetchError) throw fetchError;
-    if (!user) return NextResponse.json({ error: "탈퇴한 회원이거나 존재하지 않는 회원입니다." }, { status: 404 });
 
+    if (!user) {
+      return NextResponse.json(
+        { errorMessage: "탈퇴했거나 존재하지 않는 회원입니다." },
+        { status: 404 }
+      );
+    }
+
+    // 이름 업데이트
     const { error: updateError } = await supabase
       .from("users")
       .update({ name: newName })
-      .eq("user_id", user_id);
+      .eq("user_id", userId);
 
     if (updateError) throw updateError;
 
-    return NextResponse.json({ message: "이름 변경 완료" });
+    return NextResponse.json({ message: "nameUpdateSuccess" });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { errorMessage: err.message || "서버 에러" },
+      { status: 500 }
+    );
   }
 }
