@@ -3,8 +3,8 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import Navigation from "@/components/main/Navigation";
-import { useBookList } from "@/hooks/common/useBookList";
 import BookListItem from "@/components/books/BookListItem";
+import { useBooks } from "@/hooks/book/useBooks";
 
 export default function SearchResultPage() {
   const searchParams = useSearchParams();
@@ -12,7 +12,7 @@ export default function SearchResultPage() {
   const q = (searchParams.get("q") || "").trim().toLowerCase();
 
   // Firestore의 prefix 검색 한계로 인해 클라이언트에서 필터링
-  const { books, loading, fetchBooks, hasNext } = useBookList({
+  const { books, loading, fetchBooks, hasNext } = useBooks({
     pageSize: 50, // 넉넉히
     category: null,
     search: null, // ✅ 추가: 서버에서 prefix 검색
@@ -47,17 +47,17 @@ export default function SearchResultPage() {
   return (
     <>
       <Navigation />
-      <div className="py-80 max-w-1200 mx-auto">
-        <p className="text-2xl font-bold mb-10">
+      <div className="mx-auto py-80 max-w-1200">
+        <p className="mb-10 text-2xl font-bold">
           검색 결과: <span className="text-[var(--main-color)]">“{q}”</span>
         </p>
 
         {loading && filtered.length === 0 ? (
-          <div className="flex justify-center items-center h-300">
+          <div className="flex items-center justify-center h-300">
             <p>Loading...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center text-gray-500 py-40">
+          <div className="py-40 text-center text-gray-500">
             해당 검색어에 대한 결과가 없습니다.
           </div>
         ) : (
@@ -68,7 +68,7 @@ export default function SearchResultPage() {
 
             {/* 더보기 버튼 */}
             {(visibleCount < filtered.length || hasNext) && (
-              <div className="p-20 text-center mt-20">
+              <div className="p-20 mt-20 text-center">
                 <button
                   className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
                   onClick={() => fetchBooks()}

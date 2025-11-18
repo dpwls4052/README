@@ -12,14 +12,14 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 import { TfiArrowCircleLeft, TfiArrowCircleRight } from "react-icons/tfi";
-import { useBookList } from "@/hooks/common/useBookList";
+import { useBooks } from "@/hooks/book/useBooks";
 
 export default function Recommend() {
   const router = useRouter();
   const goDetail = (id) => {
     router.push(`/product/detail/${id}`);
   };
-  const { books, loading } = useBookList({
+  const { books, loading } = useBooks({
     pageSize: 6,
     orderField: "createdAt",
     orderDirection: "desc",
