@@ -3,12 +3,17 @@
 import Image from "next/image";
 import { IoIosHeartEmpty } from "react-icons/io";
 import noimg from "@/assets/no_image.png";
+import WishListButton from "../common/WishListButton";
+import { useAuth } from "@/hooks/common/useAuth";
+import AddToCartButton from "../common/AddToCartButton";
 
 const BookListItem = ({ book, goDetail }) => {
+  const { userId } = useAuth();
+
   return (
     <div
       key={book.id}
-      className="flex w-full justify-between border-b border-solid border-[#ccc] py-8 gap-14"
+      className="flex w-full justify-between border-b border-solid border-[#ccc] py-15 gap-14"
     >
       <div
         className="flex items-start gap-20 hover:cursor-pointer"
@@ -39,13 +44,13 @@ const BookListItem = ({ book, goDetail }) => {
         </div>
       </div>
       <div className="flex items-end flex-col justify-start gap-16">
-        <button aria-label="찜" className="p-2">
-          <IoIosHeartEmpty className="w-25 h-25 text-red-500" />
-        </button>
+        <WishListButton
+          userId={userId}
+          bookId={book.bookId}
+          stock={book.stock}
+        />
         <div className="flex flex-col gap-10 w-200 h-100">
-          <button className="bg-[var(--sub-color)] font-medium flex-1 text-white rounded-sm">
-            장바구니
-          </button>
+          <AddToCartButton book={{ bookId: book.bookid }} iconMode={false} />
           <button className="bg-[var(--main-color)] font-medium flex-1 text-white rounded-sm">
             바로구매
           </button>

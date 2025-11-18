@@ -6,7 +6,7 @@ import Modal from "../common/Modal";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import SearchSection from "./SearchSection";
 import AddedSection from "./AddedSection";
-import { useAddBook } from "@/hooks/admin/useAddBook";
+import { useCreateBook } from "@/hooks/book/useCreateBook";
 
 const AddBookModal = ({ fetchBooks }) => {
   const { searchBooks } = useFindNewBooks();
@@ -53,10 +53,11 @@ const AddBookModal = ({ fetchBooks }) => {
     );
   };
 
-  const { addBook, loading, error } = useAddBook();
+  const { addBook } = useCreateBook();
+
   const handleSaveBook = () => {
     addBook(addedBookList);
-    fetchBooks(true);
+    fetchBooks(1, false);
     reset();
     closeModal();
   };
@@ -78,6 +79,7 @@ const AddBookModal = ({ fetchBooks }) => {
         onConfirm={handleSaveBook}
         onCancel={closeModal}
         maxSize="max-w-full flex flex-col h-dvh"
+        bodyClassName="overflow-y-auto"
       >
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center w-full h-50 px-20 mx-auto border border-(--main-color) rounded-full max-w-600 shrink-0 mt-10">
