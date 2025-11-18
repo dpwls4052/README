@@ -35,7 +35,7 @@ export default function Modal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         {/* backdrop */}
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-[oklch(0.54_0_0_/_0.1)]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-[oklch(0.54_0_0_/_0.4)]" />
 
         {/* content center wrapper */}
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

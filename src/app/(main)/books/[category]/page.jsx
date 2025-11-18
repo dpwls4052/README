@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useBookList } from "@/hooks/common/useBookList";
 import { useMemo } from "react";
 import Navigation from "@/components/main/Navigation";
 import { useRouter } from "next/navigation";
 import BookListItem from "@/components/books/BookListItem";
+import { useBooks } from "@/hooks/book/useBooks";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서" },
@@ -24,12 +24,7 @@ const BookList = () => {
 
   const wantRandom = category === "recommend" || category === "season";
 
-  const { books, loading, fetchBooks, hasNext } = useBookList({
-    pageSize: 10,
-    category: null,
-    orderField: wantRandom ? "createdAt" : "salesCount",
-    orderDirection: "desc",
-  });
+  const { books, fetchMoreBooks, loading, hasNext } = useBooks();
 
   const visibleBooks = useMemo(() => {
     let list = Array.isArray(books) ? books : [];
@@ -69,13 +64,17 @@ const BookList = () => {
         ) : (
           <div className="flex flex-col">
             {visibleBooks.map((book) => (
-              <BookListItem key={book.id} book={book} goDetail={goDetail} />
+              <BookListItem
+                key={book.id ?? book.bookId}
+                book={book}
+                goDetail={goDetail}
+              />
             ))}
             {!wantRandom && hasNext && (
               <div className="p-20 text-center mt-20">
                 <button
                   className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
-                  onClick={() => fetchBooks()}
+                  onClick={() => fetchMoreBooks()}
                 >
                   더보기 +
                 </button>
