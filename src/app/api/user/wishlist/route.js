@@ -16,7 +16,7 @@ export async function POST(req) {
       .select('*')
       .eq('user_id', user_id)
       .eq('book_id', book_id)
-      .maybeSingle(); // POST는 status 상관없이 조회
+      .maybeSingle();
 
     if (selectError) throw selectError;
 
@@ -89,26 +89,33 @@ export async function GET(req) {
       return new Response(JSON.stringify([]), { status: 200 });
     }
 
-    // book.status = true 필터 추가
+    // ✅ book 테이블에서 명시적으로 필요한 필드 선택 (stock 포함)
     const { data: books, error: booksError } = await supabase
       .from('book')
-      .select('*')
+      .select('book_id, title, author, publisher, cover, price_standard, price_sales, stock, sales_count, status')
       .in('book_id', bookIds)
       .eq('status', true);
 
     if (booksError) throw booksError;
+
+    console.log('📚 위시리스트 책 데이터:', books); // ✅ 디버깅용 로그
 
     // 최종 mapping (wishlist와 book 매칭)
     const result = wishlist
       .map((w) => {
         const book = books.find((b) => b.book_id === w.book_id);
         if (!book) return null; // status false인 책은 제외
+        
+        console.log(`📖 책 ID ${book.book_id}: stock = ${book.stock}`); // ✅ 각 책의 재고 확인
+        
         return {
           ...book,
           status: w.status,
         };
       })
       .filter(Boolean); // null 제거
+
+    console.log('✅ 최종 반환 데이터:', result); // ✅ 최종 결과 확인
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (err) {
