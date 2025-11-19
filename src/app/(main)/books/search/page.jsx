@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Navigation from "@/components/main/Navigation";
 import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
@@ -11,13 +11,12 @@ export default function SearchResultPage() {
   const router = useRouter();
   const q = (searchParams.get("q") || "").trim().toLowerCase();
 
-  // Firestore의 prefix 검색 한계로 인해 클라이언트에서 필터링
-  const { books, loading, fetchBooks, hasNext } = useBooks({
-    pageSize: 50, // 넉넉히
+  const { books, loading, fetchMoreBooks, hasNext } = useBooks({
+    pageSize: 10,
     category: null,
-    search: null, // ✅ 추가: 서버에서 prefix 검색
-    orderField: "title", // ✅ 검색 시 정렬 기준 통일
-    orderDirection: "desc",
+    search: q,
+    orderField: "title",
+    orderDirection: "asc",
   });
 
   const filtered = useMemo(() => {
@@ -30,26 +29,14 @@ export default function SearchResultPage() {
     });
   }, [books, q]);
 
-  const [visibleCount, setVisibleCount] = useState(10);
-  const visibleBooks = filtered.slice(0, visibleCount);
-
   const goDetail = (id) => router.push(`/product/detail/${id}`);
-
-  const handleLoadMore = () => {
-    if (visibleCount < filtered.length) {
-      setVisibleCount((prev) => prev + 10);
-    } else if (hasNext) {
-      // 이미 불러온 것 다 봤고 서버에 더 있을 때 → Firestore에서 추가 로드
-      fetchBooks();
-    }
-  };
 
   return (
     <>
       <Navigation />
       <div className="mx-auto py-80 max-w-1200">
         <p className="mb-10 text-2xl font-bold">
-          검색 결과: <span className="text-[var(--main-color)]">“{q}”</span>
+          검색 결과: <span className="text-(--main-color)">“{q}”</span>
         </p>
 
         {loading && filtered.length === 0 ? (
@@ -63,15 +50,15 @@ export default function SearchResultPage() {
         ) : (
           <div className="flex flex-col">
             {filtered.map((book) => (
-              <BookListItem key={book.id} book={book} goDetail={goDetail} />
+              <BookListItem key={book.bookId} book={book} goDetail={goDetail} />
             ))}
 
             {/* 더보기 버튼 */}
-            {(visibleCount < filtered.length || hasNext) && (
+            {hasNext && (
               <div className="p-20 mt-20 text-center">
                 <button
-                  className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
-                  onClick={() => fetchBooks()}
+                  className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
+                  onClick={fetchMoreBooks}
                 >
                   더보기 +
                 </button>

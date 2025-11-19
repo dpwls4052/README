@@ -6,8 +6,13 @@ export async function GET(req) {
 
     // 쿼리 파라미터
     const page = parseInt(searchParams.get("page") ?? "1", 10);
+    const pageSize = searchParams.get("pageSize") || 20;
     const category = searchParams.get("category");
-    const keyword = searchParams.get("keyword");
+    const search = searchParams.get("search");
+
+    const orderField = searchParams.get("orderField") || "created_at";
+    const orderDirection =
+      searchParams.get("orderDirection") === "asc" ? true : false;
 
     if (page < 1) {
       return new Response(
@@ -16,7 +21,6 @@ export async function GET(req) {
       );
     }
 
-    const pageSize = 20;
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
@@ -24,7 +28,7 @@ export async function GET(req) {
       .from("book")
       .select("*", { count: "exact" })
       .eq("status", true)
-      .order("created_at", { ascending: false })
+      .order(orderField, { ascending: orderDirection })
       .order("book_id", { ascending: false });
 
     // 카테고리 필터
@@ -33,8 +37,8 @@ export async function GET(req) {
     }
 
     // 제목 검색 (부분 일치)
-    if (keyword) {
-      query = query.ilike("title", `%${keyword}%`);
+    if (search) {
+      query = query.ilike("title", `%${search}%`);
     }
 
     const { data, error, count } = await query.range(from, to);

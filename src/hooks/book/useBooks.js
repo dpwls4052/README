@@ -3,12 +3,12 @@ import { getBooks } from "@/service/booksService";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export const useBooks = ({
-  pageSize = 20,
-  category = null,
-  search = null,
-  orderField = "createdAt",
-  orderDirection = "desc",
-  coverResolution = "cover",
+  pageSize,
+  category,
+  search,
+  orderField,
+  orderDirection,
+  coverResolution,
 } = {}) => {
   const [books, setBooks] = useState([]);
   const [page, setPage] = useState(1);
