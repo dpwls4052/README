@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/common/useAuth";
 import { useCart } from "@/hooks/common/useCart";
 import { FiShoppingCart } from "react-icons/fi";
 
-export default function AddToCartButton({ book, iconMode = false }) {
+export default function AddToCartButton({ book, iconMode = false, className = "" }) {
   const router = useRouter();
   const { userId } = useAuth();
   const { goToCart } = useCart();
@@ -33,7 +33,6 @@ export default function AddToCartButton({ book, iconMode = false }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
 
-      // 모달 항상 표시
       setCartModalOpen(true);
     } catch (err) {
       console.error(err);
@@ -58,18 +57,20 @@ export default function AddToCartButton({ book, iconMode = false }) {
       <button
         className={
           iconMode
-            ? "p-2 text-white  bg-(--sub-color) rounded hover:bg-green-700 hover:cursor-pointer"
-            : "flex-1 bg-[var(--sub-color)] text-white font-normal py-2 h-40 rounded hover:cursor-pointer disabled:opacity-50"
+            ? `p-2 text-white bg-(--sub-color) rounded hover:bg-green-700 hover:cursor-pointer ${className}`
+            : `
+                flex-1 bg-[var(--sub-color)]
+                text-white font-normal
+                h-40 py-2
+                rounded hover:cursor-pointer disabled:opacity-50
+                ${className}
+              `
         }
         onClick={handleAddToCart}
         disabled={loading}
       >
         {loading ? (
-          iconMode ? (
-            <FiShoppingCart />
-          ) : (
-            "추가중..."
-          )
+          iconMode ? <FiShoppingCart /> : "추가중..."
         ) : iconMode ? (
           <FiShoppingCart />
         ) : (
@@ -77,7 +78,6 @@ export default function AddToCartButton({ book, iconMode = false }) {
         )}
       </button>
 
-      {/* 모달 항상 표시 */}
       <Modal
         title="선택한 상품을 장바구니에 담았어요."
         open={isCartModalOpen}
