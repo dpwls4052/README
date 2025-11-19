@@ -141,32 +141,33 @@ const Cart = () => {
     }
   };
 
-  const handlePay = () => {
-    if (selectedItems.length === 0) return alert("상품을 선택해주세요");
+const handlePay = () => {
+    if (selectedItems.length === 0) return alert("상품을 선택해주세요");
 
-    const orderItems = selectedItems.map((item) => ({
-      id: item.id,
-      title: item.name,
-      image: item.image,
-      quantity: item.count,
-      price: item.price,
-    }));
+    const orderItems = selectedItems.map((item) => ({
+      // 🚨 수정: 서버 API가 장바구니 삭제를 위해 요구하는 필드명(book_id)으로 변경
+      book_id: item.id, 
+      
+      title: item.name,
+      image: item.image,
+      quantity: item.count,
+      price: item.price,
+    }));
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "cartData",
-        JSON.stringify({
-          orderItems,
-          totalItemPrice: itemsTotal,
-          deliveryFee: shippingFee,
-          finalPrice: totalAmount,
-        })
-      );
-    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "cartData",
+        JSON.stringify({
+          orderItems,
+          totalItemPrice: itemsTotal,
+          deliveryFee: shippingFee,
+          finalPrice: totalAmount,
+        })
+      );
+    }
 
-    router.push("/pay");
-  };
-
+    router.push("/pay");
+  };
   return (
     <ProtectedRoute>
       <div className="min-h-screen py-10 bg-white">

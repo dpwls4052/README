@@ -4,13 +4,10 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import WishListButton from "@/components/common/WishListButton";
-import Modal from "@/components/common/Modal";
-import { useDirectPurchase } from "@/hooks/common/useDirectPurchase";
-import { useCart } from "@/hooks/common/useCart";
-import { useModal } from "@/hooks/common/useModal";
+import AddToCartButton from "@/components/common/AddToCartButton";
+import BuyNowButton from "@/components/common/BuyNowButton"; // ✅ 추가
 import { useAuth } from "@/hooks/common/useAuth";
 import noimg from "@/assets/no_image.png";
-import AddToCartButton from "../common/AddToCartButton";
 
 const Bestseller = () => {
   const router = useRouter();
@@ -55,65 +52,6 @@ const Bestseller = () => {
 
   const goDetail = (id) => {
     router.push(`/product/detail/${id}`);
-  };
-
-  const { purchase } = useDirectPurchase();
-  const { addToCart, goToCart } = useCart();
-
-  // 기존 모달 훅 재사용
-  const {
-    isModalOpen: isCartModalOpen,
-    openModal: openCartModal,
-    closeModal: closeCartModal,
-    toggleModal: toggleCartModal,
-  } = useModal();
-
-  const {
-    isModalOpen: isLoginModalOpen,
-    openModal: openLoginModal,
-    closeModal: closeLoginModal,
-    toggleModal: toggleLoginModal,
-  } = useModal();
-
-  const handleAddToCart = async (book) => {
-    if (!userId) {
-      openLoginModal();
-      return;
-    }
-    try {
-      const res = await fetch("/api/user/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          book_id: book.bookId,
-          amount: 1,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
-      // 모달 열기
-      openCartModal();
-    } catch (err) {
-      console.error(err);
-      alert(err.message); // 에러만 alert
-    }
-  };
-
-  const handleGoToCart = () => {
-    closeCartModal();
-    goToCart();
-  };
-
-  const handlePurchase = (book) => {
-    if (!purchase(book)) {
-      openLoginModal();
-    }
-  };
-
-  const confirmLoginModal = () => {
-    router.push("/login");
-    closeLoginModal();
   };
 
   if (loading) {
@@ -176,52 +114,29 @@ const Bestseller = () => {
               </p>
             </div>
 
-            {/* 바로구매 버튼 */}
+            {/* ✅ 장바구니 & 바로구매 버튼 */}
             <div className="flex items-center justify-between gap-2">
-              {/* 장바구니 모달 */}
-              {/* <Modal
-                title="선택한 상품을 장바구니에 담았어요."
-                open={isCartModalOpen}
-                onOpenChange={toggleCartModal}
-                confirmText="장바구니 이동"
-                cancelText="취소"
-                onConfirm={handleGoToCart}
-                onCancel={closeCartModal}
-                maxSize="max-w-md"
-                bodyClassName="text-center text-16 font-normal"
-              >
-                장바구니 페이지로 이동하시겠습니까?
-              </Modal> */}
+              {/* 장바구니 버튼 - stock 전달 */}
+              <AddToCartButton 
+                book={{ 
+                  bookId: book.bookId,
+                  stock: book.stock  // ✅ stock 추가
+                }} 
+                iconMode={false}
+                className="h-40"
+              />
 
-              {/* 로그인 모달 */}
-              <Modal
-                title="로그인이 필요한 서비스입니다."
-                open={isLoginModalOpen}
-                onOpenChange={toggleLoginModal}
-                confirmText="로그인 페이지로 이동"
-                cancelText="취소"
-                onConfirm={confirmLoginModal}
-                onCancel={closeLoginModal}
-                maxSize="max-w-md"
-                bodyClassName="text-center text-16 font-normal"
-              >
-                로그인 페이지로 이동하시겠습니까?
-              </Modal>
-
-              <AddToCartButton book={{ bookId: book.id }} iconMode={false} />
-              {/* <button
-                  className="flex-1 bg-(--sub-color) text-white py-2 h-40 rounded hover:cursor-pointer"
-                  onClick={() => handleAddToCart(book)}
-                >
-                  장바구니
-              </button> */}
-
-              <button
-                className="flex-1 bg-(--main-color) text-white py-2 rounded h-40 font-normal hover:cursor-pointer"
-                onClick={() => handlePurchase(book)}
-              >
-                바로구매
-              </button>
+              {/* 바로구매 버튼 - 컴포넌트로 교체 */}
+              <BuyNowButton
+                book={{
+                  bookId: book.bookId,
+                  title: book.title,
+                  cover: book.cover,
+                  priceStandard: book.priceStandard,
+                  stock: book.stock,
+                }}
+                className="h-40"
+              />
             </div>
           </div>
         ))}

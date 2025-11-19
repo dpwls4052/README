@@ -1,195 +1,148 @@
+// app/success/page.js 또는 pages/success.js
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 
-export default function PaymentSuccess() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [responseData, setResponseData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [paymentData, setPaymentData] = useState(null);
+export default function PaymentSuccessPage() {
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [isDbSaved, setIsDbSaved] = useState(false);
+    const [error, setError] = useState(null);
+    const [orderNumber, setOrderNumber] = useState('');
+    const [orderInfo, setOrderInfo] = useState(null);
 
-  // 로컬스토리지에서 결제 데이터 불러오기
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem("paymentData");
-      if (saved) {
-        setPaymentData(JSON.parse(saved));
-        localStorage.removeItem("paymentData");
-      }
+
+    useEffect(() => {
+        // 1. URL 파라미터 유효성 검사 제거됨
+        
+        // 2. 로컬 스토리지에서 주문 데이터 로드
+        const storedData = localStorage.getItem("pendingOrderData");
+        
+        if (!storedData) {
+            // 이 에러가 발생했다면 PaymentPage.js에서 로컬 스토리지 저장이 실패한 것
+            setError('주문 정보(pendingOrderData)를 찾을 수 없습니다. 결제 페이지로 돌아가 다시 시도해주세요.');
+            setLoading(false);
+            return;
+        }
+
+        let orderPayload;
+        try {
+            orderPayload = JSON.parse(storedData);
+        } catch (parseError) {
+            console.error("pendingOrderData 파싱 실패:", parseError);
+            setError("주문 정보 형식이 올바르지 않습니다. 결제 페이지로 돌아가 다시 시도해주세요.");
+            setLoading(false);
+            return;
+        }
+        setOrderInfo(orderPayload);
+        
+        // 3. 서버에 최종 주문 데이터 전송 (DB 저장)
+        const saveOrderToDB = async () => {
+            try {
+                // URL 파라미터(paymentKey, orderId)를 사용하지 않음
+                const finalPayload = orderPayload; 
+
+                const res = await fetch("/api/order/create", { // 🚨 서버 API 경로
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(finalPayload),
+                });
+
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    setIsDbSaved(true);
+                    setOrderNumber(result.orderNumber);
+                    
+                    // 성공적으로 저장 후 로컬 스토리지 데이터 삭제
+                    localStorage.removeItem("pendingOrderData"); 
+                } else {
+                    // DB 저장 실패 시 사용자에게 알림
+                    console.error("DB 저장 실패:", result.errorMessage);
+                    setError(`주문 저장 실패: ${result.errorMessage || '알 수 없는 오류'}`);
+                }
+            } catch (e) {
+                console.error("주문 API 통신 오류:", e);
+                setError(`서버 통신 오류: ${e.message}`);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        saveOrderToDB();
+    }, []); // 의존성 배열에서 searchParams, paymentKey 등을 제거함
+
+    useEffect(() => {
+        if (!orderInfo) return; // orderInfo가 없으면 종료
+
+        const storedCart = localStorage.getItem("cartData");
+        if (storedCart) {
+            let cart = JSON.parse(storedCart);
+
+            // 주문한 상품 id 기준으로 삭제
+            const remainingItems = cart.orderItems.filter(cartItem => 
+                !(orderInfo?.orderItems || []).some(orderItem => orderItem.title === cartItem.title)
+            );
+
+            localStorage.setItem("cartData", JSON.stringify({
+                ...cart,
+                orderItems: remainingItems
+            }));
+        }
+    }, [orderInfo]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-50">
+                <p className="text-xl text-[var(--main-color)] font-semibold">
+                    주문 정보를 확인하고 Supabase에 저장 중입니다...
+                </p>
+            </div>
+        );
     }
-  }, []);
 
-  // 실제 결제 승인이 필요한 경우 아래 주석을 해제하세요
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   async function confirm() {
-  //     const requestData = {
-  //       orderId: searchParams.get("orderId"),
-  //       amount: searchParams.get("amount"),
-  //       paymentKey: searchParams.get("paymentKey"),
-  //     };
-
-  //     const response = await fetch("/api/confirm/payment", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(requestData),
-  //     });
-
-  //     const json = await response.json();
-
-  //     if (!response.ok) {
-  //       throw { message: json.message, code: json.code };
-  //     }
-
-  //     return json;
-  //   }
-
-  //   confirm()
-  //     .then((data) => {
-  //       setResponseData(data);
-  //       setIsLoading(false);
-  //     })
-  //     .catch((error) => {
-  //       router.push(`/fail?code=${error.code}&message=${error.message}`);
-  //     });
-  // }, [searchParams, router]);
-
-  // 결제 데이터가 없을 경우
-  if (!paymentData) {
-    return (
-      <div className="bg-white min-h-screen py-10">
-        <div className="max-w-800 mx-auto px-20">
-          <p className="text-center text-gray-500 text-18">
-            결제 정보가 없습니다. 홈으로 돌아가주세요.
-          </p>
-          <div className="flex justify-center mt-6">
-            <Link
-              href="/"
-              className="bg-(--main-color) text-white text-18 h-50 px-8 rounded-15 hover:bg-[#0d5010] flex items-center justify-center transition"
-            >
-              홈으로 가기
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 결제 승인 처리 중
-  if (isLoading) {
-    return (
-      <div className="bg-white min-h-screen py-10">
-        <div className="max-w-800 mx-auto px-20">
-          <div className="flex justify-center items-center min-h-400">
-            <p className="text-20 text-gray-600">
-              결제 승인 처리 중...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <ProtectedRoute>
-    <div className="bg-white min-h-screen py-10">
-      <div className="max-w-800 mx-auto px-20">
-        <div className="flex flex-col gap-8 items-center">
-          {/* 성공 이미지 및 타이틀 */}
-          <div className="bg-(--bg-color) p-10 rounded-15 w-full text-center">
-            <img
-              src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
-              alt="success"
-              className="w-100 mx-auto mb-6"
-            />
-            <h1 className="text-28 font-bold text-(--main-color) mb-4">
-              결제가 완료되었습니다
-            </h1>
-            <p className="text-16 text-gray-600">
-              주문이 정상적으로 처리되었습니다.
-            </p>
-          </div>
-
-          {/* 결제 정보 */}
-          <div className="bg-(--bg-color) p-8 rounded-15 w-full">
-            <h2 className="text-24 font-bold mb-6 text-black">
-              결제 정보
-            </h2>
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between py-3 border-b border-gray-300">
-                <span className="text-16 font-bold text-black">
-                  결제금액
-                </span>
-                <span className="text-18 font-bold text-(--main-color)">
-                  {paymentData.finalPrice.toLocaleString()}원
-                </span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-gray-300">
-                <span className="text-16 font-bold text-black">
-                  주문상품
-                </span>
-                <span className="text-16 text-gray-600">
-                  {paymentData.orderName}
-                </span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-gray-300">
-                <span className="text-16 font-bold text-black">
-                  주문번호
-                </span>
-                <span className="text-16 text-gray-600 font-mono">
-                  {searchParams.get("orderId")}
-                </span>
-              </div>
-              <div className="flex justify-between py-3">
-                <span className="text-16 font-bold text-black">
-                  결제수단
-                </span>
-                <span className="text-16 text-gray-600">
-                  {searchParams.get("paymentType") === "NORMAL"
-                    ? "일반결제"
-                    : searchParams.get("paymentType")}
-                </span>
-              </div>
+    if (error) {
+        return (
+            <div className="max-w-xl mx-auto p-8 text-center bg-red-50 rounded-lg shadow-lg my-20">
+                <FiAlertCircle className="text-red-600 mx-auto mb-4" size={50} />
+                <h2 className="text-2xl font-bold text-red-600 mb-4">주문 처리 실패</h2>
+                <p className="text-gray-700 mb-6">{error}</p>
+                <p className="text-sm text-gray-500">결제는 완료되었을 수 있습니다. 관리자에게 문의해주세요.</p>
+                <button onClick={() => router.push('/')} className="mt-8 px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                    메인으로 돌아가기
+                </button>
             </div>
-          </div>
-
-          {/* 응답 데이터 (개발용) */}
-          {responseData && (
-            <div className="bg-(--bg-color) p-8 rounded-15 w-full">
-              <h2 className="text-24 font-bold mb-4 text-black">
-                Response Data
-              </h2>
-              <div className="bg-white p-4 rounded-lg text-14 font-mono overflow-x-auto">
-                <pre>{JSON.stringify(responseData, null, 2)}</pre>
-              </div>
+        );
+    }
+    
+    // 최종 성공 화면
+    return (
+        <div className="max-w-xl mx-auto p-8 text-center bg-white rounded-lg shadow-xl my-20 border-t-4 border-[var(--main-color)]">
+            <FiCheckCircle className="text-[var(--main-color)] mx-auto mb-4" size={60} />
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">결제가 완료되었습니다!</h2>
+            
+            <div className="bg-gray-50 p-6 rounded-md space-y-3 mb-8">
+                <div className="flex justify-between border-b pb-2">
+                    <span className="text-lg font-medium text-gray-600">주문 번호</span>
+                    <span className="text-xl font-bold text-gray-800">{orderNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-lg font-medium text-gray-600">총 결제 금액</span>
+                    <span className="text-2xl font-extrabold text-[var(--main-color)]">
+                        {(orderInfo?.price || 0).toLocaleString()}원
+                    </span>
+                </div>
             </div>
-          )}
 
-          {/* 버튼 영역 */}
-          <div className="flex flex-col md:flex-row gap-4 w-full">
-            <Link
-              href="/"
-              className="bg-(--main-color) text-white text-18 h-60 rounded-15 hover:bg-[#0d5010] flex-1 flex items-center justify-center transition"
-            >
-              홈으로 가기
-            </Link>
-            <Link
-              href="/mypage/orders"
-              className="bg-white text-(--main-color) text-18 h-60 rounded-15 border-2 border-(--main-color) hover:bg-(--bg-color) flex-1 flex items-center justify-center transition"
-            >
-              주문 내역 보기
-            </Link>
-          </div>
+            <p className="text-gray-600 mb-8">
+                성공적으로 주문이 처리되었습니다. 배송은 영업일 기준 3~5일 이내 시작됩니다.
+            </p>
+
+            <button onClick={() => router.push('/my/orders')} className="w-full py-3 bg-[var(--main-color)] text-white text-lg font-bold rounded-lg hover:bg-green-700 transition-colors">
+                주문 상세 내역 확인
+            </button>
         </div>
-      </div>
-    </div>
-    </ProtectedRoute>
-
-  );
+    );
 }
