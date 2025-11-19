@@ -14,7 +14,7 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
     openModal();
   };
   const handleSave = () => {
-    handleUpdateBook(book.id, { stock: Number(stock) });
+    handleUpdateBook(book.bookId, { stock: Number(stock) });
     closeModal();
   };
   const handleCancel = () => {
