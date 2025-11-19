@@ -6,7 +6,7 @@ export async function GET(req) {
 
     // 쿼리 파라미터
     const page = parseInt(searchParams.get("page") ?? "1", 10);
-    const pageSize = searchParams.get("pageSize") || 20;
+    const pageSize = Number(searchParams.get("pageSize")) || 20;
     const category = searchParams.get("category");
     const search = searchParams.get("search");
 
