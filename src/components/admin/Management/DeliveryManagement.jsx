@@ -1,5 +1,332 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/common/useAuth";
+import { FiPackage, FiTruck, FiCheckCircle, FiXCircle } from "react-icons/fi";
+
 const DeliveryManagement = () => {
-  return <section></section>;
+  const { userId } = useAuth();
+  
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [activeTab, setActiveTab] = useState("전체");
+
+  // 관리자 권한 확인 및 주문 내역 조회
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // 관리자 권한 확인 및 주문 조회
+        const res = await fetch(`/api/order/admin/getAllOrders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
+
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("서버 응답이 올바르지 않습니다.");
+        }
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          if (res.status === 403) {
+            setIsAdmin(false);
+            throw new Error("관리자 권한이 없습니다.");
+          }
+          throw new Error(data.error || "주문 내역 조회 실패");
+        }
+        
+        setIsAdmin(true);
+        setOrders(data);
+      } catch (err) {
+        console.error("주문 조회 에러:", err);
+        alert(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
+
+  // 배송 상태 변경
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const res = await fetch(`/api/order/admin/updateShippingStatus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user_id: userId,
+          order_id: orderId,
+          shipping_status: newStatus 
+        })
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || "상태 변경 실패");
+      
+      // 상태 업데이트
+      setOrders(prev => 
+        prev.map(order => 
+          order.order_id === orderId 
+            ? { ...order, shipping_status: newStatus }
+            : order
+        )
+      );
+      
+      alert("배송 상태가 변경되었습니다.");
+    } catch (err) {
+      console.error("상태 변경 에러:", err);
+      alert(err.message);
+    }
+  };
+
+  // 주문 번호별로 그룹화
+  const groupedOrders = orders.reduce((acc, order) => {
+    if (!acc[order.order_number]) {
+      acc[order.order_number] = {
+        orderNumber: order.order_number,
+        orderId: order.order_id,
+        orderDate: order.date,
+        totalPrice: 0,
+        status: order.status,
+        shippingStatus: order.shipping_status,
+        customerInfo: {
+          name: order.name,
+          phone: order.phone,
+          email: order.email,
+          address: `${order.address1} ${order.address2}`,
+          postalCode: order.postal_code,
+          memo: order.memo
+        },
+        items: [],
+      };
+    }
+    acc[order.order_number].totalPrice += (order.book_price * order.amount);
+    acc[order.order_number].items.push(order);
+    return acc;
+  }, {});
+
+  const orderList = Object.values(groupedOrders);
+
+  // 탭별 필터링
+  const filteredOrders = orderList.filter(order => {
+    if (activeTab === "전체") return true;
+    if (activeTab === "결제완료") return order.shippingStatus === "결제완료";
+    if (activeTab === "배송준비") return order.shippingStatus === "배송준비";
+    if (activeTab === "배송중") return order.shippingStatus === "배송중";
+    if (activeTab === "배송완료") return order.shippingStatus === "배송완료";
+    if (activeTab === "주문취소") return order.shippingStatus === "주문취소";
+    return true;
+  });
+
+  // 통계 계산
+  const stats = {
+    total: orderList.length,
+    paid: orderList.filter(o => o.shippingStatus === "결제완료").length,
+    preparing: orderList.filter(o => o.shippingStatus === "배송준비").length,
+    shipping: orderList.filter(o => o.shippingStatus === "배송중").length,
+    delivered: orderList.filter(o => o.shippingStatus === "배송완료").length,
+    cancelled: orderList.filter(o => o.shippingStatus === "주문취소").length,
+  };
+
+  if (loading) return <p className="text-center mt-20">로딩 중...</p>;
+  if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
+  if (!isAdmin) return <p className="text-center mt-20">관리자 권한이 없습니다.</p>;
+
+  return (
+    <section className="w-full min-h-screen flex justify-center bg-white">
+      <div className="w-full max-w-7xl p-10 space-y-50">
+        
+        {/* 상단 헤더 */}
+        <div className="flex justify-between items-center border-b py-50">
+          <div>
+            <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
+              주문 관리
+            </h2>
+            <p className="text-black-900 text-xl font-semibold mb-2">
+              전체 주문 내역 및 배송 상태 관리
+            </p>
+          </div>
+
+          {/* 주문 통계 */}
+          <div className="flex gap-30 text-center">
+            <div className="flex flex-col justify-center items-center gap-6">
+              <p className="text-sm font-normal text-gray-500">결제완료</p>
+              <div className="flex gap-8 items-center">
+                <FiCheckCircle className="text-2xl text-purple-600" />
+                <p className="text-lg font-semibold">{stats.paid}</p>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-6">
+              <p className="text-sm font-normal text-gray-500">배송준비</p>
+              <div className="flex gap-8 items-center">
+                <FiPackage className="text-2xl text-orange-600" />
+                <p className="text-lg font-semibold">{stats.preparing}</p>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-6">
+              <p className="text-sm font-normal text-gray-500">배송중</p>
+              <div className="flex gap-8 items-center">
+                <FiTruck className="text-2xl text-blue-600" />
+                <p className="text-lg font-semibold">{stats.shipping}</p>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-6">
+              <p className="text-sm font-normal text-gray-500">배송완료</p>
+              <div className="flex gap-8 items-center">
+                <FiCheckCircle className="text-2xl text-green-700" />
+                <p className="text-lg font-semibold">{stats.delivered}</p>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center items-center gap-6">
+              <p className="text-sm font-normal text-gray-500">주문취소</p>
+              <div className="flex gap-8 items-center">
+                <FiXCircle className="text-2xl text-red-600" />
+                <p className="text-lg font-semibold">{stats.cancelled}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 탭 메뉴 */}
+        <div className="flex gap-30 border-b-2 border-gray-200">
+          {["전체", "결제완료", "배송준비", "배송중", "배송완료", "주문취소"].map((tab) => (
+            <button
+              key={tab}
+              className={`pb-10 px-2 font-normal text-20 transition-colors ${
+                activeTab === tab
+                  ? "border-b-2 border-[var(--main-color)] text-[var(--main-color)] -mb-[2px]"
+                  : "text-gray-600 hover:text-[var(--main-color)]"
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* 주문 목록 */}
+        <div className="space-y-20">
+          {filteredOrders.length === 0 ? (
+            <div className="text-center py-40 text-gray-500">
+              <p className="text-lg">
+                {activeTab === "전체" 
+                  ? "주문 내역이 없습니다." 
+                  : `${activeTab} 상태의 주문이 없습니다.`}
+              </p>
+            </div>
+          ) : (
+            filteredOrders.map((order) => (
+              <div
+                key={order.orderNumber}
+                className="border rounded-lg p-20 bg-[var(--bg-color)] space-y-15"
+              >
+                {/* 주문 헤더 */}
+                <div className="flex justify-between items-center border-b pb-15">
+                  <div className="space-y-5">
+                    <p className="font-semibold text-18">
+                      주문번호: {order.orderNumber}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      주문일: {new Date(order.orderDate).toLocaleString('ko-KR')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      주문자: {order.customerInfo.name} ({order.customerInfo.phone})
+                    </p>
+                  </div>
+                  
+                  {/* 배송 상태 선택 드롭다운 */}
+                  <div className="flex items-center gap-10">
+                    <select
+                      value={order.shippingStatus}
+                      onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
+                      className={`px-12 py-8 rounded border text-sm font-medium cursor-pointer ${
+                        order.shippingStatus === "배송완료"
+                          ? "bg-green-100 text-green-700 border-green-300"
+                          : order.shippingStatus === "배송중"
+                          ? "bg-blue-100 text-blue-700 border-blue-300"
+                          : order.shippingStatus === "배송준비"
+                          ? "bg-orange-100 text-orange-700 border-orange-300"
+                          : order.shippingStatus === "주문취소"
+                          ? "bg-red-100 text-red-700 border-red-300"
+                          : "bg-purple-100 text-purple-700 border-purple-300"
+                      }`}
+                    >
+                      <option value="결제완료">결제완료</option>
+                      <option value="배송준비">배송준비</option>
+                      <option value="배송중">배송중</option>
+                      <option value="배송완료">배송완료</option>
+                      <option value="주문취소">주문취소</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 배송지 정보 */}
+                <div className="p-15 rounded">
+                  <p className="font-medium text-14 mb-8 text-gray-700">배송지 정보</p>
+                  <div className="text-sm text-gray-600 space-y-3">
+                    <p>📍 {order.customerInfo.address} ({order.customerInfo.postalCode})</p>
+                    <p>📧 {order.customerInfo.email}</p>
+                    {order.customerInfo.memo && (
+                      <p className="text-orange-600">📝 요청사항: {order.customerInfo.memo}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* 주문 상품 목록 */}
+                <div className="space-y-10">
+                  {order.items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex gap-15 items-center p-15 rounded"
+                    >
+                      <img
+                        src={item.cover || "https://placehold.co/80x110"}
+                        alt={item.title}
+                        className="w-80 h-110 object-cover rounded border"
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-16 mb-5">
+                          {item.title}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-5">
+                          {item.book_price?.toLocaleString()}원 × {item.amount}개
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-18 text-[var(--main-color)]">
+                          {(item.book_price * item.amount).toLocaleString()}원
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 주문 합계 */}
+                <div className="border-t pt-15 flex justify-between items-center">
+                  <p className="font-semibold text-16">총 결제금액</p>
+                  <p className="font-bold text-20 text-[var(--main-color)]">
+                    {order.totalPrice?.toLocaleString()}원
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default DeliveryManagement;
