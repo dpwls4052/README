@@ -8,9 +8,9 @@ import AddressInput from "@/components/common/AddressInput";
 
 export default function Profile() {
   const { userId } = useAuth();
-  
+
   console.log("Profile 렌더링 - userId:", userId);
-  
+
   const [userInfo, setUserInfo] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalField, setModalField] = useState("");
@@ -50,9 +50,9 @@ export default function Profile() {
 
   // 기본 주소 가져오기
   useEffect(() => {
-  if (!userId) return;
-  fetchAddressList(); // 페이지 처음 렌더링 시 주소 목록 가져오기
-}, [userId]);
+    if (!userId) return;
+    fetchAddressList(); // 페이지 처음 렌더링 시 주소 목록 가져오기
+  }, [userId]);
 
   // 사용자 정보 조회
   useEffect(() => {
@@ -265,8 +265,7 @@ export default function Profile() {
       return;
     }
 
-const targetAddr = addressList.find((a) => a.address_id === addressIdx);
-
+    const targetAddr = addressList.find((a) => a.address_id === addressIdx);
 
     // console.log("=== 삭제 시도 ===");
     // console.log("userId:", userId);
@@ -452,51 +451,77 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
   ];
 
   return (
-    <div className="w-full min-h-fit py-10 flex justify-center">
-      <div className="w-full max-w-5xl rounded-xl shadow-md p-10 space-y-12">
+    <div className="w-full min-h-fit flex justify-center">
+      <div className="w-full max-w-5xl p-10 space-y-50">
         {/* 상단 정보 */}
-        <section className="flex justify-between items-center border-b pb-6">
-          <div>
-            <h2 className="text-2xl font-semibold text-[#0A400C] mb-2">
-              {userInfo.name}님
-            </h2>
-            <p className="text-black-900 font-semibold mb-2">
-              나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
-            </p>
-          </div>
-        </section>
+        <div className="flex justify-between items-center border-b py-50">
+          <section className="flex justify-between items-center  pb-6">
+            <div>
+              <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
+                {userInfo.name}님
+              </h2>
+              <p className="text-black-900 text-xl font-semibold mb-2">
+                나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
+              </p>
+            </div>
+          </section>
+          {/* 나의 활동 */}
+          <section>
+            {/* <h3 className="text-xl font-semibold mb-4">나의 활동</h3> */}
+            <div className="flex gap-40 text-center mr-30">
+              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+                <p className="text-sm font-normal text-gray-500">주문 내역</p>
+                <div className="flex gap-8 items-center">
+                  <FaBookOpen className="mx-auto text-2xl text-green-700" />
+                  <p className="text-lg font-semibold">5</p>
+                </div>
+              </div>
+              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+                <p className="text-sm font-normal text-gray-500">찜한 도서</p>
+                <div className="flex gap-8 items-center">
+                  <FaRegHeart className="mx-auto text-2xl text-pink-600" />
+                  <p className="text-lg font-semibold">8</p>
+                </div>
+              </div>
+              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+                <p className="text-sm font-normal text-gray-500">리뷰 작성</p>
 
+                <div className="flex gap-8 items-center">
+                  <FaGift className="mx-auto text-2xl text-yellow-600" />
+                  <p className="text-lg font-semibold">3</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
         {/* 기본 정보 */}
-        <section className="border rounded-lg py-6 px-6 mt-6">
-          <h3 className="text-2xl font-semibold mb-4">기본 정보</h3>
-          <div className="space-y-3 text-xl font-normal">
+        <section className=" mt-6 border-b pb-50">
+          <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
+          <div className="space-y-3 text-18 font-normal">
             {fields.map(({ label, field, value }) => (
-              <div
-                key={field}
-                className="flex justify-between items-center mt-2"
-              >
+              <div key={field} className="flex gap-20 items-center mt-15">
                 <p>
                   <b>{label} :</b> {value}
                 </p>
                 <button
-                  className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                  className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
                   onClick={() => {
                     setModalField(field);
                     setModalValue(value);
                     setModalOpen(true);
                   }}
                 >
-                  {label} 수정
+                  수정
                 </button>
               </div>
             ))}
             {/* 배송주소 */}
-            <div className="flex justify-between items-center mt-2">
+            <div className="flex gap-20 items-center mt-10">
               <p>
                 <b>배송주소 :</b> {displayAddress}
               </p>
               <button
-                className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
                 onClick={openAddressModal}
               >
                 배송주소 관리
@@ -505,42 +530,20 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
           </div>
         </section>
 
-        {/* 나의 활동 */}
-        <section>
-          <h3 className="text-xl font-semibold mb-4">나의 활동</h3>
-          <div className="grid grid-cols-3 gap-6 text-center">
-            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaBookOpen className="mx-auto text-2xl text-green-700 mb-2" />
-              <p className="text-lg font-semibold">5</p>
-              <p className="text-sm text-gray-500">주문 내역</p>
-            </div>
-            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaRegHeart className="mx-auto text-2xl text-pink-600 mb-2" />
-              <p className="text-lg font-semibold">8</p>
-              <p className="text-sm text-gray-500">찜한 도서</p>
-            </div>
-            <div className="bg-green-50 p-5 rounded-lg hover:shadow-md cursor-pointer">
-              <FaGift className="mx-auto text-2xl text-yellow-600 mb-2" />
-              <p className="text-lg font-semibold">3</p>
-              <p className="text-sm text-gray-500">리뷰 작성</p>
-            </div>
-          </div>
-        </section>
-
         {/* 최근 본 도서 */}
         <section>
-          <h3 className="text-xl font-semibold mb-4">최근 본 도서</h3>
-          <div className="grid grid-cols-4 gap-5">
+          <h3 className="text-2xl font-semibold mb-30">최근 본 도서</h3>
+          <div className="flex justify-between gap-10">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="border rounded-lg overflow-hidden hover:shadow-md transition"
+                className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer"
               >
                 <img
                   src={`https://placehold.co/200x250?text=Book+${i}`}
                   alt={`Book ${i}`}
                 />
-                <div className="p-3 text-sm">
+                <div className="p-5 text-sm">
                   <p className="font-medium">인기 도서 {i}</p>
                   <p className="text-gray-500">저자 이름</p>
                 </div>
@@ -552,7 +555,7 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
         {/* 개인 설정 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
-          <button className="mt-6 text-sm text-red-500 hover:underline">
+          <button className="mt-6 font-light text-sm text-red-500 hover:underline">
             회원 탈퇴하기
           </button>
         </section>
@@ -567,10 +570,11 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
         cancelText="취소"
         onConfirm={updateUserField}
         onCancel={() => setModalOpen(false)}
+        maxSize="max-w-md"
       >
         <input
           type="text"
-          className="w-full p-2 border rounded-md"
+          className="w-full p-10 border rounded-sm"
           value={modalValue}
           onChange={(e) => setModalValue(e.target.value)}
           autoFocus
@@ -583,33 +587,36 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
         onOpenChange={setAddressModalOpen}
         title="배송주소 관리"
         maxSize="max-w-3xl"
-        bodyClassName="max-h-[600px] overflow-y-auto"
+        bodyClassName="max-h-[700px] overflow-y-auto"
       >
-        <div className="space-y-6">
+        <div className="space-y-10">
           {/* 기존 주소 목록 */}
           {addressList.length > 0 ? (
             addressList.map((addr) => {
               const isEditing = editingAddressIdx === addr.address_id;
-              
+
               return (
                 <div
                   key={addr.address_id}
-                  className="border rounded-lg p-4 bg-gray-50 space-y-3"
+                  className="border rounded-sm p-15 bg-gray-50 space-y-3"
                 >
                   {isEditing ? (
                     // 수정 모드
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-5">
                           주소 닉네임 <span className="text-red-500">*</span>
                         </label>
                         <input
                           placeholder="예: 집, 회사"
                           value={editForm.nickname}
                           onChange={(e) =>
-                            setEditForm((prev) => ({ ...prev, nickname: e.target.value }))
+                            setEditForm((prev) => ({
+                              ...prev,
+                              nickname: e.target.value,
+                            }))
                           }
-                          className="w-full px-4 py-2 border border-gray-200 rounded-sm"
+                          className="w-full p-10 border rounded-sm"
                         />
                       </div>
                       <AddressInput
@@ -617,20 +624,23 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
                         address={editForm.address}
                         detailAddress={editForm.detailAddress}
                         onDetailAddressChange={(value) =>
-                          setEditForm((prev) => ({ ...prev, detailAddress: value }))
+                          setEditForm((prev) => ({
+                            ...prev,
+                            detailAddress: value,
+                          }))
                         }
                         onPostcodeSearch={handlePostcodeSearchForEdit}
                       />
-                      <div className="flex gap-2 justify-end">
+                      <div className="flex gap-5 justify-end mt-10">
                         <button
                           onClick={() => saveAddress(addr.address_id)}
-                          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                          className="px-12 py-6 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-80 cursor-pointer"
                         >
                           저장
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                          className="px-12 py-6 bg-gray-300 text-gray-700 rounded-sm hover:bg-gray-400 cursor-pointer"
                         >
                           취소
                         </button>
@@ -640,39 +650,43 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
                     // 보기 모드
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-semibold text-lg">{addr.nickname}</span>
+                        <div className="flex items-center gap-8 mb-6">
+                          <span className="font-semibold text-lg">
+                            {addr.nickname}
+                          </span>
                           {addr.is_default && (
-                            <span className="px-2 py-1 text-xs bg-green-600 text-white rounded">
+                            <span className="px-8 py-3 text-xs bg-[var(--sub-color)] text-white rounded">
                               기본
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm font-normal text-gray-600 mb-5">
                           [{addr.postcode}] {addr.road_address}
                         </p>
                         {addr.detail_address && (
-                          <p className="text-sm text-gray-600">{addr.detail_address}</p>
+                          <p className="text-sm font-normal text-gray-600">
+                            {addr.detail_address}
+                          </p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         {!addr.is_default && (
                           <button
                             onClick={() => setDefaultAddress(addr.address_id)}
-                            className="text-sm px-3 py-1 border rounded-md hover:bg-green-100 transition"
+                            className="text-sm font-light px-8 py-3 border rounded-sm hover:bg-[var(--main-color)]  hover:text-white transition cursor-pointer"
                           >
                             기본설정
                           </button>
                         )}
                         <button
                           onClick={() => startEditAddress(addr)}
-                          className="text-sm px-3 py-1 border rounded-md hover:bg-green-600 hover:text-white transition"
+                          className="text-sm font-light px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => deleteAddress(addr.address_id)}
-                          className="text-sm px-3 py-1 border rounded-md hover:bg-red-600 hover:text-white transition"
+                          className="text-sm font-light px-8 py-3 border rounded-sm hover:bg-red-600 hover:text-white transition cursor-pointer"
                         >
                           삭제
                         </button>
@@ -683,16 +697,18 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
               );
             })
           ) : (
-            <p className="text-center text-gray-500 py-6">등록된 배송지가 없습니다.</p>
+            <p className="text-center text-gray-500 py-6">
+              등록된 배송지가 없습니다.
+            </p>
           )}
 
           {/* 새 주소 추가 */}
           {editingAddressIdx === null && (
-            <div className="border-t pt-6">
-              <h4 className="font-semibold mb-3">새 배송지 추가</h4>
+            <div className="px-10 pt-20">
+              <h4 className="font-semibold text-md mb-10">새 배송지 추가</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 my-5">
                     주소 닉네임 <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -704,7 +720,7 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
                         nickname: e.target.value,
                       }))
                     }
-                    className="w-full px-4 py-2 border border-gray-200 rounded-sm"
+                    className="w-full p-10 border rounded-sm"
                   />
                 </div>
                 <AddressInput
@@ -721,7 +737,7 @@ const targetAddr = addressList.find((a) => a.address_id === addressIdx);
                 />
                 <button
                   onClick={addNewAddress}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="w-full py-15 bg-[var(--main-color)] font-normal text-white rounded-sm hover:opacity-80 transition cursor-pointer"
                 >
                   주소 추가
                 </button>

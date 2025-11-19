@@ -19,11 +19,7 @@ export default function Recommend() {
   const goDetail = (id) => {
     router.push(`/product/detail/${id}`);
   };
-  const { books, loading } = useBooks({
-    pageSize: 6,
-    orderField: "createdAt",
-    orderDirection: "desc",
-  });
+  const { books, loading } = useBooks();
 
   const randomBooks = useMemo(() => {
     if (!books?.length) return [];
@@ -32,7 +28,7 @@ export default function Recommend() {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    return pool.slice(0, 10);
+    return pool.slice(0, 6);
   }, [books]);
 
   const prevRef = useRef(null);
@@ -107,7 +103,7 @@ export default function Recommend() {
                 onClick={() => goDetail(book.id)}
               >
                 <Image
-                  src={book.highResCover || noimg}
+                  src={book.highResCover || book.cover || noimg}
                   alt={book.title || "도서"}
                   className="object-cover w-full h-full"
                   width={200}
