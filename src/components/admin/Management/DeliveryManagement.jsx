@@ -230,7 +230,7 @@ const DeliveryManagement = () => {
             filteredOrders.map((order) => (
               <div
                 key={order.orderNumber}
-                className="border rounded-lg p-20 bg-gray-50 space-y-15"
+                className="border rounded-lg p-20 bg-[var(--bg-color)] space-y-15"
               >
                 {/* 주문 헤더 */}
                 <div className="flex justify-between items-center border-b pb-15">
@@ -273,7 +273,7 @@ const DeliveryManagement = () => {
                 </div>
 
                 {/* 배송지 정보 */}
-                <div className="bg-white p-15 rounded">
+                <div className="p-15 rounded">
                   <p className="font-medium text-14 mb-8 text-gray-700">배송지 정보</p>
                   <div className="text-sm text-gray-600 space-y-3">
                     <p>📍 {order.customerInfo.address} ({order.customerInfo.postalCode})</p>
@@ -289,7 +289,7 @@ const DeliveryManagement = () => {
                   {order.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex gap-15 items-center bg-white p-15 rounded"
+                      className="flex gap-15 items-center p-15 rounded"
                     >
                       <img
                         src={item.cover || "https://placehold.co/80x110"}
