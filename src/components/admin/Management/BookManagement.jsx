@@ -1,36 +1,32 @@
 import EditBookModal from "../EditBookModal";
-import { useUpdateBook } from "@/hooks/admin/useUpdateBook";
-import { useDeleteBook } from "@/hooks/admin/useDeleteBook";
 import Image from "next/image";
 import DeleteBookModal from "../DeleteBookModal";
 import AddBookModal from "../AddBookModal";
 import { useBooks } from "@/hooks/book/useBooks";
+import { useDeleteBook } from "@/hooks/book/useDeleteBook";
+import { useUpdateBook } from "@/hooks/book/useUpdateBook";
 
 const BookManagement = () => {
-  const { books, fetchBooks, fetchMoreBooks, loading, hasNext } = useBooks();
+  const { books, fetchBooks, fetchMoreBooks, loading, hasNext, setBooks } =
+    useBooks();
 
-  const {
-    updateBook,
-    loading: updateLoading,
-    error: updateError,
-  } = useUpdateBook();
-  const {
-    deleteBook,
-    loading: deleteLoading,
-    error: deleteError,
-  } = useDeleteBook();
-
-  const handleUpdateBook = (bookId, updatedFields) => {
+  const { changeBook } = useUpdateBook();
+  const handleUpdateBook = async (bookId, updatedFields) => {
+    const changedBook = await changeBook(bookId, updatedFields);
+    console.log(changedBook);
     setBooks((prev) =>
       prev.map((book) =>
-        book.id === bookId ? { ...book, ...updatedFields } : book
+        book.bookId === changedBook.bookId ? changedBook : book
       )
     );
-    updateBook(bookId, updatedFields);
   };
-  const handleDeleteBook = (bookId) => {
-    setBooks((prev) => prev.filter((book) => book.id !== bookId));
-    deleteBook(bookId);
+
+  const { removeBook } = useDeleteBook();
+  const handleDeleteBook = async (bookId) => {
+    const removedBook = await removeBook(bookId);
+    setBooks((prev) =>
+      prev.filter((book) => book.bookId !== removedBook.bookId)
+    );
   };
 
   return (
@@ -43,7 +39,7 @@ const BookManagement = () => {
         <div className="pe-3">
           {books.map((book) => (
             <div
-              key={book.isbn}
+              key={book.bookId}
               className="flex items-center justify-between gap-10 px-20 py-10 border-b h-120 border-b-gray-200"
             >
               <Image
