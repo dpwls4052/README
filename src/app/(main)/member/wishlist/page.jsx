@@ -31,6 +31,7 @@ const Wishlist = () => {
             name: item.title || `도서 ${item.book_id}`,
             price: item.price_standard || 0,
             image: item.cover || "https://via.placeholder.com/80",
+            stock: item.stock || 0, // ✅ stock 추가
           }))
         );
       } catch (err) {
@@ -95,6 +96,12 @@ const Wishlist = () => {
                           <span className="text-lg font-bold text-[var(--main-color)]">
                             {item.price.toLocaleString()}원
                           </span>
+                          {/* ✅ 재고 표시 추가 */}
+                          <span className={`text-sm font-medium mt-1`}
+                            style={{ color: item.stock > 0 ? "var(--sub-color)" : "rgb(220, 38, 38)" }}
+                          >
+                            {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
+                          </span>
                         </div>
                       </div>
                       <div className="flex gap-10">
@@ -104,8 +111,12 @@ const Wishlist = () => {
                         >
                           <FaHeart size={20} />
                         </button>
+                        {/* ✅ stock 전달 */}
                         <AddToCartButton
-                          book={{ bookId: item.id }}
+                          book={{ 
+                            bookId: item.id,
+                            stock: item.stock 
+                          }}
                           iconMode={true}
                         />
                       </div>

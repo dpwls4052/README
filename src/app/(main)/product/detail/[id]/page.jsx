@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { AiOutlineShoppingCart } from "react-icons/ai";
 import WishListButton from "@/components/common/WishListButton";
-import { useAuth } from "@/hooks/common/useAuth";
 import AddToCartButton from "@/components/common/AddToCartButton";
+import BuyNowButton from "@/components/common/BuyNowButton"; // ✅ 추가
+import { useAuth } from "@/hooks/common/useAuth";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -88,7 +88,6 @@ const MOCK_DETAIL_TABS_DATA = {
       answer: "현재는 선물 포장 서비스는 지원하지 않습니다.",
     },
   ],
-
 };
 
 const ProductDetail = () => {
@@ -116,7 +115,7 @@ const ProductDetail = () => {
             ...data,
             ...MOCK_DETAIL_TABS_DATA,
           });
-          console.log(data,'책데이터')
+          console.log(data, '책데이터');
         } else {
           setError(data.error || "책 정보를 찾을 수 없습니다.");
         }
@@ -130,15 +129,6 @@ const ProductDetail = () => {
 
     fetchBookData();
   }, [bookId]);
-
-  const handleAddToCart = () => {
-    alert(`${bookData.title}이(가) 장바구니에 담겼습니다.`);
-  };
-
-  const handleBuyNow = () => {
-    alert(`${bookData.title} 결제가 완료되었습니다.`);
-    router.push("/kt_3team_project_2025/success");
-  };
 
   if (loading) {
     return (
@@ -239,35 +229,33 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {/* 버튼 */}
+          {/* 버튼 영역 - 수정됨 */}
           <div className="flex gap-6 py-20">
+            {/* 위시리스트 버튼 */}
             <WishListButton 
               userId={userId} 
               bookId={bookData.bookId} 
               stock={bookData.stock} 
             />
-{/* 
-            <button
-              onClick={handleAddToCart}
-              disabled={bookData.stock === 0}
-              className="flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 flex items-center justify-center gap-3 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <AiOutlineShoppingCart size={24} />
-              장바구니
-            </button> */}
+
+            {/* 장바구니 버튼 */}
             <AddToCartButton
-              book={{ bookId: bookData.bookId }}
+              book={{ bookId: bookData.bookId, stock: bookData.stock}}
               iconMode={false}
-              className="h-[50px] flex-1 bg-(--main-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-[50px] flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
 
-            <button
-              onClick={handleBuyNow}
-              disabled={bookData.stock === 0}
-              className="flex-1 bg-(--main-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed "
-            >
-              바로구매
-            </button>
+            {/* ✅ 바로구매 버튼 - 컴포넌트로 변경 */}
+            <BuyNowButton
+              book={{
+                bookId: bookData.bookId,
+                title: bookData.title,
+                cover: bookData.cover,
+                priceStandard: bookData.priceStandard,
+                stock: bookData.stock,
+              }}
+                className="h-[50px] flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
 
           {bookData.link && (
