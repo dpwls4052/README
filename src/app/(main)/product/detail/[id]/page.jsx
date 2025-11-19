@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import WishListButton from "@/components/common/WishListButton";
 import { useAuth } from "@/hooks/common/useAuth";
+import AddToCartButton from "@/components/common/AddToCartButton";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -44,10 +45,50 @@ const MOCK_DETAIL_TABS_DATA = {
     {
       id: 2,
       question: "반품/교환이 가능한가요?",
-      answer:
-        "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
+      answer: "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
+    },
+    {
+      id: 3,
+      question: "중고 도서도 판매하나요?",
+      answer: "현재는 신품 도서만 판매하고 있으며, 중고 도서는 지원하지 않습니다.",
+    },
+    {
+      id: 4,
+      question: "주문한 책은 어떻게 포장되나요?",
+      answer: "모든 도서는 배송 중 손상이 없도록 에어캡으로 안전하게 포장됩니다.",
+    },
+    {
+      id: 5,
+      question: "주문 후 배송지를 변경할 수 있나요?",
+      answer: "상품 준비 이전 단계라면 고객센터를 통해 배송지 변경이 가능합니다.",
+    },
+    {
+      id: 6,
+      question: "결제 수단은 어떤 것이 있나요?",
+      answer: "신용카드, 체크카드, 카카오페이, 네이버페이 등 다양한 결제 수단을 지원합니다.",
+    },
+    {
+      id: 7,
+      question: "품절된 도서는 재입고 되나요?",
+      answer: "일부 도서는 재입고 예정이 있으나, 출판사 사정에 따라 달라질 수 있습니다.",
+    },
+    {
+      id: 8,
+      question: "영수증이나 구매 내역은 어디서 확인하나요?",
+      answer: "마이페이지 내 '주문 내역'에서 영수증 및 구매 내역을 확인할 수 있습니다.",
+    },
+    {
+      id: 9,
+      question: "도서에 하자가 있을 경우 어떻게 하나요?",
+      answer: "파본이나 인쇄 오류가 있을 경우 무료로 교환해드립니다. 고객센터로 문의해주세요.",
+    },
+    {
+      id: 10,
+      question: "선물 포장 서비스가 있나요?",
+      answer: "현재는 선물 포장 서비스는 지원하지 않습니다.",
     },
   ],
+
 };
 
 const ProductDetail = () => {
@@ -75,6 +116,7 @@ const ProductDetail = () => {
             ...data,
             ...MOCK_DETAIL_TABS_DATA,
           });
+          console.log(data,'책데이터')
         } else {
           setError(data.error || "책 정보를 찾을 수 없습니다.");
         }
@@ -204,7 +246,7 @@ const ProductDetail = () => {
               bookId={bookData.bookId} 
               stock={bookData.stock} 
             />
-
+{/* 
             <button
               onClick={handleAddToCart}
               disabled={bookData.stock === 0}
@@ -212,7 +254,12 @@ const ProductDetail = () => {
             >
               <AiOutlineShoppingCart size={24} />
               장바구니
-            </button>
+            </button> */}
+            <AddToCartButton
+              book={{ bookId: bookData.bookId }}
+              iconMode={false}
+              className="h-[50px] flex-1 bg-(--main-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            />
 
             <button
               onClick={handleBuyNow}
@@ -253,7 +300,7 @@ const ProductDetail = () => {
                 ? "상품설명"
                 : tab === "reviews"
                 ? `리뷰 (${bookData.reviews.length})`
-                : `FAQ (${bookData.faqs.length})`}
+                : `자주 묻는 질문 (${bookData.faqs.length})`}
             </button>
           ))}
         </div>
