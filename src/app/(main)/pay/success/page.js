@@ -97,7 +97,7 @@ export default function PaymentSuccessPage() {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
                 <p className="text-xl text-[var(--main-color)] font-semibold">
-                    주문 정보를 확인하고 Supabase에 저장 중입니다...
+                    주문 정보를 확인하고 있습니다...
                 </p>
             </div>
         );
