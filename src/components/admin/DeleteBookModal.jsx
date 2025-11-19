@@ -6,10 +6,6 @@ import { useModal } from "@/hooks/common/useModal";
 const DeleteBookModal = ({ book, handleDeleteBook }) => {
   const { isModalOpen, openModal, closeModal, toggleModal } = useModal();
 
-  const handleDelete = () => {
-    handleDeleteBook(book.id);
-  };
-
   return (
     <>
       <button
@@ -24,7 +20,7 @@ const DeleteBookModal = ({ book, handleDeleteBook }) => {
         onOpenChange={toggleModal}
         confirmText="삭제"
         cancelText="취소"
-        onConfirm={handleDelete}
+        onConfirm={() => handleDeleteBook(book.bookId)}
         onCancel={closeModal}
         maxSize="max-w-lg"
       >

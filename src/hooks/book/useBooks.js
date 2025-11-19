@@ -71,6 +71,7 @@ export const useBooks = ({
 
   return {
     books,
+    setBooks,
     fetchBooks,
     fetchMoreBooks,
     loading,

@@ -46,7 +46,7 @@ export async function updateBook(bookId, updatedData) {
   if (!bookId) throw new Error("bookId가 필요합니다.");
 
   const res = await fetch(`/api/books/${bookId}`, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedData),
   });
@@ -58,3 +58,7 @@ export async function updateBook(bookId, updatedData) {
 
   return await res.json();
 }
+
+export const deleteBook = async (bookId) => {
+  return updateBook(bookId, { status: false });
+};
