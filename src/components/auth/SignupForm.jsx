@@ -13,7 +13,7 @@ const SignupForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  // const [address, setAddress] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -28,7 +28,7 @@ const SignupForm = () => {
       return;
     }
 
-    const isSuccess = await signup(name, email, password, phone, address);
+    const isSuccess = await signup(name, email, password, phone);
     if (isSuccess) {
       toaster.create({
         title: "회원가입 완료",
@@ -112,7 +112,7 @@ const SignupForm = () => {
         </div>
 
         {/* 주소 입력 */}
-        <div className="w-full">
+        {/* <div className="w-full">
           <label className="block text-sm font-semibold mb-1">주소</label>
           <input
             type="text"
@@ -122,7 +122,7 @@ const SignupForm = () => {
             required
             className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-        </div>
+        </div> */}
 
         {/* 회원가입 버튼 */}
         <button
