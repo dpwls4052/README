@@ -3,11 +3,8 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
-  createUserWithEmailAndPassword,
-  updateProfile,
 } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import { supabase } from "@/lib/supabaseClient";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -64,37 +61,33 @@ export function useAuth() {
     }
   };
 
-  const signup = async (name, email, password, phone, address) => {
+  // ✅ API 라우트를 통한 회원가입
+  const signup = async (name, email, password, phone) => {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const createdUser = userCredential.user;
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, phone }),
+      });
 
-      // 2) Firebase displayName 업데이트
-      await updateProfile(createdUser, { displayName: name });
+      const data = await res.json();
 
-      // 3) Supabase users 테이블에 저장
-const { data, error: supabaseError } = await supabase.from("users").insert({
-  user_id: createdUser.uid,
-  email,
-  name,
-  phone_number: phone,
-  address_id_default: null,
-  cart_count: 0,
-});
+      if (!res.ok) {
+        throw new Error(data.error || "회원가입에 실패했습니다.");
+      }
 
-if (supabaseError) {
-  console.error("🔥 Supabase Insert Error:", supabaseError.message);
-  console.error("📌 Supabase Details:", supabaseError.details);
-  console.error("📌 Supabase Hint:", supabaseError.hint);
-  console.error("📌 Supabase Code:", supabaseError.code);
-  throw new Error("Supabase 저장 실패");
-}
+      if (data.success) {
+        // 회원가입 성공 후 자동 로그인
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await fetchUserId(userCredential.user.uid, userCredential.user.email);
+        return true;
+      }
 
-
-      return true;
+      return false;
     } catch (err) {
+      console.error("Signup error:", err);
       setError(err.message);
       return false;
     } finally {
@@ -102,8 +95,6 @@ if (supabaseError) {
     }
   };
 
-
-  // 🔥 로그아웃
   const logout = async () => {
     await signOut(auth);
     setUser(null);
