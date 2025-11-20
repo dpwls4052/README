@@ -14,10 +14,10 @@ export default function FindPasswordForm() {
     setLoading(true);
     setResult("");
 
-    const res = await fetch("/api/auth/findPassword", {
+    const res = await fetch("/api/auth/resetPassword", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, phone }),
+      body: JSON.stringify({ email, phone_number: phone, name: "temp" }),
     });
 
     const data = await res.json();
