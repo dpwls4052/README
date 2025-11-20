@@ -5,6 +5,8 @@ import { FaBookOpen, FaGift, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "@/hooks/common/useAuth";
 import Modal from "@/components/common/Modal";
 import AddressInput from "@/components/common/AddressInput";
+import { getAuth, deleteUser } from "firebase/auth";
+
 
 export default function Profile() {
   const { userId } = useAuth();
@@ -32,6 +34,63 @@ export default function Profile() {
     address: "",
     detailAddress: "",
   });
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
+
+    try {
+      const auth = getAuth();
+      const firebaseUser = auth.currentUser;
+
+      if (!firebaseUser) {
+        alert("로그인 정보를 찾을 수 없습니다. 다시 로그인 후 시도해주세요.");
+        return;
+      }
+
+      // 1️⃣ Firebase 계정 삭제
+      try {
+        await deleteUser(firebaseUser);
+        console.log("🔥 Firebase 계정 삭제 완료");
+      } catch (err) {
+        // 🔥 Firebase는 보안 때문에 최근 로그인 안 했으면 삭제 막음
+        if (err.code === "auth/requires-recent-login") {
+          alert("보안을 위해 다시 로그인 후 탈퇴해주세요.");
+          return;
+        }
+        throw err;
+      }
+
+      // 2️⃣ Supabase users 테이블 유저 삭제
+      const res = await fetch("/api/user/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert("Supabase DB 삭제 실패: " + data.error);
+        return;
+      }
+
+      console.log("🔥 Supabase 사용자 정보 삭제 완료");
+
+      alert("회원 탈퇴가 완료되었습니다.");
+
+      // 3️⃣ 쿠키 삭제 (로그아웃)
+      document.cookie = "auth_token=; expires=Thu, 01 Jan 1970; path=/;";
+
+      // 4️⃣ 홈으로 이동
+      window.location.href = "/";
+
+    } catch (err) {
+      console.error(err);
+      alert("회원 탈퇴 중 오류 발생: " + err.message);
+    }
+  };
+
+
 
   // 다음 우편번호 API 스크립트 로드
   useEffect(() => {
@@ -555,7 +614,10 @@ export default function Profile() {
         {/* 개인 설정 */}
         <section>
           <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
-          <button className="mt-6 font-light text-sm text-red-500 hover:underline">
+          <button
+            onClick={handleDeleteAccount}
+            className="mt-6 font-light text-sm text-red-500 hover:underline"
+          >
             회원 탈퇴하기
           </button>
         </section>
