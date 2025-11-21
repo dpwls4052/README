@@ -51,17 +51,33 @@ export function useAuth() {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Firebase에서 이메일 인증 확인
+      if (!userCredential.user.emailVerified) {
+        await signOut(auth);
+        setError("이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요.");
+        return false;
+      }
+      
       await fetchUserId(userCredential.user.uid, userCredential.user.email);
       return true;
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'auth/wrong-password') {
+        setError("비밀번호가 올바르지 않습니다.");
+      } else if (err.code === 'auth/user-not-found') {
+        setError("존재하지 않는 이메일입니다.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.");
+      } else {
+        setError(err.message);
+      }
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ API 라우트를 통한 회원가입
+  // ✅ 이메일 인증 포함 회원가입
   const signup = async (name, email, password, phone) => {
     setLoading(true);
     setError(null);
@@ -79,17 +95,15 @@ export function useAuth() {
       }
 
       if (data.success) {
-        // 회원가입 성공 후 자동 로그인
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        await fetchUserId(userCredential.user.uid, userCredential.user.email);
-        return true;
+        // 이메일 인증 발송 성공
+        return { success: true, emailVerificationSent: true };
       }
 
-      return false;
+      return { success: false };
     } catch (err) {
       console.error("Signup error:", err);
       setError(err.message);
-      return false;
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
