@@ -1,10 +1,10 @@
 // @/app/api/auth/signup/route.js
 import { NextResponse } from 'next/server';
-import { signupFirebase } from '@/service/authService';
+import { signupFirebaseWithVerification } from '@/service/authService';
 import { supabase } from '@/lib/supabaseClient';
 
 /**
- * 회원가입 API
+ * 이메일 인증 포함 회원가입 API
  * POST /api/auth/signup
  * Body: { email, password, name, phone }
  */
@@ -20,14 +20,14 @@ export async function POST(req) {
       );
     }
 
-    // 2. Firebase 인증 - 회원가입
-    const firebaseUser = await signupFirebase(email, password);
+    // 2. Firebase 인증 - 회원가입 + 이메일 인증 발송
+    const firebaseUser = await signupFirebaseWithVerification(email, password);
     
     if (!firebaseUser || !firebaseUser.uid) {
       throw new Error("Firebase 회원가입 실패");
     }
 
-    console.log("✅ Firebase 회원가입 성공:", firebaseUser.uid);
+    console.log("✅ Firebase 회원가입 성공 (이메일 인증 발송):", firebaseUser.uid);
 
     // 3. Supabase에서 이메일로 기존 사용자 조회
     const { data: existingUser, error: fetchError } = await supabase
@@ -80,7 +80,7 @@ export async function POST(req) {
 
       if (roleError) {
         console.error("❌ 역할 추가 실패:", roleError);
-        throw roleError; // roles 추가 실패 시 에러 발생
+        throw roleError;
       }
       
       console.log("✅ 기본 역할(user) 추가 완료:", roleData);
@@ -106,15 +106,16 @@ export async function POST(req) {
       console.log("✅ 기존 사용자 Firebase uid 연동 완료:", user.user_id);
     }
 
-    // 6. 성공 응답
+    // 6. 성공 응답 (인증 이메일 발송 완료)
     return NextResponse.json(
       { 
         success: true, 
+        message: "인증 이메일이 발송되었습니다. 이메일을 확인해주세요.",
         user: {
           user_id: user.user_id,
           email: user.email,
           name: user.name,
-          uid: user.uid
+          uid: user.uid,
         }
       },
       { status: 200 }
@@ -122,6 +123,18 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("💥 회원가입 API 오류:", error);
+    
+    // Firebase 중복 이메일 오류 처리
+    if (error.code === 'auth/email-already-in-use') {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "이미 사용 중인 이메일입니다." 
+        },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { 
         success: false, 

@@ -13,7 +13,7 @@ const SignupForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  // const [address, setAddress] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -28,22 +28,67 @@ const SignupForm = () => {
       return;
     }
 
-    const isSuccess = await signup(name, email, password, phone);
-    if (isSuccess) {
+    const result = await signup(name, email, password, phone);
+    
+    if (result.success) {
+      setEmailSent(true);
       toaster.create({
-        title: "회원가입 완료",
-        description: "로그인 페이지로 이동합니다.",
+        title: "인증 이메일 발송",
+        description: "이메일을 확인하여 인증을 완료해주세요.",
         type: "success",
-        duration: 1500,
+        duration: 3000,
       });
-      setTimeout(() => router.push("/login"), 1500);
     }
   };
+
+  if (emailSent) {
+    return (
+      <div className="w-[500px] mx-auto flex flex-col justify-center items-center gap-6 p-8 bg-white rounded-lg shadow-md">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-800">이메일을 확인해주세요</h2>
+          
+          <p className="text-gray-600">
+            <strong>{email}</strong>로 인증 이메일을 발송했습니다.
+          </p>
+          
+          <p className="text-sm text-gray-500">
+            이메일의 인증 링크를 클릭하여 회원가입을 완료해주세요.
+          </p>
+
+          <div className="pt-4 space-y-3">
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full h-[45px] bg-[#0A400C] text-white font-bold rounded-md hover:bg-[#13661A] transition-colors"
+            >
+              로그인 페이지로 이동
+            </button>
+            
+            <button
+              onClick={() => setEmailSent(false)}
+              className="w-full h-[45px] border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors"
+            >
+              다시 가입하기
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500 pt-4">
+            이메일이 오지 않나요? 스팸 메일함을 확인해보세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[500px] h-[400px] mx-auto flex flex-col justify-center items-center gap-6"
+      className="w-[500px] mx-auto flex flex-col justify-center items-center gap-6"
     >
       <div className="w-full space-y-6">
         {/* 이름 입력 */}
@@ -103,26 +148,13 @@ const SignupForm = () => {
           <label className="block text-sm font-semibold mb-1">전화번호</label>
           <input
             type="text"
-            placeholder="010-0000-0000"
+            placeholder="01000000000"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
             className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
-
-        {/* 주소 입력 */}
-        {/* <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">주소</label>
-          <input
-            type="text"
-            placeholder="주소를 입력하세요"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
-          />
-        </div> */}
 
         {/* 회원가입 버튼 */}
         <button
