@@ -6,6 +6,7 @@ import Navigation from "@/components/main/Navigation";
 import { useRouter } from "next/navigation";
 import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
+import { useCategories } from "@/hooks/book/useCategories";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서" },
@@ -50,15 +51,18 @@ const BookList = () => {
     return list;
   }, [books, config.prefix, wantRandom]);
 
+  const { categories } = useCategories({ mainCategory: "외국도서" });
+  console.log(categories);
+
   return (
     <>
       <Navigation />
 
-      <div className="py-80 max-w-1200 mx-auto">
-        <p className="text-2xl font-bold mb-10">{config.title}</p>
+      <div className="mx-auto py-80 max-w-1200">
+        <p className="mb-10 text-2xl font-bold">{config.title}</p>
 
         {loading ? (
-          <div className="flex justify-center items-center h-300">
+          <div className="flex items-center justify-center h-300">
             <p>Loading...</p>
           </div>
         ) : (
@@ -71,9 +75,9 @@ const BookList = () => {
               />
             ))}
             {!wantRandom && hasNext && (
-              <div className="p-20 text-center mt-20">
+              <div className="p-20 mt-20 text-center">
                 <button
-                  className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
+                  className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer"
                   onClick={() => fetchMoreBooks()}
                 >
                   더보기 +
