@@ -7,6 +7,7 @@ import WishListButton from "@/components/common/WishListButton";
 import AddToCartButton from "@/components/common/AddToCartButton";
 import BuyNowButton from "@/components/common/BuyNowButton"; // ✅ 추가
 import { useAuth } from "@/hooks/common/useAuth";
+import { useBook } from "@/hooks/book/useBook";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -45,42 +46,50 @@ const MOCK_DETAIL_TABS_DATA = {
     {
       id: 2,
       question: "반품/교환이 가능한가요?",
-      answer: "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
+      answer:
+        "상품 수령 후 7일 이내 미개봉 상태에 한해 반품/교환이 가능합니다.",
     },
     {
       id: 3,
       question: "중고 도서도 판매하나요?",
-      answer: "현재는 신품 도서만 판매하고 있으며, 중고 도서는 지원하지 않습니다.",
+      answer:
+        "현재는 신품 도서만 판매하고 있으며, 중고 도서는 지원하지 않습니다.",
     },
     {
       id: 4,
       question: "주문한 책은 어떻게 포장되나요?",
-      answer: "모든 도서는 배송 중 손상이 없도록 에어캡으로 안전하게 포장됩니다.",
+      answer:
+        "모든 도서는 배송 중 손상이 없도록 에어캡으로 안전하게 포장됩니다.",
     },
     {
       id: 5,
       question: "주문 후 배송지를 변경할 수 있나요?",
-      answer: "상품 준비 이전 단계라면 고객센터를 통해 배송지 변경이 가능합니다.",
+      answer:
+        "상품 준비 이전 단계라면 고객센터를 통해 배송지 변경이 가능합니다.",
     },
     {
       id: 6,
       question: "결제 수단은 어떤 것이 있나요?",
-      answer: "신용카드, 체크카드, 카카오페이, 네이버페이 등 다양한 결제 수단을 지원합니다.",
+      answer:
+        "신용카드, 체크카드, 카카오페이, 네이버페이 등 다양한 결제 수단을 지원합니다.",
     },
     {
       id: 7,
       question: "품절된 도서는 재입고 되나요?",
-      answer: "일부 도서는 재입고 예정이 있으나, 출판사 사정에 따라 달라질 수 있습니다.",
+      answer:
+        "일부 도서는 재입고 예정이 있으나, 출판사 사정에 따라 달라질 수 있습니다.",
     },
     {
       id: 8,
       question: "영수증이나 구매 내역은 어디서 확인하나요?",
-      answer: "마이페이지 내 '주문 내역'에서 영수증 및 구매 내역을 확인할 수 있습니다.",
+      answer:
+        "마이페이지 내 '주문 내역'에서 영수증 및 구매 내역을 확인할 수 있습니다.",
     },
     {
       id: 9,
       question: "도서에 하자가 있을 경우 어떻게 하나요?",
-      answer: "파본이나 인쇄 오류가 있을 경우 무료로 교환해드립니다. 고객센터로 문의해주세요.",
+      answer:
+        "파본이나 인쇄 오류가 있을 경우 무료로 교환해드립니다. 고객센터로 문의해주세요.",
     },
     {
       id: 10,
@@ -97,42 +106,19 @@ const ProductDetail = () => {
   const { userId } = useAuth();
 
   const [activeTab, setActiveTab] = useState("description");
-  const [bookData, setBookData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { book, loading, error } = useBook(bookId);
 
-  useEffect(() => {
-    const fetchBookData = async () => {
-      if (!bookId) return;
-
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/books/${bookId}`);
-        const data = await res.json();
-
-        if (res.ok) {
-          setBookData({
-            ...data,
-            ...MOCK_DETAIL_TABS_DATA,
-          });
-          console.log(data, '책데이터');
-        } else {
-          setError(data.error || "책 정보를 찾을 수 없습니다.");
-        }
-      } catch (err) {
-        console.error("Error fetching book:", err);
-        setError("데이터를 불러오는 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
+  const bookInfo = book
+    ? {
+        ...book,
+        reviews: MOCK_DETAIL_TABS_DATA.reviews,
+        faqs: MOCK_DETAIL_TABS_DATA.faqs,
       }
-    };
-
-    fetchBookData();
-  }, [bookId]);
+    : null;
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8 mt-20">
+      <div className="px-6 py-8 mx-auto mt-20 max-w-7xl">
         <div className="flex justify-center items-center min-h-[60vh]">
           <div className="text-xl text-(--main-color)">로딩 중...</div>
         </div>
@@ -140,11 +126,11 @@ const ProductDetail = () => {
     );
   }
 
-  if (error || !bookData) {
+  if (error || !bookInfo) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8 mt-20">
+      <div className="px-6 py-8 mx-auto mt-20 max-w-7xl">
         <div className="flex flex-col justify-center items-center min-h-[60vh]">
-          <div className="text-xl text-red-500 mb-6">
+          <div className="mb-6 text-xl text-red-500">
             {error || "책을 찾을 수 없습니다."}
           </div>
           <button
@@ -159,25 +145,26 @@ const ProductDetail = () => {
     );
   }
 
-  const totalReviews = bookData.reviews?.length || 0;
+  const totalReviews = bookInfo.reviews?.length || 0;
   const averageRating =
     totalReviews > 0
       ? (
-          bookData.reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+          bookInfo.reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
         ).toFixed(1)
       : 0;
 
-  const highResCover = bookData.cover?.replace(/coversum/gi, "cover500") || bookData.cover;
+  const highResCover =
+    bookInfo.cover?.replace(/coversum/gi, "cover500") || bookInfo.cover;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 mt-50">
+    <div className="mx-auto max-w-1200 mt-50 px-60">
       {/* 상품 정보 영역 */}
       <div className="flex mb-80 gap-80">
         {/* 이미지 */}
         <div className="w-400 h-auto rounded-md overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
           <Image
             src={highResCover}
-            alt={bookData.title}
+            alt={bookInfo.title}
             width={600}
             height={600}
             className="object-contain"
@@ -185,46 +172,46 @@ const ProductDetail = () => {
         </div>
 
         {/* 정보 */}
-        <div className="flex flex-col space-y-6 py-20 flex-[2]">
+        <div className="flex flex-col py-20 space-y-6 flex-2">
           <div>
-            <p className="text-16 text-gray-500 font-normal mb-2">
-              {bookData.categoryName}
+            <p className="mb-2 font-normal text-gray-500 text-16">
+              {bookInfo.category.map((c) => c.name).join(" > ")}
             </p>
             <h1 className="text-3xl font-bold text-black my-25">
-              {bookData.title}
+              {bookInfo.title}
             </h1>
-            <p className="text-18 font-normal text-gray-700">
-              {bookData.author} | {bookData.publisher} | {bookData.pubDate}
+            <p className="font-normal text-gray-700 text-18">
+              {bookInfo.author} | {bookInfo.publisher} | {bookInfo.pubDate}
             </p>
           </div>
 
-          <div className=" py-20  border-b border-gray-200 text-right">
+          <div className="py-20 text-right border-b border-gray-200 ">
             <p className="text-4xl font-bold text-(--main-color)">
-              {bookData.priceStandard?.toLocaleString()}원
+              {bookInfo.priceStandard?.toLocaleString()}원
             </p>
           </div>
 
-          <div className="flex justify-between items-center py-15 my-0 border-b border-gray-200">
+          <div className="flex items-center justify-between my-0 border-b border-gray-200 py-15">
             <span className="font-semibold text-black text-20">재고량</span>
             <span
               style={{ borderRadius: "var(--radius-5)" }}
               className={`px-10 py-6 font-medium text-20 ${
-                bookData.stock > 10
+                bookInfo.stock > 10
                   ? "bg-(--sub-color)/20 text-(--main-color)"
-                  : bookData.stock > 0
+                  : bookInfo.stock > 0
                   ? "bg-orange-100 text-orange-600"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
-              {bookData.stock > 0 ? `${bookData.stock}권` : "품절"}
+              {bookInfo.stock > 0 ? `${bookInfo.stock}권` : "품절"}
             </span>
           </div>
 
-          {bookData.salesCount && (
-            <div className="flex justify-between items-center py-15 my-0 border-b border-gray-200">
+          {bookInfo.salesCount && (
+            <div className="flex items-center justify-between my-0 border-b border-gray-200 py-15">
               <span className="font-semibold text-black text-20">판매량</span>
               <span className="text-(--main-color) font-medium text-20">
-                {bookData.salesCount?.toLocaleString()}권
+                {bookInfo.salesCount?.toLocaleString()}권
               </span>
             </div>
           )}
@@ -232,38 +219,38 @@ const ProductDetail = () => {
           {/* 버튼 영역 - 수정됨 */}
           <div className="flex gap-6 py-20">
             {/* 위시리스트 버튼 */}
-            <WishListButton 
-              userId={userId} 
-              bookId={bookData.bookId} 
-              stock={bookData.stock} 
+            <WishListButton
+              userId={userId}
+              bookId={bookInfo.bookId}
+              stock={bookInfo.stock}
             />
 
             {/* 장바구니 버튼 */}
             <AddToCartButton
-              book={{ bookId: bookData.bookId, stock: bookData.stock}}
+              book={{ bookId: bookInfo.bookId, stock: bookInfo.stock }}
               iconMode={false}
-              className="h-[50px] flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
 
             {/* ✅ 바로구매 버튼 - 컴포넌트로 변경 */}
             <BuyNowButton
               book={{
-                bookId: bookData.bookId,
-                title: bookData.title,
-                cover: bookData.cover,
-                priceStandard: bookData.priceStandard,
-                stock: bookData.stock,
+                bookId: bookInfo.bookId,
+                title: bookInfo.title,
+                cover: bookInfo.cover,
+                priceStandard: bookInfo.priceStandard,
+                stock: bookInfo.stock,
               }}
-                className="h-[50px] flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
-          {bookData.link && (
+          {bookInfo.link && (
             <a
-              href={bookData.link}
+              href={bookInfo.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-(--text-14) text-(--sub-color) hover:text-(--main-color) font-medium hover:underline transition-colors text-right"
+              className="text-14 text-(--sub-color) hover:text-(--main-color) font-medium hover:underline transition-colors text-right"
             >
               알라딘에서 보기 →
             </a>
@@ -272,14 +259,14 @@ const ProductDetail = () => {
       </div>
 
       {/* 탭 */}
-      <div className=" pt-12">
-        <div className="flex gap-30 border-b-2 border-gray-200">
+      <div className="pt-12 ">
+        <div className="flex border-b-2 border-gray-200 gap-30">
           {["description", "reviews", "faq"].map((tab) => (
             <button
               key={tab}
               className={`pb-10 px-2 font-normal text-20 transition-colors ${
                 activeTab === tab
-                  ? "border-b-2 border-(--main-color) text-(--main-color) -mb-[2px]"
+                  ? "border-b-2 border-(--main-color) text-(--main-color) -mb-2"
                   : "text-gray-600 hover:text-(--main-color)"
               }`}
               onClick={() => setActiveTab(tab)}
@@ -287,8 +274,8 @@ const ProductDetail = () => {
               {tab === "description"
                 ? "상품설명"
                 : tab === "reviews"
-                ? `리뷰 (${bookData.reviews.length})`
-                : `자주 묻는 질문 (${bookData.faqs.length})`}
+                ? `리뷰 (${bookInfo.reviews?.length})`
+                : `자주 묻는 질문 (${bookInfo.faqs?.length})`}
             </button>
           ))}
         </div>
@@ -300,8 +287,8 @@ const ProductDetail = () => {
               style={{ borderRadius: "var(--radius-15)" }}
               className="bg-(--bg-color) p-15"
             >
-              <p className="text-18 leading-relaxed font-light text-black whitespace-pre-line">
-                {bookData.description}
+              <p className="font-light leading-relaxed text-black whitespace-pre-line text-18">
+                {bookInfo.description}
               </p>
             </div>
           )}
@@ -310,9 +297,9 @@ const ProductDetail = () => {
             <div className="space-y-10">
               <div
                 style={{ borderRadius: "var(--radius-15)" }}
-                className="flex gap-12 items-center  p-15"
+                className="flex items-center gap-12 p-15"
               >
-                <span className="font-semibold text-16 text-black">
+                <span className="font-semibold text-black text-16">
                   전체 리뷰 {totalReviews}개
                 </span>
                 <span className="text-(--main-color) font-semibold text-20">
@@ -320,7 +307,7 @@ const ProductDetail = () => {
                 </span>
               </div>
 
-              {bookData.reviews.map((review) => (
+              {bookInfo.reviews.map((review) => (
                 <div
                   key={review.id}
                   className="p-25 rounded-sm bg-(--bg-color) "
@@ -329,21 +316,21 @@ const ProductDetail = () => {
                     <img
                       src={review.avatar}
                       alt={review.author}
-                      className="w-30 h-30 object-cover rounded-full"
+                      className="object-cover rounded-full w-30 h-30"
                     />
                     <div className="flex-1">
-                      <div className="flex justify-between items-start mb-10">
+                      <div className="flex items-start justify-between mb-10">
                         <span className="font-semibold text-black text-20">
                           {review.author}
                         </span>
-                        <span className="text-16 font-normal text-gray-500">
+                        <span className="font-normal text-gray-500 text-16">
                           {review.date}
                         </span>
                       </div>
                       <div className=" text-16">
                         {"⭐".repeat(review.rating)}
                       </div>
-                      <p className="text-18 mt-20 font-light text-black leading-relaxed">
+                      <p className="mt-20 font-light leading-relaxed text-black text-18">
                         {review.content}
                       </p>
                     </div>
@@ -355,12 +342,12 @@ const ProductDetail = () => {
 
           {activeTab === "faq" && (
             <div className="space-y-10">
-              {bookData.faqs.map((faq) => (
+              {bookInfo.faqs.map((faq) => (
                 <div key={faq.id} className="p-25 rounded-sm  bg-(--bg-color)">
                   <p className="font-bold text-(--main-color) mb-20 text-20">
                     Q. {faq.question}
                   </p>
-                  <p className="pl-20 font-light text-black text-18 leading-relaxed">
+                  <p className="pl-20 font-light leading-relaxed text-black text-18">
                     {faq.answer}
                   </p>
                 </div>
