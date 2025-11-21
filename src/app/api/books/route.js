@@ -83,6 +83,69 @@ export async function GET(req) {
   }
 }
 
+async function resolveCategoryId(fullCategoryName) {
+  if (!fullCategoryName) return null;
+  const parts = fullCategoryName.split(">");
+  let parent_id = null;
+
+  for (let i = 0; i < parts.length; i++) {
+    const name = parts[i];
+    const depth = i + 1; // depth 계산
+
+    let query = supabase
+      .from("category")
+      .select("category_id")
+      .eq("name", name);
+
+    if (parent_id === null) {
+      query = query.is("parent_id", null);
+    } else {
+      query = query.eq("parent_id", parent_id);
+    }
+
+    const { data: existing, error: selectError } = await query.maybeSingle();
+
+    if (selectError) throw selectError;
+
+    if (existing) {
+      parent_id = existing.category_id;
+    } else {
+      const { data, error } = await supabase
+        .from("category")
+        .insert({ name, parent_id, depth }) // depth 추가
+        .select("category_id")
+        .single();
+
+      if (error) {
+        if (error.code === "23505") {
+          let retryQuery = supabase
+            .from("category")
+            .select("category_id")
+            .eq("name", name);
+
+          if (parent_id === null) {
+            retryQuery = retryQuery.is("parent_id", null);
+          } else {
+            retryQuery = retryQuery.eq("parent_id", parent_id);
+          }
+
+          const { data: retryData, error: retryError } =
+            await retryQuery.maybeSingle();
+          if (retryError) throw retryError;
+          if (!retryData) throw new Error(`Category not found: ${name}`);
+          parent_id = retryData.category_id;
+        } else {
+          throw error;
+        }
+      } else {
+        parent_id = data.category_id;
+      }
+    }
+  }
+
+  return parent_id;
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -98,33 +161,54 @@ export async function POST(req) {
 
     // 필수값 검사
     for (const item of body) {
-      if (!item.title || !item.author) {
+      if (!item.title) {
         return new Response(
-          JSON.stringify({ error: "각 책은 title과 author가 필요합니다." }),
+          JSON.stringify({ error: "각 책은 title가 필요합니다." }),
           { status: 400 }
         );
       }
     }
 
-    // Supabase insert용 매핑
-    const booksToInsert = body.map((b) => ({
-      title: b.title,
-      author: b.author,
-      publisher: b.publisher,
-      pub_date: b.pubDate,
-      price_standard: b.priceStandard,
-      price_sales: b.priceSales,
-      cover: b.cover,
-      description: b.description,
-      category: b.categoryName,
-      link: b.link,
-      stock: b.stock ?? 0,
-      status: true,
-      sales_count: b.salesCount,
-      created_at: now,
-      updated_at: now,
-      isbn: b.isbn,
-    }));
+    // 카테고리 중복 방지를 위한 캐시
+    const categoryCache = new Map();
+
+    // 각 책의 category를 category_id로 변환
+    const booksToInsert = await Promise.all(
+      body.map(async (b) => {
+        let category_id = null;
+
+        if (b.categoryName) {
+          // 캐시에 있으면 재사용
+          if (categoryCache.has(b.categoryName)) {
+            category_id = categoryCache.get(b.categoryName);
+          } else {
+            // 없으면 조회/생성 후 캐시에 저장
+            category_id = await resolveCategoryId(b.categoryName);
+            categoryCache.set(b.categoryName, category_id);
+          }
+        }
+
+        return {
+          title: b.title,
+          author: b.author,
+          publisher: b.publisher,
+          pub_date: b.pubDate,
+          price_standard: b.priceStandard,
+          price_sales: b.priceSales,
+          cover: b.cover,
+          description: b.description,
+          category_id: category_id,
+          link: b.link,
+          stock: b.stock ?? 0,
+          status: true,
+          sales_count: b.salesCount,
+          created_at: now,
+          updated_at: now,
+          isbn: b.isbn,
+          mallType: b.mallType,
+        };
+      })
+    );
 
     const { error } = await supabase
       .from("book")
@@ -135,7 +219,6 @@ export async function POST(req) {
       throw error;
     }
 
-    // 반환 없음
     return new Response(null, { status: 201 });
   } catch (err) {
     console.error("Books create API error:", err);
