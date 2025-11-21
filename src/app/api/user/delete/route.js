@@ -12,7 +12,7 @@ export async function POST(req) {
     const { error } = await supabase
       .from("users")
       .delete()
-      .eq("uid", userId);   // ← uid 기준으로 삭제
+      .eq("user_id", userId);   // ← 여기를 수정해야 정상 삭제됨!!
 
     if (error) {
       return NextResponse.json({
