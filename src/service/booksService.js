@@ -1,5 +1,10 @@
 import axios from "axios";
 
+export async function getBook(id) {
+  const res = await axios.get(`/api/books/${id}`);
+  return res.data;
+}
+
 export async function getBooks({
   page = 1,
   pageSize,
