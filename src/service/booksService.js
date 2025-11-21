@@ -1,32 +1,24 @@
-// services/booksService.ts
+import axios from "axios";
 
 export async function getBooks({
   page = 1,
   pageSize,
-  category,
+  category, // ["국내도서", "소설"] 형태의 배열
   search,
   orderField,
   orderDirection,
-}) {
-  const params = new URLSearchParams();
-  params.append("page", page.toString());
-  if (pageSize) params.append("pageSize", pageSize);
-  if (category) params.append("category", category);
-  if (search) params.append("search", search);
-  if (orderField) params.append("orderField", orderField);
-  if (orderDirection) params.append("orderDirection", orderDirection);
+} = {}) {
+  const params = { page };
 
-  const res = await fetch(`/api/books?${params.toString()}`, {
-    method: "GET",
-  });
+  if (pageSize) params.pageSize = pageSize;
+  if (category) params.category = JSON.stringify(category);
+  if (search) params.search = search;
+  if (orderField) params.orderField = orderField;
+  if (orderDirection) params.orderDirection = orderDirection;
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "책 목록 조회 실패");
-  }
+  const res = await axios.get("/api/books", { params });
 
-  const data = await res.json();
-  return data;
+  return res.data;
 }
 
 export async function createBook(books) {

@@ -2,7 +2,7 @@
 import { getCategories } from "@/service/categoriesService";
 import { useEffect, useState } from "react";
 
-export const useCategories = ({ mainCategory = "국내도서" } = {}) => {
+export const useCategories = ({ rootCategory = "국내도서" } = {}) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -13,7 +13,7 @@ export const useCategories = ({ mainCategory = "국내도서" } = {}) => {
       setError(null);
 
       try {
-        const fetchedCategories = await getCategories({ mainCategory });
+        const fetchedCategories = await getCategories({ rootCategory });
         setCategories(fetchedCategories);
       } catch (err) {
         console.error(err);
@@ -24,7 +24,7 @@ export const useCategories = ({ mainCategory = "국내도서" } = {}) => {
     };
 
     fetchCategories();
-  }, [mainCategory]);
+  }, [rootCategory]);
 
   return {
     categories,
