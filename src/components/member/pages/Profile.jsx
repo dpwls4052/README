@@ -171,9 +171,9 @@ export default function Profile() {
 
     try {
       const endpointMap = {
-        name: "updateName",
-        phone: "updatePhone",
-        email: "updateEmail",
+        name: "update/name",
+        phone: "update/phone",
+        email: "update/email",
       };
 
       const payload = { userId };
