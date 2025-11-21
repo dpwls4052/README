@@ -7,7 +7,7 @@ export async function GET(req) {
     // 쿼리 파라미터
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const pageSize = Number(searchParams.get("pageSize")) || 20;
-    const category = searchParams.get("category");
+    const category = searchParams.get("category"); // JSON 문자열: ["국내도서", "소설"]
     const search = searchParams.get("search");
 
     const orderField = searchParams.get("orderField") || "created_at";
@@ -24,6 +24,66 @@ export async function GET(req) {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
+    // 전체 카테고리 조회 (캐싱용)
+    const { data: allCategories, error: categoryError } = await supabase
+      .from("category")
+      .select("category_id, name, parent_id, depth");
+
+    if (categoryError) throw categoryError;
+
+    // 카테고리 경로 찾기 함수
+    const getCategoryPath = (categoryId) => {
+      const path = [];
+      let currentId = categoryId;
+
+      while (currentId) {
+        const cat = allCategories.find((c) => c.category_id === currentId);
+        if (!cat) break;
+
+        path.unshift({
+          category_id: cat.category_id,
+          name: cat.name,
+          depth: cat.depth,
+        });
+        currentId = cat.parent_id;
+      }
+
+      return path;
+    };
+
+    // 카테고리 이름 경로로 category_id 찾기 함수
+    const findCategoryIdByPath = (categoryPath) => {
+      let parentId = null;
+
+      for (const name of categoryPath) {
+        const cat = allCategories.find(
+          (c) => c.name === name && c.parent_id === parentId
+        );
+        if (!cat) return null;
+        parentId = cat.category_id;
+      }
+
+      return parentId;
+    };
+
+    // 특정 카테고리와 그 하위 카테고리의 모든 category_id 찾기
+    const findAllChildCategoryIds = (parentCategoryId) => {
+      const ids = [parentCategoryId];
+      const queue = [parentCategoryId];
+
+      while (queue.length > 0) {
+        const currentId = queue.shift();
+        const children = allCategories.filter((c) => c.parent_id === currentId);
+
+        for (const child of children) {
+          ids.push(child.category_id);
+          queue.push(child.category_id);
+        }
+      }
+
+      return ids;
+    };
+
     let query = supabase
       .from("book")
       .select("*", { count: "exact" })
@@ -33,7 +93,26 @@ export async function GET(req) {
 
     // 카테고리 필터
     if (category) {
-      query = query.eq("category", category);
+      const categoryPath = JSON.parse(category); // ["국내도서", "소설"]
+      const targetCategoryId = findCategoryIdByPath(categoryPath);
+
+      if (targetCategoryId) {
+        const categoryIds = findAllChildCategoryIds(targetCategoryId);
+        query = query.in("category_id", categoryIds);
+      } else {
+        // 카테고리를 찾지 못한 경우 빈 결과 반환
+        return new Response(
+          JSON.stringify({
+            books: [],
+            page,
+            pageSize,
+            totalCount: 0,
+            totalPages: 0,
+            hasNext: false,
+          }),
+          { status: 200 }
+        );
+      }
     }
 
     // 제목 검색 (부분 일치)
@@ -57,7 +136,7 @@ export async function GET(req) {
       priceStandard: book.price_standard,
       cover: book.cover,
       description: book.description,
-      categoryName: book.category,
+      category: getCategoryPath(book.category_id), // 카테고리 경로 배열
       link: book.link,
       stock: book.stock,
       salesCount: book.sales_count,

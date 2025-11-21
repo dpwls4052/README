@@ -3,13 +3,13 @@ import { supabase } from "@/lib/supabaseClient";
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const mainCategory = searchParams.get("mainCategory") || "국내도서";
+    const rootCategory = searchParams.get("rootCategory") || "국내도서";
 
-    // 1. mainCategory(국내도서 || 외국도서)카테고리의 category_id 조회
+    // 1. rootCategory(국내도서 || 외국도서)카테고리의 category_id 조회
     const { data: parent, error: parentError } = await supabase
       .from("category")
       .select("category_id")
-      .eq("name", mainCategory)
+      .eq("name", rootCategory)
       .single();
 
     if (parentError) throw parentError;
