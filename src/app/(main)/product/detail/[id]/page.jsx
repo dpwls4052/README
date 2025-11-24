@@ -119,6 +119,55 @@ const renderDescriptionWithImages = (text) => {
       }
     : null;
 
+    // ✅ 최근 본 도서 저장 기능 추가
+useEffect(() => {
+  if (!bookInfo) return;
+
+  const stored = JSON.parse(localStorage.getItem("recentBooks")) || [];
+
+  const newBook = {
+    id: bookInfo.bookId,
+    title: bookInfo.title,
+    author: bookInfo.author,
+    image: bookInfo.cover,
+  };
+
+  // 중복 제거 + 최신순 유지
+  const filtered = stored.filter((b) => b.id !== newBook.id);
+  const updated = [newBook, ...filtered].slice(0, 10);
+
+  localStorage.setItem("recentBooks", JSON.stringify(updated));
+}, [bookInfo]);
+
+// ✅ Supabase 최근 본 도서 저장 (API 사용)
+useEffect(() => {
+  if (!bookInfo || !userId) return;
+
+  const saveRecentBook = async () => {
+    try {
+      await fetch("/api/user/recentBooks/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          bookId: bookInfo.bookId,
+          title: bookInfo.title,
+          author: bookInfo.author,
+          image: bookInfo.cover,
+        }),
+      });
+    } catch (err) {
+      console.error("최근 본 도서 저장 실패:", err);
+    }
+  };
+
+  saveRecentBook();
+}, [bookInfo, userId]);
+
+
+
+
+
   if (loading) {
     return (
       <div className="px-6 py-8 mx-auto mt-20 max-w-7xl">

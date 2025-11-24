@@ -34,6 +34,8 @@ export default function Profile() {
     address: "",
     detailAddress: "",
   });
+  // ✅ 최근 본 도서 상태
+  const [recentBooks, setRecentBooks] = useState([]);
 
   const handleDeleteAccount = async () => {
     if (!confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
@@ -135,6 +137,32 @@ export default function Profile() {
 
     fetchUser();
   }, [userId]);
+
+  // ✅ 최근 본 도서 불러오기 (Supabase + 사용자별)
+useEffect(() => {
+  if (!userId) return;
+
+  const fetchRecentBooks = async () => {
+    try {
+      const res = await fetch("/api/user/recentBooks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setRecentBooks(data.books);
+      }
+    } catch (err) {
+      console.error("최근 본 도서 불러오기 실패:", err);
+    }
+  };
+
+  fetchRecentBooks();
+}, [userId]);
+
 
   // 주소 목록 조회
   const fetchAddressList = async () => {
@@ -592,24 +620,35 @@ export default function Profile() {
         {/* 최근 본 도서 */}
         <section>
           <h3 className="text-2xl font-semibold mb-30">최근 본 도서</h3>
-          <div className="flex justify-between gap-10">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer"
-              >
-                <img
-                  src={`https://placehold.co/200x250?text=Book+${i}`}
-                  alt={`Book ${i}`}
-                />
-                <div className="p-5 text-sm">
-                  <p className="font-medium">인기 도서 {i}</p>
-                  <p className="text-gray-500">저자 이름</p>
+
+          {recentBooks.length === 0 ? (
+            <p className="text-gray-500 text-sm">최근 본 도서가 없습니다.</p>
+          ) : (
+            <div className="flex justify-between gap-10">
+              {recentBooks.slice(0, 4).map((book, index) => (
+                <div
+                  key={index}
+                  className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
+                  onClick={() => window.location.href = `/product/detail/${book.id}`}
+                >
+                  <div className="w-full h-[250px] bg-gray-100 flex items-center justify-center">
+                    <img
+                      src={book.image}
+                      alt={book.title}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                  <div className="p-5 text-sm">
+                    <p className="font-medium truncate">{book.title}</p>
+                    <p className="text-gray-500 text-xs truncate">{book.author}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
+
+
 
         {/* 개인 설정 */}
         <section>
