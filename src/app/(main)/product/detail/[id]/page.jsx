@@ -185,14 +185,15 @@ const ProductDetail = () => {
             </span>
           </div>
 
-          {bookInfo.salesCount && (
+          {bookInfo.salesCount !== undefined && bookInfo.salesCount !== null && (
             <div className="flex items-center justify-between my-0 border-b border-gray-200 py-15">
               <span className="font-semibold text-black text-20">판매량</span>
               <span className="text-(--main-color) font-medium text-20">
-                {bookInfo.salesCount?.toLocaleString()}권
+                {bookInfo.salesCount.toLocaleString()}권
               </span>
             </div>
           )}
+
 
           {/* 버튼 영역 - 수정됨 */}
           <div className="flex gap-6 py-20">

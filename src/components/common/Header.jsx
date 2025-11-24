@@ -66,7 +66,7 @@ export default function Header() {
   // console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
   // console.log('user', user)
   return (
-    <header className="sticky top-0 z-40 px-100 backdrop-blur-3xl shadow-[0_4px_10px_rgba(153,153,153,0.25)]">
+    <header className="sticky top-0 z-40 px-100 shadow-[0_4px_10px_rgba(153,153,153,0.25)] header-blur">
       <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-1200">
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
