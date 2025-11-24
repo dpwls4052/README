@@ -87,6 +87,10 @@ const AddBookModal = ({ fetchBooks }) => {
               type="text"
               value={searchKey}
               onChange={(e) => setSearchKey(e.target.value)}
+              placeholder="도서명을 검색하세요."
+              onKeyUp={(e) => {
+                if (e.key === "Enter") searchAladin();
+              }}
               className="w-full h-full outline-none"
             />
             <button className="hover:cursor-pointer" onClick={searchAladin}>
@@ -103,6 +107,7 @@ const AddBookModal = ({ fetchBooks }) => {
             />
             <AddedSection
               addedBookList={addedBookList}
+              setAddedBookList={setAddedBookList}
               handleDeleteBook={handleDeleteBook}
             />
           </div>

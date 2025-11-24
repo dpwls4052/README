@@ -11,7 +11,7 @@ const BookItem = ({ book, children }) => {
           height={100}
           className="rounded-md shrink-0"
         />
-        <div className="flex-1 text-start">
+        <div className="flex-1">
           <p className="font-semibold line-clamp-2 leading-24">{book.title}</p>
           <p className="line-clamp-2 text-14">{book.author}</p>
         </div>
