@@ -229,6 +229,7 @@ const Cart = () => {
                   <div
                     key={item.id}
                     className="flex justify-between items-center py-15 px-4 gap-15 border-b border-gray-200"
+                    
                   >
                     <div className="flex items-start gap-20 flex-1">
                       <input
@@ -241,8 +242,9 @@ const Cart = () => {
                         src={item.image}
                         alt={item.name}
                         className="w-100 h-140 object-cover rounded-md border border-gray-300"
+                        onClick={() => router.push(`/product/detail/${item.id}`)}
                       />
-                      <div className="flex flex-col gap-1 flex-1">
+                      <div className="flex flex-col gap-1 flex-1" onClick={() => router.push(`/product/detail/${item.id}`)}>
                         <p className="text-base font-medium text-black ">
                           {item.name}
                         </p>
