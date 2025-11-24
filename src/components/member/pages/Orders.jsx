@@ -14,6 +14,47 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("전체");
 
+  // 🌟 UTC → 한국 시간 변환 함수 (개선)
+  const convertToKoreaTime = (dateString) => {
+    if (!dateString) return "";
+    
+    try {
+      // Supabase timestamp 형식: "2024-01-15T15:30:00" 또는 "2024-01-15 15:30:00"
+      let date;
+      
+      if (dateString.includes("T")) {
+        // ISO 형식
+        date = new Date(dateString);
+      } else if (dateString.includes(" ")) {
+        // "YYYY-MM-DD HH:mm:ss" 형식 → UTC로 변환
+        const utcString = dateString.replace(" ", "T") + "Z";
+        date = new Date(utcString);
+      } else {
+        // 그 외 형식
+        date = new Date(dateString);
+      }
+      
+      // Invalid Date 체크
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return dateString; // 원본 반환
+      }
+      
+      // 한국 시간으로 변환
+      return date.toLocaleString("ko-KR", {
+        timeZone: "Asia/Seoul",
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (err) {
+      console.error("Date conversion error:", err, dateString);
+      return dateString;
+    }
+  };
+
   // 주문 내역 조회
   useEffect(() => {
     if (!userId) {
@@ -32,7 +73,6 @@ export default function Orders() {
           body: JSON.stringify({ user_id: userId })
         });
 
-        // HTML 에러 체크
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("서버 응답이 올바르지 않습니다. API 경로를 확인하세요.");
@@ -41,6 +81,11 @@ export default function Orders() {
         const data = await res.json();
         
         if (!res.ok) throw new Error(data.error || "주문 내역 조회 실패");
+        
+        // 🌟 날짜 형식 확인용 로그
+        if (data.length > 0) {
+          console.log("주문 날짜 형식:", data[0].date);
+        }
         
         setOrders(data);
       } catch (err) {
@@ -66,7 +111,6 @@ export default function Orders() {
         items: [],
       };
     }
-    // 총 가격 누적
     acc[order.order_number].totalPrice += (order.book_price * order.amount);
     acc[order.order_number].items.push(order);
     return acc;
@@ -74,7 +118,7 @@ export default function Orders() {
 
   const orderList = Object.values(groupedOrders);
 
-  // 탭별 필터링 (shipping_status 기준)
+  // 탭별 필터링
   const filteredOrders = orderList.filter(order => {
     if (activeTab === "전체") return true;
     if (activeTab === "배송준비") return order.shippingStatus === "배송준비";
@@ -178,7 +222,7 @@ export default function Orders() {
                         주문번호: {order.orderNumber}
                       </p>
                       <p className="text-sm text-gray-600">
-                        주문일: {new Date(order.orderDate).toLocaleDateString()}
+                        주문일: {convertToKoreaTime(order.orderDate)}
                       </p>
                     </div>
                     <div className="text-right">

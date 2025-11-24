@@ -15,8 +15,33 @@ import { useWishlistCount } from "@/hooks/common/useWishlistCount";
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
+  const { userId } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [userInfo, setUserInfo] = useState(null);
+  
+  // 사용자 정보 조회
+  useEffect(() => {
+    if (!userId) return;
+
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/user/getUser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
+
+        if (!res.ok) throw new Error("사용자 정보 불러오기 실패");
+        const data = await res.json();
+        setUserInfo(data.user);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchUser();
+  }, [userId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -38,8 +63,8 @@ export default function Header() {
   const { count: cartCount } = useCartCount(); // 🌟 수정
   const { count: wishlistCount } = useWishlistCount(); 
 
-  console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
-
+  // console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
+  // console.log('user', user)
   return (
     <header className="sticky top-0 z-40 px-100 backdrop-blur-3xl shadow-[0_4px_10px_rgba(153,153,153,0.25)]">
       <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-1200">
@@ -130,7 +155,7 @@ export default function Header() {
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <p className="font-bold text-lg text-black truncate">
-                        {user.displayName || "사용자"}
+                        {userInfo.name || "사용자"} 님
                       </p>
                       <p className="text-sm text-gray-600 truncate">
                         {user.email}
