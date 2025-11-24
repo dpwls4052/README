@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaHeart } from "react-icons/fa";
 import AddToCartButton from "@/components/common/AddToCartButton";
+import WishListButton from "@/components/common/WishListButton";
 import { useAuth } from "@/hooks/common/useAuth";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 
@@ -31,7 +31,7 @@ const Wishlist = () => {
             name: item.title || `도서 ${item.book_id}`,
             price: item.price_standard || 0,
             image: item.cover || "https://via.placeholder.com/80",
-            stock: item.stock || 0, // ✅ stock 추가
+            stock: item.stock || 0,
           }))
         );
       } catch (err) {
@@ -43,22 +43,6 @@ const Wishlist = () => {
 
     fetchWishlist();
   }, [userId]);
-
-  const handleToggleHeart = async (bookId) => {
-    if (!userId) return alert("로그인이 필요합니다.");
-    setItems((prev) => prev.filter((item) => item.id !== bookId));
-
-    try {
-      const res = await fetch("/api/user/wishlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, book_id: bookId }),
-      });
-      if (!res.ok) console.error(await res.json());
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   if (loading) return <p className="text-center mt-20">로딩 중...</p>;
   if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
@@ -96,22 +80,21 @@ const Wishlist = () => {
                           <span className="text-lg font-bold text-[var(--main-color)]">
                             {item.price.toLocaleString()}원
                           </span>
-                          {/* ✅ 재고 표시 추가 */}
-                          <span className={`text-sm font-medium mt-1`}
+                          <span 
+                            className={`text-sm font-medium mt-1`}
                             style={{ color: item.stock > 0 ? "var(--sub-color)" : "rgb(220, 38, 38)" }}
                           >
                             {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-10">
-                        <button
-                          onClick={() => handleToggleHeart(item.id)}
-                          className="text-red-600 hover:bg-red-100 p-5 rounded hover:cursor-pointer"
-                        >
-                          <FaHeart size={20} />
-                        </button>
-                        {/* ✅ stock 전달 */}
+                      <div className="flex gap-10 items-center">
+                        {/* 🌟 WishListButton 컴포넌트 사용 */}
+                        <WishListButton
+                          userId={userId}
+                          bookId={item.id}
+                          stock={item.stock}
+                        />
                         <AddToCartButton
                           book={{ 
                             bookId: item.id,
@@ -125,7 +108,7 @@ const Wishlist = () => {
               )}
             </div>
 
-            <div className="flex-1 bg-[var(--bg-color)] p-20 rounded-md shadow-sm h-fit  lg:sticky lg:top-200">
+            <div className="flex-1 bg-[var(--bg-color)] p-20 rounded-md shadow-sm h-fit lg:sticky lg:top-200">
               <h2 className="text-xl font-bold mb-30 text-black">
                 위시리스트 정보
               </h2>
@@ -136,7 +119,7 @@ const Wishlist = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-black font-normal">총 금액</span>
-                  <span className="font-bold text-(--main-color)">
+                  <span className="font-bold text-[var(--main-color)]">
                     {items
                       .reduce((acc, i) => acc + i.price, 0)
                       .toLocaleString()}
