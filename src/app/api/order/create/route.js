@@ -37,14 +37,14 @@ export async function POST(req) {
     const orderNumber = `ON${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${timestamp}${randomSuffix}`;
     console.log("✅ 주문번호 생성:", orderNumber);
 
-    // 3️⃣ orders 테이블에 삽입할 데이터 생성 (book_id 제외)
+    // 3️⃣ orders 테이블에 삽입할 데이터 생성 (book_id 포함)
     const orderRows = orderItems.map((item) => {
       const row = {
         order_number: orderNumber,
         user_id: userId,
-        // book_id는 orders 테이블에 없으므로 제외
+        book_id: item.book_id || null, // ✅ book_id 추가
         title: item.title || "",
-        cover: item.cover || item.image || "",  // cover 또는 image 둘 다 대응
+        cover: item.cover || item.image || "",
         book_price: Number(item.price) || 0,
         amount: Number(item.quantity) || 1,
         price: Number(price) || 0,
