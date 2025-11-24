@@ -12,6 +12,7 @@ import SearchBar from "./SearchBar";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import { useCartCount } from "@/hooks/common/useCartCount";
 import { useWishlistCount } from "@/hooks/common/useWishlistCount";
+import useSearchForm from "@/hooks/common/useSearchForm";
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
@@ -19,7 +20,8 @@ export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [userInfo, setUserInfo] = useState(null);
-  
+  const { query, setQuery, handleSearch } = useSearchForm();
+
   // 사용자 정보 조회
   useEffect(() => {
     if (!userId) return;
@@ -61,13 +63,13 @@ export default function Header() {
   };
 
   const { count: cartCount } = useCartCount(); // 🌟 수정
-  const { count: wishlistCount } = useWishlistCount(); 
+  const { count: wishlistCount } = useWishlistCount();
 
   // console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
   // console.log('user', user)
   return (
     <header className="sticky top-0 z-40 px-100 shadow-[0_4px_10px_rgba(153,153,153,0.25)] header-blur">
-      <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-1200">
+      <div className="flex items-center justify-between gap-8 px-6 mx-auto py-15 max-w-1200">
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
           <Image
@@ -80,7 +82,11 @@ export default function Header() {
         </Link>
 
         {/* 검색창 */}
-        <SearchBar />
+        <SearchBar
+          query={query}
+          setQuery={setQuery}
+          handleSearch={handleSearch}
+        />
 
         {/* 아이콘 버튼 */}
         <div className="flex items-center gap-20">
@@ -88,13 +94,13 @@ export default function Header() {
           <div className="relative">
             <Link
               href="/cart"
-              className="w-25 h-25 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+              className="flex items-center justify-center transition rounded-full w-25 h-25 hover:bg-gray-100"
             >
               <SlBasket className="text-3xl" />
             </Link>
 
             {cartCount > 0 && (
-              <span className="absolute -top-2 left-20 bg-gray-500 text-white text-xs w-10 h-10 flex items-center justify-center rounded-full">
+              <span className="absolute flex items-center justify-center w-10 h-10 text-xs text-white bg-gray-500 rounded-full -top-2 left-20">
                 {cartCount}
               </span>
             )}
@@ -104,13 +110,13 @@ export default function Header() {
           <div className="relative">
             <Link
               href="/member/wishlist"
-              className="w-25 h-25 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+              className="flex items-center justify-center transition rounded-full w-25 h-25 hover:bg-gray-100"
             >
               <IoIosHeartEmpty className="text-3xl text-red-500" />
             </Link>
 
             {wishlistCount > 0 && (
-              <span className="absolute -top-2 left-17 bg-red-500 text-white text-xs w-10 h-10 flex items-center justify-center rounded-full">
+              <span className="absolute flex items-center justify-center w-10 h-10 text-xs text-white bg-red-500 rounded-full -top-2 left-17">
                 {wishlistCount}
               </span>
             )}
@@ -130,10 +136,10 @@ export default function Header() {
                   <img
                     src={user.photoURL}
                     alt="프로필"
-                    className="w-full h-full object-cover"
+                    className="object-cover w-full h-full"
                   />
                 ) : (
-                  <FiUser className="text-white text-4xl" />
+                  <FiUser className="text-4xl text-white" />
                 )}
               </button>
 
@@ -147,14 +153,14 @@ export default function Header() {
                         <img
                           src={user.photoURL}
                           alt="프로필"
-                          className="w-full h-full object-cover"
+                          className="object-cover w-full h-full"
                         />
                       ) : (
-                        <FiUser className="text-white text-5xl" />
+                        <FiUser className="text-5xl text-white" />
                       )}
                     </div>
                     <div className="flex-1 overflow-hidden">
-                      <p className="font-bold text-lg text-black truncate">
+                      <p className="text-lg font-bold text-black truncate">
                         {userInfo.name || "사용자"} 님
                       </p>
                       <p className="text-sm text-gray-600 truncate">
