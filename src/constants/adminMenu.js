@@ -11,8 +11,4 @@ export const ADMIN_TAB = [
     value: "delivery",
     label: "배송 관리",
   },
-  {
-    value: "faq",
-    label: "FAQ 관리",
-  },
 ];

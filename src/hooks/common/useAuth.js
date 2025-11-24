@@ -8,20 +8,25 @@ import { auth } from "../../lib/firebase";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      setLoading(false);
 
       if (currentUser) {
-        fetchUserId(currentUser.uid, currentUser.email);
+        const id = await fetchUserId(currentUser.uid, currentUser.email);
+        if (id) {
+          await fetchUserRole(id);
+        }
       } else {
         setUserId(null);
+        setRole(null);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -34,15 +39,17 @@ export function useAuth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, email }),
       });
+
       const data = await res.json();
       if (res.ok && data.user_id) {
         setUserId(data.user_id);
-        console.log("유저아이디 (fetchUserId):", data.user_id);
-      } else {
-        console.error("user_id fetch failed:", data);
+        return data.user_id;
       }
+
+      return null;
     } catch (err) {
-      console.error("user_id fetch error:", err);
+      console.error("userId fetch error:", err);
+      return null;
     }
   };
 
@@ -50,23 +57,33 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       // Firebase에서 이메일 인증 확인
       if (!userCredential.user.emailVerified) {
         await signOut(auth);
         setError("이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요.");
         return false;
       }
-      
-      await fetchUserId(userCredential.user.uid, userCredential.user.email);
+
+      const id = await fetchUserId(
+        userCredential.user.uid,
+        userCredential.user.email
+      );
+      if (id) {
+        await fetchUserRole(id);
+      }
       return true;
     } catch (err) {
-      if (err.code === 'auth/wrong-password') {
+      if (err.code === "auth/wrong-password") {
         setError("비밀번호가 올바르지 않습니다.");
-      } else if (err.code === 'auth/user-not-found') {
+      } else if (err.code === "auth/user-not-found") {
         setError("존재하지 않는 이메일입니다.");
-      } else if (err.code === 'auth/too-many-requests') {
+      } else if (err.code === "auth/too-many-requests") {
         setError("너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.");
       } else {
         setError(err.message);
@@ -113,7 +130,31 @@ export function useAuth() {
     await signOut(auth);
     setUser(null);
     setUserId(null);
+    setRole(null);
   };
 
-  return { user, userId, loading, error, login, signup, logout };
+  const fetchUserRole = async (userId) => {
+    try {
+      const res = await fetch(`/api/auth/role`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.role) {
+        setRole(data.role);
+      } else {
+        setRole(null);
+      }
+    } catch (err) {
+      console.error("fetchUserRole error:", err);
+      setRole(null);
+    }
+  };
+
+  const isAdmin = role === "admin";
+
+  return { user, userId, role, isAdmin, loading, error, login, signup, logout };
 }
