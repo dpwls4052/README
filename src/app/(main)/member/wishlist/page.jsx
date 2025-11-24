@@ -71,10 +71,10 @@ const Wishlist = () => {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-100 h-140 object-cover rounded-md border border-gray-300"
+                          className="w-100 h-140 object-cover rounded-md border border-gray-300 cursor-pointer"
                           onClick={() => window.location.href = `/product/detail/${item.id}`}
                         />
-                        <div className="flex flex-col gap-1 flex-1" onClick={() => window.location.href = `/product/detail/${item.id}`}>
+                        <div className="flex flex-col gap-1 flex-1 cursor-pointer" onClick={() => window.location.href = `/product/detail/${item.id}`}>
                           <span className="text-base text-black font-medium mt-5">
                             {item.name}
                           </span>

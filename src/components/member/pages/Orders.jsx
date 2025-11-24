@@ -225,7 +225,7 @@ export default function Orders() {
                         주문일: {convertToKoreaTime(order.orderDate)}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right" >
                       <span
                         className={`px-12 py-6 rounded text-sm font-medium ${
                           order.shippingStatus === "배송완료"
@@ -245,7 +245,8 @@ export default function Orders() {
                     {order.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex gap-15 items-center p-15 rounded"
+                        className="flex gap-15 items-center p-15 rounded cursor-pointer"
+                        onClick={item.book_id ? () => router.push(`/product/detail/${item.book_id}`) : null}
                       >
                         <img
                           src={item.cover || "https://placehold.co/80x110"}
