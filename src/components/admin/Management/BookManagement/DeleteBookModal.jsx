@@ -1,6 +1,6 @@
 "use client";
 
-import Modal from "../common/Modal";
+import Modal from "@/components/common/Modal";
 import { useModal } from "@/hooks/common/useModal";
 
 const DeleteBookModal = ({ book, handleDeleteBook }) => {

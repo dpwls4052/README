@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useFindNewBooks } from "@/hooks/admin/useFindNewBooks";
 import { useModal } from "@/hooks/common/useModal";
-import Modal from "../common/Modal";
+import Modal from "@/components/common/Modal";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import SearchSection from "./SearchSection";
 import AddedSection from "./AddedSection";
@@ -57,9 +57,9 @@ const AddBookModal = ({ fetchBooks }) => {
 
   const handleSaveBook = () => {
     addBook(addedBookList);
-    fetchBooks(1, false);
     reset();
     closeModal();
+    fetchBooks(1, false);
   };
 
   return (

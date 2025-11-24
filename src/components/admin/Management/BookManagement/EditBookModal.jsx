@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import Modal from "../common/Modal";
+import Modal from "@/components/common/Modal";
 import Image from "next/image";
 import { useModal } from "@/hooks/common/useModal";
 
