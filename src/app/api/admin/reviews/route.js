@@ -7,8 +7,8 @@ export async function GET(req) {
     // 쿼리 파라미터
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const pageSize = Number(searchParams.get("pageSize")) || 10;
+    const userEmail = searchParams.get("userEmail");
     const bookId = searchParams.get("bookId");
-    const userId = searchParams.get("userId");
     const minRating = searchParams.get("minRating");
     const maxRating = searchParams.get("maxRating");
     const orderField = searchParams.get("orderField") || "created_at";
@@ -24,6 +24,38 @@ export async function GET(req) {
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
+
+    let userId = null;
+    if (userEmail) {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("user_id")
+        .eq("email", userEmail)
+        .single();
+
+      if (userError && userError.code !== "PGRST116") {
+        console.error("User lookup error:", userError);
+        throw userError;
+      }
+
+      userId = userData?.user_id;
+
+      // userEmail은 입력했는데 userId를 찾지 못한 경우
+      if (!userId) {
+        return new Response(
+          JSON.stringify({
+            error: "입력하신 이메일에 해당하는 사용자를 찾을 수 없습니다.",
+            reviews: [],
+            page,
+            pageSize,
+            totalCount: 0,
+            totalPages: 0,
+            hasNext: false,
+          }),
+          { status: 200 }
+        );
+      }
+    }
 
     // 기본 쿼리
     let query = supabase
@@ -48,14 +80,14 @@ export async function GET(req) {
       .order(orderField, { ascending: orderDirection })
       .order("review_id", { ascending: false });
 
-    // bookId 필터
-    if (bookId) {
-      query = query.eq("book_id", parseInt(bookId, 10));
+    // user_id 필터
+    if (userId) {
+      query = query.eq("user_id", userId);
     }
 
-    // userId 필터
-    if (userId) {
-      query = query.eq("user_id", parseInt(userId, 10));
+    // book_id 필터
+    if (bookId) {
+      query = query.eq("book_id", bookId);
     }
 
     // 평점 범위 필터
@@ -77,9 +109,10 @@ export async function GET(req) {
       reviewId: review.review_id,
       bookId: review.book_id,
       userId: review.user_id,
-      rating: review.rate,
+      rate: review.rate,
       review: review.review,
       createdAt: review.created_at,
+      status: review.status,
       user: review.user
         ? {
             userId: review.user.user_id,
