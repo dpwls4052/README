@@ -168,9 +168,25 @@
   }
 }
 
-
 .header-blur {
-  background: rgba(255, 255, 255, 0.4); 
-  backdrop-filter: blur(50px);          
-  -webkit-backdrop-filter: blur(20px);  
+  /* 항상 적용되는 기본 반투명 배경 (fallback) */
+  background: rgba(255, 255, 255, 0.6);
+
+  /* blur 지원 브라우저용 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* 성능 최적화 */
+  will-change: backdrop-filter;
+}
+
+/* blur 미지원 브라우저 전용 fallback */
+@supports not (
+  (
+    backdrop-filter: blur(20px),
+  )
+) {
+  .header-blur {
+    background: rgba(255, 255, 255, 0.9); /* blur 없으면 조금 더 불투명하게 */
+  }
 }

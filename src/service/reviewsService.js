@@ -3,8 +3,8 @@ import axios from "axios";
 export const getAdminReviews = async ({
   page = 1,
   pageSize = 10,
+  userEmail,
   bookId,
-  userId,
   minRating,
   maxRating,
   orderField = "created_at",
@@ -17,8 +17,8 @@ export const getAdminReviews = async ({
     orderDirection,
   });
 
+  if (userEmail) params.append("userEmail", userEmail.toString());
   if (bookId) params.append("bookId", bookId.toString());
-  if (userId) params.append("userId", userId.toString());
   if (minRating) params.append("minRating", minRating.toString());
   if (maxRating) params.append("maxRating", maxRating.toString());
 
