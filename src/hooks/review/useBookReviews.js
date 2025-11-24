@@ -17,7 +17,7 @@ export default function useBookReviews(bookId) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`/api/review/getReview?bookId=${bookId}`, {
+        const res = await fetch(`/api/reviews?bookId=${bookId}`, {
           signal: controller.signal,
         });
 
