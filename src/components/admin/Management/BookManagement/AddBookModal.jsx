@@ -3,10 +3,10 @@ import { useState } from "react";
 import { useFindNewBooks } from "@/hooks/admin/useFindNewBooks";
 import { useModal } from "@/hooks/common/useModal";
 import Modal from "@/components/common/Modal";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import SearchSection from "./SearchSection";
 import AddedSection from "./AddedSection";
 import { useCreateBook } from "@/hooks/book/useCreateBook";
+import SearchBar from "@/components/common/SearchBar";
 
 const AddBookModal = ({ fetchBooks }) => {
   const { searchBooks } = useFindNewBooks();
@@ -17,7 +17,8 @@ const AddBookModal = ({ fetchBooks }) => {
   const [hasNext, setHasNext] = useState(false);
   const [addedBookList, setAddedBookList] = useState([]);
 
-  const searchAladin = async () => {
+  const searchAladin = async (e) => {
+    e.preventDefault();
     const res = await searchBooks(searchKey);
     setPage(1);
     setAladinBookList(res.item);
@@ -81,24 +82,16 @@ const AddBookModal = ({ fetchBooks }) => {
         maxSize="max-w-full flex flex-col h-dvh"
         bodyClassName="overflow-y-auto"
       >
-        <div className="flex flex-col h-full overflow-hidden">
-          <div className="flex items-center w-full h-50 px-20 mx-auto border border-(--main-color) rounded-full max-w-600 shrink-0 mt-10">
-            <input
-              type="text"
-              value={searchKey}
-              onChange={(e) => setSearchKey(e.target.value)}
-              placeholder="도서명을 검색하세요."
-              onKeyUp={(e) => {
-                if (e.key === "Enter") searchAladin();
-              }}
-              className="w-full h-full outline-none"
+        <div className="flex flex-col w-full h-full">
+          <div className="flex justify-center py-10">
+            <SearchBar
+              query={searchKey}
+              setQuery={setSearchKey}
+              handleSearch={searchAladin}
             />
-            <button className="hover:cursor-pointer" onClick={searchAladin}>
-              <FaMagnifyingGlass className="stroke-(--main-color)" />
-            </button>
           </div>
 
-          <div className="flex h-full mt-20 overflow-hidden gap-30">
+          <div className="flex h-full overflow-hidden gap-30">
             <SearchSection
               aladinBookList={aladinBookList}
               hasNext={hasNext}

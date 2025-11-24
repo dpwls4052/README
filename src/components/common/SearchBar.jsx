@@ -3,7 +3,7 @@ import { IoIosSearch } from "react-icons/io";
 
 export default function SearchBar({ query, setQuery, handleSearch }) {
   return (
-    <form onSubmit={handleSearch} className="relative flex-1 max-w-600">
+    <form onSubmit={handleSearch} className="relative flex-1 w-full max-w-600">
       <input
         type="text"
         placeholder="검색어를 입력하세요."
