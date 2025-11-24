@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "sonner";
 
-export default function WishListButton({ userId, bookId, stock }) {
+export default function WishListButton({ userId, bookId}) {
   const [isWished, setIsWished] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -80,7 +80,7 @@ export default function WishListButton({ userId, bookId, stock }) {
   return (
     <button
       onClick={toggleWishlist}
-      disabled={loading || stock === 0}
+      disabled={loading}
       className="p-4 text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
     >
       {isWished ? <IoIosHeart size={28} /> : <IoIosHeartEmpty size={28} />}

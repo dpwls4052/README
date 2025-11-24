@@ -99,7 +99,6 @@ const Bestseller = () => {
                 <WishListButton
                   userId={userId}
                   bookId={book.bookId}
-                  stock={book.stock}
                 />
               </div>
             </div>

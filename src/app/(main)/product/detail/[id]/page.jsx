@@ -222,12 +222,11 @@ const ProductDetail = () => {
             <WishListButton
               userId={userId}
               bookId={bookInfo.bookId}
-              stock={bookInfo.stock}
             />
 
             {/* 장바구니 버튼 */}
             <AddToCartButton
-              book={{ bookId: bookInfo.bookId, stock: bookInfo.stock }}
+              book={{ bookId: bookInfo.bookId}}
               iconMode={false}
               className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />

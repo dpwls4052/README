@@ -44,7 +44,6 @@ const BookListItem = ({ book, goDetail }) => {
         <WishListButton
           userId={userId}
           bookId={book.bookId}
-          stock={book.stock}
         />
         <div className="flex flex-col gap-10 w-200 h-100">
           <AddToCartButton book={book} iconMode={false} />
