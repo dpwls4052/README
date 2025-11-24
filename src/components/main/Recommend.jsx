@@ -100,7 +100,7 @@ export default function Recommend() {
             <SwiperSlide key={book.id}>
               <div
                 className="w-[200px] h-[280px] rounded-md overflow-hidden  hover:cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
-                onClick={() => goDetail(book.id)}
+                onClick={() => goDetail(book.bookId)}
               >
                 <Image
                   src={book.highResCover || book.cover || noimg}
