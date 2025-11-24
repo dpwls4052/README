@@ -61,7 +61,8 @@ export const useBooks = ({
   // 옵션(category, search 등)이 바뀌면 첫 페이지부터 다시 로딩
   useEffect(() => {
     fetchBooks(1, false);
-  }, []);
+  }, [pageSize, category, search, orderField, orderDirection, coverResolution]);
+
 
   const fetchMoreBooks = useCallback(() => {
     if (hasNext && !loading) {

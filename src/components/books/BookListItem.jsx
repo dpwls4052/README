@@ -4,6 +4,7 @@ import Image from "next/image";
 import { IoIosHeartEmpty } from "react-icons/io";
 import noimg from "@/assets/no_image.png";
 import WishListButton from "../common/WishListButton";
+import BuyNowButton from "../common/BuyNowButton"; // 🌟 추가
 import { useAuth } from "@/hooks/common/useAuth";
 import AddToCartButton from "../common/AddToCartButton";
 
@@ -17,7 +18,11 @@ const BookListItem = ({ book, goDetail }) => {
         onClick={() => goDetail(book.bookId)}
       >
         <Image
-          src={book.highResCover || book.cover || noimg}
+          src={
+            book.highResCover || 
+            book.cover?.replace(/coversum/gi, "cover500") || 
+            noimg
+          }
           alt={book.title || "제목 미상"}
           width={160}
           height={220}
@@ -46,10 +51,24 @@ const BookListItem = ({ book, goDetail }) => {
           bookId={book.bookId}
         />
         <div className="flex flex-col gap-10 w-200 h-100">
-          <AddToCartButton book={book} iconMode={false} />
-          <button className="bg-[var(--main-color)] font-medium flex-1 text-white rounded-sm">
-            바로구매
-          </button>
+          <AddToCartButton 
+            book={{
+              bookId: book.bookId,
+              stock: book.stock
+            }} 
+            iconMode={false} 
+          />
+          {/* 🌟 바로구매 버튼 컴포넌트로 교체 */}
+          <BuyNowButton
+            book={{
+              bookId: book.bookId,
+              title: book.title,
+              cover: book.cover,
+              priceStandard: book.priceStandard,
+              stock: book.stock,
+            }}
+            className="h-auto flex-1"
+          />
         </div>
       </div>
     </div>

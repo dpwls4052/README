@@ -103,7 +103,11 @@ export default function Recommend() {
                 onClick={() => goDetail(book.bookId)}
               >
                 <Image
-                  src={book.highResCover || book.cover || noimg}
+                  src={
+                    book.highResCover || 
+                    book.cover?.replace(/coversum/gi, "cover500") || 
+                    noimg
+                  }
                   alt={book.title || "도서"}
                   className="object-cover w-full h-full"
                   width={200}

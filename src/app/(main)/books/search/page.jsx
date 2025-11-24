@@ -4,13 +4,14 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navigation from "@/components/main/Navigation";
 import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
+import { useEffect } from "react";
 
 export default function SearchResultPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const q = (searchParams.get("q") || "").trim().toLowerCase();
 
-  const { books, loading, fetchMoreBooks, hasNext } = useBooks({
+  const { books, loading, fetchMoreBooks, hasNext, reset } = useBooks({
     pageSize: 10,
     category: null,
     search: q || null,
@@ -46,7 +47,6 @@ export default function SearchResultPage() {
               <BookListItem key={book.bookId} book={book} goDetail={goDetail} />
             ))}
 
-            {/* 더보기 버튼 */}
             {hasNext && (
               <div className="p-20 mt-20 text-center">
                 <button
