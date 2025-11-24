@@ -78,3 +78,60 @@ export async function GET(req, { params }) {
     });
   }
 }
+
+export async function PATCH(req, { params }) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: "bookId가 필요합니다." }), {
+        status: 400,
+      });
+    }
+
+    const updatedData = await req.json();
+    if (!updatedData || typeof updatedData !== "object") {
+      return new Response(
+        JSON.stringify({ error: "수정할 데이터가 필요합니다." }),
+        { status: 400 }
+      );
+    }
+
+    // updated_at 자동 갱신
+    const now = new Date().toISOString();
+    const { error, data } = await supabase
+      .from("book")
+      .update({ ...updatedData, updated_at: now })
+      .eq("book_id", id)
+      .select() // select를 붙이면 업데이트 후 결과 반환 가능
+      .single();
+
+    const updatedBook = {
+      id: data.book_id,
+      bookId: data.book_id,
+      title: data.title,
+      author: data.author,
+      publisher: data.publisher,
+      pubDate: data.pub_date,
+      priceStandard: data.price_standard,
+      cover: data.cover,
+      description: data.description,
+      categoryName: data.category,
+      link: data.link,
+      stock: data.stock,
+      salesCount: data.sales_count,
+    };
+
+    if (error) {
+      console.error("Book update error:", error);
+      throw error;
+    }
+
+    return new Response(JSON.stringify({ book: updatedBook }), { status: 200 });
+  } catch (err) {
+    console.error("Book update API error:", err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+    });
+  }
+}
