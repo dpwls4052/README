@@ -8,35 +8,10 @@ import AddToCartButton from "@/components/common/AddToCartButton";
 import BuyNowButton from "@/components/common/BuyNowButton"; // ✅ 추가
 import { useAuth } from "@/hooks/common/useAuth";
 import { useBook } from "@/hooks/book/useBook";
+import useBookReviews from "@/hooks/review/useBookReviews";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
-  reviews: [
-    {
-      id: 1,
-      author: "독서광123",
-      rating: 5,
-      date: "2025-01-15",
-      content: "정말 감동적인 책이었습니다. 강력 추천합니다!",
-      avatar: "https://bit.ly/dan-abramov",
-    },
-    {
-      id: 2,
-      author: "책벌레",
-      rating: 4,
-      date: "2025-01-10",
-      content: "내용이 알차고 좋았어요. 다만 중반부가 조금 지루했습니다.",
-      avatar: "https://bit.ly/kent-c-dodds",
-    },
-    {
-      id: 3,
-      author: "리더777",
-      rating: 5,
-      date: "2025-01-05",
-      content: "인생 책으로 등극! 여러 번 읽고 싶네요.",
-      avatar: "https://bit.ly/ryan-florence",
-    },
-  ],
   faqs: [
     {
       id: 1,
@@ -104,14 +79,17 @@ const ProductDetail = () => {
   const params = useParams();
   const bookId = params?.id;
   const { userId } = useAuth();
-
+  const {
+    reviews,
+    loading: reviewLoading,
+    error: reviewError,
+  } = useBookReviews(bookId);
   const [activeTab, setActiveTab] = useState("description");
   const { book, loading, error } = useBook(bookId);
 
   const bookInfo = book
     ? {
         ...book,
-        reviews: MOCK_DETAIL_TABS_DATA.reviews,
         faqs: MOCK_DETAIL_TABS_DATA.faqs,
       }
     : null;
@@ -145,12 +123,12 @@ const ProductDetail = () => {
     );
   }
 
-  const totalReviews = bookInfo.reviews?.length || 0;
+  const totalReviews = reviews?.length || 0;
   const averageRating =
     totalReviews > 0
-      ? (
-          bookInfo.reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
-        ).toFixed(1)
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(
+          1
+        )
       : 0;
 
   const highResCover =
@@ -219,14 +197,11 @@ const ProductDetail = () => {
           {/* 버튼 영역 - 수정됨 */}
           <div className="flex gap-6 py-20">
             {/* 위시리스트 버튼 */}
-            <WishListButton
-              userId={userId}
-              bookId={bookInfo.bookId}
-            />
+            <WishListButton userId={userId} bookId={bookInfo.bookId} />
 
             {/* 장바구니 버튼 */}
             <AddToCartButton
-              book={{ bookId: bookInfo.bookId}}
+              book={{ bookId: bookInfo.bookId }}
               iconMode={false}
               className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -273,7 +248,7 @@ const ProductDetail = () => {
               {tab === "description"
                 ? "상품설명"
                 : tab === "reviews"
-                ? `리뷰 (${bookInfo.reviews?.length})`
+                ? `리뷰 (${reviews?.length})`
                 : `자주 묻는 질문 (${bookInfo.faqs?.length})`}
             </button>
           ))}
@@ -306,31 +281,51 @@ const ProductDetail = () => {
                 </span>
               </div>
 
-              {bookInfo.reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="p-25 rounded-sm bg-(--bg-color) "
-                >
+              {/* 로딩 상태 */}
+              {reviewLoading && (
+                <div className="p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-18 text-gray-600">
+                    리뷰를 불러오는 중입니다...
+                  </p>
+                </div>
+              )}
+
+              {/* 에러 상태 */}
+              {reviewError && (
+                <div className="p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-18 text-red-500">{reviewError}</p>
+                </div>
+              )}
+
+              {/* 리뷰 없음 */}
+              {!reviewLoading && !reviewError && reviews.length === 0 && (
+                <div className="p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-18 text-gray-600">
+                    아직 등록된 리뷰가 없습니다.
+                  </p>
+                </div>
+              )}
+
+              {reviews.map((item) => (
+                <div key={item.id} className="p-25 rounded-sm bg-(--bg-color) ">
                   <div className="flex gap-10">
                     <img
-                      src={review.avatar}
-                      alt={review.author}
+                      src={item.avatar}
+                      alt={item.author}
                       className="object-cover rounded-full w-30 h-30"
                     />
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-10">
                         <span className="font-semibold text-black text-20">
-                          {review.author}
+                          {item.author}
                         </span>
                         <span className="font-normal text-gray-500 text-16">
-                          {review.date}
+                          {item.date}
                         </span>
                       </div>
-                      <div className=" text-16">
-                        {"⭐".repeat(review.rating)}
-                      </div>
+                      <div className=" text-16">{"⭐".repeat(item.rating)}</div>
                       <p className="mt-20 font-light leading-relaxed text-black text-18">
-                        {review.content}
+                        {item.content}
                       </p>
                     </div>
                   </div>

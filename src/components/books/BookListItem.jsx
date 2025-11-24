@@ -14,7 +14,7 @@ const BookListItem = ({ book, goDetail }) => {
     <div className="flex w-full justify-between border-b border-solid border-[#ccc] py-15 gap-14">
       <div
         className="flex items-start gap-20 hover:cursor-pointer"
-        onClick={() => goDetail(book.id)}
+        onClick={() => goDetail(book.bookId)}
       >
         <Image
           src={book.highResCover || book.cover || noimg}
