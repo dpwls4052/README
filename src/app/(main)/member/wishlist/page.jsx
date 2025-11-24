@@ -115,7 +115,6 @@ const Wishlist = () => {
                         <AddToCartButton
                           book={{ 
                             bookId: item.id,
-                            stock: item.stock 
                           }}
                           iconMode={true}
                         />
