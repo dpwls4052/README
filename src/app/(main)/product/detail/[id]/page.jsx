@@ -87,6 +87,31 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState("description");
   const { book, loading, error } = useBook(bookId);
 
+
+
+// 텍스트 안 이미지 URL을 <img> 태그로 변환
+const renderDescriptionWithImages = (text) => {
+  const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif))/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, idx) => {
+    if (part.match(urlRegex)) {
+      // 이미지 URL이면 <img>로 렌더링
+      return (
+        <img
+          key={idx}
+          src={part}
+          alt="description image"
+          className="my-4 w-auto max-w-full rounded-md"
+        />
+      );
+    }
+    return <span key={idx}>{part}</span>;
+  });
+};
+
+
+  
   const bookInfo = book
     ? {
         ...book,
@@ -311,9 +336,9 @@ useEffect(() => {
               style={{ borderRadius: "var(--radius-15)" }}
               className="bg-(--bg-color) p-15"
             >
-              <p className="font-light leading-relaxed text-black whitespace-pre-line text-18">
-                {bookInfo.description}
-              </p>
+              <div className="font-light leading-relaxed text-black whitespace-pre-line text-18 flex flex-col items-center">
+                {renderDescriptionWithImages(bookInfo.description)}
+              </div>
             </div>
           )}
 

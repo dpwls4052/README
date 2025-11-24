@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 
 export const useAdminReviews = ({
   pageSize = 10,
+  userEmail,
   bookId,
-  userId,
   minRating,
   maxRating,
   orderField = "created_at",
@@ -27,8 +27,8 @@ export const useAdminReviews = ({
           await getAdminReviews({
             page: targetPage,
             pageSize,
+            userEmail,
             bookId,
-            userId,
             minRating,
             maxRating,
             orderField,
@@ -49,7 +49,15 @@ export const useAdminReviews = ({
         setLoading(false);
       }
     },
-    [pageSize, bookId, userId, minRating, maxRating, orderField, orderDirection]
+    [
+      pageSize,
+      userEmail,
+      bookId,
+      minRating,
+      maxRating,
+      orderField,
+      orderDirection,
+    ]
   );
 
   // 옵션이 바뀌면 첫 페이지부터 다시 로딩
