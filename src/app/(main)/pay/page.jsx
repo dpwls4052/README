@@ -403,12 +403,12 @@ const persistPendingOrder = async () => {
                       <div className="flex items-start gap-20 flex-1">
                         <img src={item.image} alt={item.title} className="w-100 h-140 rounded-lg object-cover" />
                         <div className="flex flex-col gap-1 flex-1">
-                          <p className="text-base font-medium text-black mt-5">{item.title}</p>
+                          <p className="text-base font-medium text-black mt-5">{item.title}* {item.quantity}권</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-10">
+                      {/* <div className="flex items-center gap-10">
                         <div className="flex items-center gap-2">
-                          {/* 수량은 1개 이하로 못 떨어지게 로직 수정 */}
+                         
                           <button onClick={() => handleQuantityChange(item.id, -1)} disabled={item.quantity <= 1} className="p-2 bg-[var(--sub-color)] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:cursor-pointer"><Minus /></button>
                           <span className="font-medium min-w-[40px] text-center text-black">{item.quantity}</span>
                           <button onClick={() => handleQuantityChange(item.id, 1)} className="p-2 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90  hover:cursor-pointer"><Plus /></button>
@@ -416,9 +416,9 @@ const persistPendingOrder = async () => {
                         <div className="text-right">
                           <p className="text-lg font-bold text-black mb-1">{(item.price * item.quantity).toLocaleString()}원</p>
                         </div>
-                          {/* 상품이 1개 남았을 경우 삭제 불가 로직 추가 */}
+                
                         <button onClick={() => handleRemoveItem(item.id)} disabled={orderItems.length <= 1} className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-30" title="삭제"><FiX size={20} /></button>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>

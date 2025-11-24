@@ -40,7 +40,7 @@ const Minus = ({ size = 16 }) => (
 const Cart = () => {
   const router = useRouter();
   const { userId } = useAuth();
-  const { removeFromCart } = useCartCount(); // 🌟 추가
+  const { removeFromCart } = useCartCount();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +53,7 @@ const Cart = () => {
       const res = await fetch(`/api/user/cart?user_id=${userId}`);
       if (!res.ok) throw new Error("장바구니 조회 실패");
       const data = await res.json();
+
       const mappedItems = data
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .map((item) => ({
@@ -61,8 +62,9 @@ const Cart = () => {
           name: item.title,
           price: item.price_standard,
           count: item.amount,
+          stock: item.stock,
           image: item.cover,
-          selected: true,
+          selected: item.stock > 0, // 재고 0이면 선택 불가
         }));
       setItems(mappedItems);
     } catch (err) {
@@ -86,18 +88,28 @@ const Cart = () => {
 
   const handleSelectAll = (e) => {
     const checked = e.target.checked;
-    setItems(items.map((item) => ({ ...item, selected: checked })));
+    setItems(
+      items.map((item) =>
+        item.stock > 0 ? { ...item, selected: checked } : item
+      )
+    );
   };
 
   const handleSelect = (id) => {
     setItems(
       items.map((item) =>
-        item.id === id ? { ...item, selected: !item.selected } : item
+        item.id === id && item.stock > 0
+          ? { ...item, selected: !item.selected }
+          : item
       )
     );
   };
 
   const handleCountChange = async (item, delta) => {
+    const newCount = item.count + delta;
+    if (newCount < 1) return;
+    if (newCount > item.stock) return alert("재고가 부족합니다.");
+
     try {
       await fetch("/api/user/cart", {
         method: "PATCH",
@@ -122,9 +134,7 @@ const Cart = () => {
         body: JSON.stringify({ cartIds: selected.map((i) => i.cartId) }),
       });
 
-      // 🌟 Context에서 삭제된 book_id들 제거
       selected.forEach((item) => removeFromCart(item.id));
-
       fetchCart();
     } catch (err) {
       console.error(err);
@@ -141,9 +151,7 @@ const Cart = () => {
         body: JSON.stringify({ cartIds: items.map((i) => i.cartId) }),
       });
 
-      // 🌟 Context에서 모든 book_id 제거
       items.forEach((item) => removeFromCart(item.id));
-
       fetchCart();
     } catch (err) {
       console.error(err);
@@ -154,22 +162,41 @@ const Cart = () => {
   const handlePay = () => {
     if (selectedItems.length === 0) return alert("상품을 선택해주세요");
 
-    const orderItems = selectedItems.map((item) => ({
-      book_id: item.id,
-      title: item.name,
-      image: item.image,
-      quantity: item.count,
-      price: item.price,
-    }));
+    let hasAdjusted = false;
+
+    const orderItems = selectedItems.map((item) => {
+      if (item.count > item.stock) {
+        hasAdjusted = true;
+        item.count = item.stock; // 재고로 조정
+      }
+      return {
+        book_id: item.id,
+        title: item.name,
+        image: item.image,
+        quantity: item.count,
+        price: item.price,
+      };
+    });
+
+    if (hasAdjusted) {
+      alert(
+        "재고가 부족한 상품이 있어 최대 구매 가능한 수량으로 조정되었습니다."
+      );
+    }
 
     if (typeof window !== "undefined") {
       localStorage.setItem(
         "cartData",
         JSON.stringify({
           orderItems,
-          totalItemPrice: itemsTotal,
+          totalItemPrice: orderItems.reduce(
+            (acc, i) => acc + i.price * i.quantity,
+            0
+          ),
           deliveryFee: shippingFee,
-          finalPrice: totalAmount,
+          finalPrice:
+            orderItems.reduce((acc, i) => acc + i.price * i.quantity, 0) +
+            shippingFee,
         })
       );
     }
@@ -229,28 +256,48 @@ const Cart = () => {
                   <div
                     key={item.id}
                     className="flex justify-between items-center py-15 px-4 gap-15 border-b border-gray-200"
-                    
                   >
                     <div className="flex items-start gap-20 flex-1">
                       <input
                         type="checkbox"
                         checked={item.selected}
                         onChange={() => handleSelect(item.id)}
-                        className="w-20 h-20 "
+                        className="w-20 h-20"
+                        disabled={item.stock === 0} // 재고 0이면 선택 불가
                       />
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-100 h-140 object-cover rounded-md border border-gray-300 cursor-pointer"
-                        onClick={() => router.push(`/product/detail/${item.id}`)}
+                        onClick={() =>
+                          router.push(`/product/detail/${item.id}`)
+                        }
                       />
-                      <div className="flex flex-col gap-1 flex-1 cursor-pointer" onClick={() => router.push(`/product/detail/${item.id}`)}>
+                      <div
+                        className="flex flex-col gap-1 flex-1 cursor-pointer"
+                        onClick={() => router.push(`/product/detail/${item.id}`)}
+                      >
                         <p className="text-base font-medium text-black ">
                           {item.name}
                         </p>
                         <p className="text-lg font-bold text-[var(--main-color)]">
                           {item.price.toLocaleString()}원
                         </p>
+                        <div className="flex items-center gap-2">
+  <span
+    className={`px-2 py-1 font-medium text-14 whitespace-nowrap ${
+      item.stock > 10
+        ? "bg-[var(--sub-color)]/20 text-[var(--main-color)]"
+        : item.stock > 0
+        ? "bg-orange-100 text-orange-600"
+        : "bg-gray-100 text-gray-600"
+    }`}
+    style={{ width: "auto", display: "inline-block" }}
+  >
+    {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
+  </span>
+</div>
+
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
