@@ -22,9 +22,13 @@ const ReviewItem = ({ review }) => {
             className="rounded-md shrink-0"
           />
           <div className="flex-1 text-start">
-            <p className="font-semibold line-clamp-2 leading-24">
+            <p className="text-14">도서ID : {review.book.bookId}</p>
+            <a
+              href={`/product/detail/${review.book.bookId}`}
+              className="font-semibold line-clamp-2 leading-24 hover:underline"
+            >
               {review.book.title}
-            </p>
+            </a>
             <p className="line-clamp-2 text-14">{review.book.author}</p>
           </div>
         </div>
