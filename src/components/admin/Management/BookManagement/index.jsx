@@ -1,7 +1,7 @@
-import EditBookModal from "../EditBookModal";
+import EditBookModal from "./EditBookModal";
 import Image from "next/image";
-import DeleteBookModal from "../DeleteBookModal";
-import AddBookModal from "../AddBookModal";
+import DeleteBookModal from "./DeleteBookModal";
+import AddBookModal from "./AddBookModal";
 import { useBooks } from "@/hooks/book/useBooks";
 import { useDeleteBook } from "@/hooks/book/useDeleteBook";
 import { useUpdateBook } from "@/hooks/book/useUpdateBook";
@@ -13,7 +13,6 @@ const BookManagement = () => {
   const { changeBook } = useUpdateBook();
   const handleUpdateBook = async (bookId, updatedFields) => {
     const changedBook = await changeBook(bookId, updatedFields);
-    console.log(changedBook);
     setBooks((prev) =>
       prev.map((book) =>
         book.bookId === changedBook.bookId ? changedBook : book
