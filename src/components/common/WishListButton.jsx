@@ -1,12 +1,15 @@
+// WishListButton.jsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "sonner";
+import { useWishlistCount } from "@/hooks/common/useWishlistCount"; // 추가
 
-export default function WishListButton({ userId, bookId}) {
+export default function WishListButton({ userId, bookId, stock }) {
   const [isWished, setIsWished] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { setCount } = useWishlistCount(); // Context에서 setCount 가져오기
 
   // 초기 wishlist 상태 확인
   useEffect(() => {
@@ -41,7 +44,8 @@ export default function WishListButton({ userId, bookId}) {
       setLoading(true);
 
       // UI 즉시 반응
-      setIsWished((prev) => !prev);
+      const newIsWished = !isWished;
+      setIsWished(newIsWished);
 
       // DB 요청
       const res = await fetch("/api/user/wishlist", {
@@ -62,6 +66,10 @@ export default function WishListButton({ userId, bookId}) {
       } else {
         // 서버에서 받은 실제 status로 업데이트
         setIsWished(data.status);
+        
+        // 🌟 여기가 핵심! Context의 count 실시간 업데이트 🌟
+        setCount((prevCount) => data.status ? prevCount + 1 : prevCount - 1);
+        
         toast.success(
           data.status
             ? "위시리스트에 추가했습니다."

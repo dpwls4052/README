@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/hooks/common/useAuth";
+import { useCartCount } from "@/hooks/common/useCartCount"; // 🌟 추가
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -39,6 +40,7 @@ const Minus = ({ size = 16 }) => (
 const Cart = () => {
   const router = useRouter();
   const { userId } = useAuth();
+  const { removeFromCart } = useCartCount(); // 🌟 추가
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const Cart = () => {
       if (!res.ok) throw new Error("장바구니 조회 실패");
       const data = await res.json();
       const mappedItems = data
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 최신순 정렬
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .map((item) => ({
           id: item.book_id,
           cartId: item.cart_id,
@@ -119,6 +121,10 @@ const Cart = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartIds: selected.map((i) => i.cartId) }),
       });
+
+      // 🌟 Context에서 삭제된 book_id들 제거
+      selected.forEach((item) => removeFromCart(item.id));
+
       fetchCart();
     } catch (err) {
       console.error(err);
@@ -134,6 +140,10 @@ const Cart = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartIds: items.map((i) => i.cartId) }),
       });
+
+      // 🌟 Context에서 모든 book_id 제거
+      items.forEach((item) => removeFromCart(item.id));
+
       fetchCart();
     } catch (err) {
       console.error(err);
@@ -141,33 +151,32 @@ const Cart = () => {
     }
   };
 
-const handlePay = () => {
-    if (selectedItems.length === 0) return alert("상품을 선택해주세요");
+  const handlePay = () => {
+    if (selectedItems.length === 0) return alert("상품을 선택해주세요");
 
-    const orderItems = selectedItems.map((item) => ({
-      // 🚨 수정: 서버 API가 장바구니 삭제를 위해 요구하는 필드명(book_id)으로 변경
-      book_id: item.id, 
-      
-      title: item.name,
-      image: item.image,
-      quantity: item.count,
-      price: item.price,
-    }));
+    const orderItems = selectedItems.map((item) => ({
+      book_id: item.id,
+      title: item.name,
+      image: item.image,
+      quantity: item.count,
+      price: item.price,
+    }));
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "cartData",
-        JSON.stringify({
-          orderItems,
-          totalItemPrice: itemsTotal,
-          deliveryFee: shippingFee,
-          finalPrice: totalAmount,
-        })
-      );
-    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "cartData",
+        JSON.stringify({
+          orderItems,
+          totalItemPrice: itemsTotal,
+          deliveryFee: shippingFee,
+          finalPrice: totalAmount,
+        })
+      );
+    }
 
-    router.push("/pay");
-  };
+    router.push("/pay");
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen py-10 bg-white">

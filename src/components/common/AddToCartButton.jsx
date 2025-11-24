@@ -5,16 +5,18 @@ import { useRouter } from "next/navigation";
 import Modal from "@/components/common/Modal";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useCart } from "@/hooks/common/useCart";
+import { useCartCount } from "@/hooks/common/useCartCount";
 import { FiShoppingCart } from "react-icons/fi";
 
 export default function AddToCartButton({ book, iconMode = false, className = "" }) {
   const router = useRouter();
   const { userId } = useAuth();
   const { goToCart } = useCart();
+  const { addToCart } = useCartCount(); // 🌟 addToCart 가져오기
 
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-  const [isStockModalOpen, setStockModalOpen] = useState(false); // ✅ 재고 부족 모달 추가
+  const [isStockModalOpen, setStockModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleAddToCart = async () => {
@@ -24,7 +26,7 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
       return;
     }
 
-    // 2. 재고 체크 ✅
+    // 2. 재고 체크
     if (!book || book.stock === 0 || book.stock < 1) {
       setStockModalOpen(true);
       return;
@@ -40,6 +42,9 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
+
+      // 🌟 성공 시 bookId 추가 (이미 있으면 자동으로 무시됨)
+      addToCart(book.bookId);
 
       setCartModalOpen(true);
     } catch (err) {
@@ -60,7 +65,6 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
     setLoginModalOpen(false);
   };
 
-  // ✅ 재고가 0일 때 버튼 비활성화
   const isOutOfStock = !book || book.stock === 0 || book.stock < 1;
 
   return (
@@ -68,7 +72,7 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
       <button
         className={
           iconMode
-            ? `p-2 text-white bg-(--sub-color) rounded hover:bg-green-700 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`
+            ? `p-2 text-white bg-[var(--sub-color)] rounded hover:bg-green-700 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`
             : `
                 flex-1 bg-[var(--sub-color)]
                 text-white font-normal
@@ -79,7 +83,7 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
               `
         }
         onClick={handleAddToCart}
-        disabled={loading || isOutOfStock} // ✅ 재고 없으면 비활성화
+        disabled={loading || isOutOfStock}
       >
         {loading ? (
           iconMode ? <FiShoppingCart /> : "추가중..."
@@ -92,7 +96,6 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
         )}
       </button>
 
-      {/* 장바구니 추가 완료 모달 */}
       <Modal
         title="선택한 상품을 장바구니에 담았어요."
         open={isCartModalOpen}
@@ -107,7 +110,6 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
         장바구니 페이지로 이동하시겠습니까?
       </Modal>
 
-      {/* 로그인 필요 모달 */}
       <Modal
         title="로그인이 필요한 서비스입니다."
         open={isLoginModalOpen}
@@ -122,7 +124,6 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
         로그인 페이지로 이동하시겠습니까?
       </Modal>
 
-      {/* ✅ 재고 부족 모달 (신규) */}
       <Modal
         title="재고가 부족합니다."
         open={isStockModalOpen}
@@ -131,7 +132,7 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
         onConfirm={() => setStockModalOpen(false)}
         maxSize="max-w-md"
         bodyClassName="text-center text-16 font-normal"
-        hideCancel // 확인 버튼만 표시
+        hideCancel
       >
         현재 이 상품은 품절되었습니다.
       </Modal>

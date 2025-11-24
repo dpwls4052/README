@@ -10,6 +10,8 @@ import Logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/common/useAuth";
 import SearchBar from "./SearchBar";
 import { HiOutlineDocumentText } from "react-icons/hi";
+import { useCartCount } from "@/hooks/common/useCartCount";
+import { useWishlistCount } from "@/hooks/common/useWishlistCount";
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
@@ -33,6 +35,11 @@ export default function Header() {
     logout();
   };
 
+  const { count: cartCount } = useCartCount(); // 🌟 수정
+  const { count: wishlistCount } = useWishlistCount(); 
+
+  console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
+
   return (
     <header className="sticky top-0 z-40 px-100 backdrop-blur-3xl shadow-[0_4px_10px_rgba(153,153,153,0.25)]">
       <div className="flex items-center justify-between gap-8 px-6 py-15 mx-auto max-w-1200">
@@ -53,20 +60,36 @@ export default function Header() {
         {/* 아이콘 버튼 */}
         <div className="flex items-center gap-20">
           {/* 카트 */}
-          <Link
-            href="/cart"
-            className="w-20 h-20 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-          >
-            <SlBasket className="text-3xl" />
-          </Link>
+          <div className="relative">
+            <Link
+              href="/cart"
+              className="w-25 h-25 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            >
+              <SlBasket className="text-3xl" />
+            </Link>
+
+            {cartCount > 0 && (
+              <span className="absolute -top-2 left-20 bg-gray-500 text-white text-xs w-10 h-10 flex items-center justify-center rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </div>
 
           {/* 위시리스트 */}
-          <Link
-            href="/member/wishlist"
-            className="w-20 h-20 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-          >
-            <IoIosHeartEmpty className="text-3xl text-red-500" />
-          </Link>
+          <div className="relative">
+            <Link
+              href="/member/wishlist"
+              className="w-25 h-25 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            >
+              <IoIosHeartEmpty className="text-3xl text-red-500" />
+            </Link>
+
+            {wishlistCount > 0 && (
+              <span className="absolute -top-2 left-17 bg-red-500 text-white text-xs w-10 h-10 flex items-center justify-center rounded-full">
+                {wishlistCount}
+              </span>
+            )}
+          </div>
 
           {/* 로그인/프로필 */}
           {loading ? (
