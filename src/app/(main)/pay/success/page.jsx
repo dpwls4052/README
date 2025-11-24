@@ -140,7 +140,7 @@ export default function PaymentSuccessPage() {
                 성공적으로 주문이 처리되었습니다. 배송은 영업일 기준 3~5일 이내 시작됩니다.
             </p>
 
-            <button onClick={() => router.push('/my/orders')} className="w-full py-3 bg-[var(--main-color)] text-white text-lg font-bold rounded-lg hover:bg-green-700 transition-colors">
+            <button onClick={() => router.push('/member?MemberTab=orders')} className="w-full py-3 bg-[var(--main-color)] text-white text-lg font-bold rounded-lg hover:bg-green-700 transition-colors">
                 주문 상세 내역 확인
             </button>
         </div>
