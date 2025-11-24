@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { FaMinus, FaPlus } from "react-icons/fa";
 import Modal from "@/components/common/Modal";
 import Image from "next/image";
 import { useModal } from "@/hooks/common/useModal";
+import QuantityStepper from "@/components/common/QuantityStepper";
 
 const EditBookModal = ({ book, handleUpdateBook }) => {
   const [stock, setStock] = useState(book.stock);
@@ -21,8 +21,6 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
     setStock(book.stock);
     closeModal();
   };
-
-  // TODO 숫자 입력 -, e 막기
 
   return (
     <>
@@ -42,7 +40,7 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
         onCancel={handleCancel}
         maxSize="max-w-2xl"
       >
-        <div className="flex items-center gap-10 h-160">
+        <div className="flex items-start gap-10 h-160">
           {/* 왼쪽 이미지 */}
           <Image
             src={book.cover}
@@ -53,36 +51,14 @@ const EditBookModal = ({ book, handleUpdateBook }) => {
           />
 
           {/* 오른쪽 책 정보 */}
-          <div className="flex flex-col justify-between flex-1 h-full text-start">
-            <div className="flex flex-col items-start gap-5">
-              <p className="text-18">{book.title}</p>
-              <p className="text-14">{book.author}</p>
-              <p className="text-18">{book.priceStandard}원</p>
-            </div>
+          <div className="flex-1">
+            <p className="text-18">{book.title}</p>
+            <p className="mt-5 text-14">{book.author}</p>
+            <p className="mt-10 text-18">{book.priceStandard}원</p>
 
             {/* 재고 수량 조절 */}
-            <div className="flex items-center justify-end gap-10">
-              재고
-              <div className="flex gap-0 h-36 border border-[#cccccc] items-center rounded-md">
-                <button
-                  onClick={() => stock > 0 && setStock((prev) => prev - 1)}
-                  className="flex items-center justify-center w-36 h-36 shrink-0 hover:cursor-pointer border-r border-r-[#eeeeee]"
-                >
-                  <FaMinus className="w-12 h-12" />
-                </button>
-                <input
-                  type="number"
-                  value={stock}
-                  onChange={(e) => setStock(Number(e.target.value))}
-                  className="h-full text-center w-80 outline-0"
-                />
-                <button
-                  onClick={() => setStock((prev) => prev + 1)}
-                  className="flex items-center justify-center w-36 h-36 shrink-0 hover:cursor-pointer border-l border-l-[#eeeeee]"
-                >
-                  <FaPlus className="w-12 h-12" />
-                </button>
-              </div>
+            <div className="inline-block mt-10">
+              <QuantityStepper value={stock} onChange={setStock} />
             </div>
           </div>
         </div>
