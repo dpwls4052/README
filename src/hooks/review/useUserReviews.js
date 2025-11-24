@@ -19,7 +19,7 @@ export default function useUserReviews(userId) {
         setError(null);
 
         const res = await fetch(
-          `/api/review/getReview?userId=${encodeURIComponent(userId)}`,
+          `/api/reviews?userId=${encodeURIComponent(userId)}`,
           { signal: controller.signal }
         );
 

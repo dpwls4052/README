@@ -8,10 +8,11 @@ import { USER_TAB } from "@/constants/userMenu";
 import Profile from "@/components/member/pages/Profile";
 import Orders from "@/components/member/pages/Orders";
 import Reviews from "@/components/member/pages/Reviews";
+import CreateReview from "@/components/member/pages/CreateReview";
 
 const MyPage = () => {
   // 🔹 탭 value 목록 생성 (['profile', 'orders', 'reviews', 'settings'])
-  const tabValues = USER_TAB.map((tab) => tab.value);
+  const tabValues = [...USER_TAB.map((tab) => tab.value), "createreview"];
   const { tabIndex, handleClickTab } = useTab("MemberTab", tabValues);
 
   // 🔹 탭 value에 따라 컴포넌트 매핑
@@ -19,6 +20,7 @@ const MyPage = () => {
     profile: Profile,
     orders: Orders,
     reviews: Reviews,
+    createreview: CreateReview,
   };
 
   // 🔹 현재 활성화된 탭 컴포넌트 선택
