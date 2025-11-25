@@ -1,3 +1,4 @@
+import { useState } from "react";
 import EditBookModal from "./EditBookModal";
 import Image from "next/image";
 import DeleteBookModal from "./DeleteBookModal";
@@ -5,10 +6,13 @@ import AddBookModal from "./AddBookModal";
 import { useBooks } from "@/hooks/book/useBooks";
 import { useDeleteBook } from "@/hooks/book/useDeleteBook";
 import { useUpdateBook } from "@/hooks/book/useUpdateBook";
+import SearchBar from "@/components/common/SearchBar";
 
 const BookManagement = () => {
+  const [searchQuery, setSearchQuery] = useState(""); // 입력중인 검색어
+  const [search, setSearch] = useState(""); // 실제 적용될 검색어
   const { books, fetchBooks, fetchMoreBooks, loading, hasNext, setBooks } =
-    useBooks();
+    useBooks({ search });
 
   const { changeBook } = useUpdateBook();
   const handleUpdateBook = async (bookId, updatedFields) => {
@@ -28,14 +32,26 @@ const BookManagement = () => {
     );
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
+    setSearch(searchQuery); // 검색 버튼 클릭 시 실제 검색어 업데이트
+  };
+
   return (
     <section className="flex flex-col w-full h-full gap-20">
       <div className="flex items-center justify-between">
         <h1 className="text-32 text-(--main-color)">도서 관리</h1>
         <AddBookModal fetchBooks={fetchBooks} />
       </div>
-      <article className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide">
-        <div className="pe-3">
+      <article className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide relative">
+        <div className="sticky top-0 flex justify-center py-20 bg-(--bg-color)">
+          <SearchBar
+            query={searchQuery}
+            setQuery={setSearchQuery}
+            handleSearch={handleSearch}
+          />
+        </div>
+        <div>
           {books.map((book) => (
             <div
               key={book.bookId}

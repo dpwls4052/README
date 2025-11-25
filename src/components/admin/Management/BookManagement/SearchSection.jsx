@@ -7,11 +7,16 @@ const SearchSection = ({
   handleAddBook,
 }) => {
   return (
-    <div className="w-full border border-(--main-color) rounded-md h-full flex flex-col">
-      <p className="flex items-center justify-center h-40 text-center border-b border-black shrink-0">
+    <div className="w-full rounded-md h-full flex flex-col bg-(--bg-color) overflow-hidden">
+      <p className="flex items-center justify-center h-40 text-center shrink-0 bg-(--sub-color) text-white font-normal">
         검색 결과
       </p>
-      <ul className="flex flex-col w-full overflow-y-auto">
+      <ul className="flex flex-col w-full h-full overflow-y-auto">
+        {aladinBookList.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            도서를 검색해보세요.
+          </div>
+        )}
         {aladinBookList.map((book) => (
           <BookItem key={book.isbn} book={book}>
             <div className="text-end">
