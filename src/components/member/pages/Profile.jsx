@@ -40,7 +40,7 @@ export default function Profile() {
     address: "",
     detailAddress: "",
   });
-  // ✅ 최근 본 도서 상태
+  // 최근 본 도서 상태
   const [recentBooks, setRecentBooks] = useState([]);
 
   const handleDeleteAccount = async () => {
@@ -55,12 +55,11 @@ export default function Profile() {
         return;
       }
 
-      // 1️⃣ Firebase 계정 삭제
+      // Firebase 계정 삭제
       try {
         await deleteUser(firebaseUser);
         console.log("🔥 Firebase 계정 삭제 완료");
       } catch (err) {
-        // 🔥 Firebase는 보안 때문에 최근 로그인 안 했으면 삭제 막음
         if (err.code === "auth/requires-recent-login") {
           alert("보안을 위해 다시 로그인 후 탈퇴해주세요.");
           return;
@@ -68,7 +67,7 @@ export default function Profile() {
         throw err;
       }
 
-      // 2️⃣ Supabase users 테이블 유저 삭제
+      // Supabase users 테이블 유저 삭제
       const res = await fetch("/api/user/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,14 +81,14 @@ export default function Profile() {
         return;
       }
 
-      console.log("🔥 Supabase 사용자 정보 삭제 완료");
+      console.log("Supabase 사용자 정보 삭제 완료");
 
       alert("회원 탈퇴가 완료되었습니다.");
 
-      // 3️⃣ 쿠키 삭제 (로그아웃)
+      // 쿠키 삭제 (로그아웃)
       document.cookie = "auth_token=; expires=Thu, 01 Jan 1970; path=/;";
 
-      // 4️⃣ 홈으로 이동
+      // 홈으로 이동
       window.location.href = "/";
 
     } catch (err) {
@@ -149,7 +148,7 @@ export default function Profile() {
   // 기본 주소 가져오기
   useEffect(() => {
     if (!userId) return;
-    fetchAddressList(); // 페이지 처음 렌더링 시 주소 목록 가져오기
+    fetchAddressList();
   }, [userId]);
 
   // 사용자 정보 조회
@@ -175,7 +174,7 @@ export default function Profile() {
     fetchUser();
   }, [userId]);
 
-  // ✅ 최근 본 도서 불러오기 (Supabase + 사용자별)
+  // 최근 본 도서 불러오기
 useEffect(() => {
   if (!userId) return;
 
