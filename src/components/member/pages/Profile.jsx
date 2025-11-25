@@ -6,10 +6,16 @@ import { useAuth } from "@/hooks/common/useAuth";
 import Modal from "@/components/common/Modal";
 import AddressInput from "@/components/common/AddressInput";
 import { getAuth, deleteUser } from "firebase/auth";
+import { supabase } from "@/lib/supabaseClient"; 
+
 
 
 export default function Profile() {
   const { userId } = useAuth();
+  const [orderCount, setOrderCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+
 
   console.log("Profile 렌더링 - userId:", userId);
 
@@ -91,6 +97,37 @@ export default function Profile() {
       alert("회원 탈퇴 중 오류 발생: " + err.message);
     }
   };
+
+  useEffect(() => {
+  if (!userId) return;
+
+  const fetchCounts = async () => {
+    // 주문 개수
+    const { count: orders } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    // 찜 개수
+    const { count: wishlist } = await supabase
+      .from("wishlist")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    // 리뷰 개수
+    const { count: reviews } = await supabase
+      .from("review")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    setOrderCount(orders || 0);
+    setWishlistCount(wishlist || 0);
+    setReviewCount(reviews || 0);
+  };
+
+  fetchCounts();
+}, [userId]);
+
 
 
 
@@ -560,14 +597,14 @@ useEffect(() => {
                 <p className="text-sm font-normal text-gray-500">주문 내역</p>
                 <div className="flex gap-8 items-center">
                   <FaBookOpen className="mx-auto text-2xl text-green-700" />
-                  <p className="text-lg font-semibold">5</p>
+                  <p className="text-lg font-semibold">{orderCount}</p>
                 </div>
               </div>
               <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
                 <p className="text-sm font-normal text-gray-500">찜한 도서</p>
                 <div className="flex gap-8 items-center">
                   <FaRegHeart className="mx-auto text-2xl text-pink-600" />
-                  <p className="text-lg font-semibold">8</p>
+                  <p className="text-lg font-semibold">{wishlistCount}</p>
                 </div>
               </div>
               <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
@@ -575,7 +612,7 @@ useEffect(() => {
 
                 <div className="flex gap-8 items-center">
                   <FaGift className="mx-auto text-2xl text-yellow-600" />
-                  <p className="text-lg font-semibold">3</p>
+                  <p className="text-lg font-semibold">{reviewCount}</p>
                 </div>
               </div>
             </div>
