@@ -14,11 +14,11 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="py-3 w-full my-30">
-      <ul className="max-w-[1200px] mx-auto flex justify-center gap-[120px]">
+    <nav className="w-full py-3 my-30">
+      <ul className="max-w-1200 w-full mx-auto flex justify-center gap-[120px]">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
-          
+
           return (
             <li key={item.href}>
               <Link

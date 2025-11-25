@@ -12,7 +12,7 @@ const BestsellerItem = ({ book, userId }) => {
   };
 
   return (
-    <div className="bg-(--bg-color) p-8 flex flex-col justify-between gap-15">
+    <div className="bg-(--bg-color) p-8 flex flex-col justify-between gap-15 w-266 mx-auto">
       {/* 도서 이미지 */}
       <div
         className="overflow-hidden border border-gray-300 rounded-md w-250 h-320 hover:cursor-pointer"

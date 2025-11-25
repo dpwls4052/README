@@ -7,7 +7,7 @@ import noimg from "@/assets/no_image.png";
 
 const BestsellerItemSkeleton = ({ book, userId }) => {
   return (
-    <div className="bg-(--bg-color) p-8 flex flex-col justify-between gap-15 w-full">
+    <div className="bg-(--bg-color) p-8 flex flex-col justify-between gap-15 w-266 mx-auto">
       {/* 도서 이미지 */}
       <div className="w-full overflow-hidden border border-gray-300 rounded-md h-320 skeletonUI"></div>
 

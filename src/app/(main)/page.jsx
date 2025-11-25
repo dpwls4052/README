@@ -6,7 +6,7 @@ import Recommend from "@/components/main/Recommend";
 export default function Main() {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="flex flex-col items-center text-center max-w-1200">
+      <div className="flex flex-col items-center w-full px-20 text-center max-w-1200">
         <Navigation />
         <Banner />
         <Bestseller />
