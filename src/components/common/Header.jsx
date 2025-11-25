@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { SlBasket, SlSettings } from "react-icons/sl";
-import { IoIosHeartEmpty, IoIosSearch } from "react-icons/io";
+import { SlBasket } from "react-icons/sl";
+import { IoIosHeartEmpty } from "react-icons/io";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import Image from "next/image";
 import Logo from "@/assets/logo.png";
@@ -65,11 +65,9 @@ export default function Header() {
   const { count: cartCount } = useCartCount(); // 🌟 수정
   const { count: wishlistCount } = useWishlistCount();
 
-  // console.log("Header 렌더링: cartCount =", cartCount, ", wishlistCount =", wishlistCount);
-  // console.log('user', user)
   return (
-    <header className="sticky top-0 z-40 px-100 shadow-[0_4px_10px_rgba(153,153,153,0.25)] header-blur">
-      <div className="flex items-center justify-between gap-8 px-6 mx-auto py-15 max-w-1200">
+    <header className="sticky top-0 z-40 w-full shadow-[0_4px_10px_rgba(153,153,153,0.25)] header-blur px-20">
+      <div className="flex items-center justify-between gap-8 mx-auto py-15 max-w-1200">
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
           <Image
@@ -82,11 +80,13 @@ export default function Header() {
         </Link>
 
         {/* 검색창 */}
-        <SearchBar
-          query={query}
-          setQuery={setQuery}
-          handleSearch={handleSearch}
-        />
+        <div className="flex-1 hidden sm:block max-w-600">
+          <SearchBar
+            query={query}
+            setQuery={setQuery}
+            handleSearch={handleSearch}
+          />
+        </div>
 
         {/* 아이콘 버튼 */}
         <div className="flex items-center gap-20">
@@ -223,6 +223,13 @@ export default function Header() {
             </Link>
           )}
         </div>
+      </div>
+      <div className="block w-full pb-15 sm:hidden">
+        <SearchBar
+          query={query}
+          setQuery={setQuery}
+          handleSearch={handleSearch}
+        />
       </div>
     </header>
   );
