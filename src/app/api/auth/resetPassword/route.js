@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { Resend } from "resend";
 
+// 환경 변수 체크 후 초기화
+if (!process.env.RESEND_API_KEY) {
+  console.error("🚨 Resend API key is missing!");
+}
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
     const { email, phone_number } = await req.json();
+
+    if (!email || !phone_number) {
+      return NextResponse.json({ success: false, message: "email or phone_number missing" });
+    }
 
     const cleanPhone = phone_number.replace(/[^0-9]/g, "");
 
@@ -18,11 +26,12 @@ export async function POST(req) {
       .maybeSingle();
 
     if (!user || error) {
+      console.error("User not found or Supabase error:", error);
       return NextResponse.json({ success: false, message: "not-found" });
     }
 
     // 2) DB 전화번호 포맷 정리 후 비교
-    const dbPhone = user.phone_number.replace(/[^0-9]/g, "");
+    const dbPhone = (user.phone_number ?? "").replace(/[^0-9]/g, "");
     if (dbPhone !== cleanPhone) {
       return NextResponse.json({ success: false, message: "not-found" });
     }
@@ -31,6 +40,10 @@ export async function POST(req) {
     const resetLink = `http://localhost:3000/reset-password?email=${email}`;
 
     // 4) 실제 이메일 전송
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ success: false, message: "Resend API key missing" });
+    }
+
     await resend.emails.send({
       from: "onboarding@resend.dev",
       to: email,
@@ -48,6 +61,7 @@ export async function POST(req) {
     });
 
   } catch (err) {
+    console.error("POST /api/auth/resetPassword error:", err);
     return NextResponse.json({
       success: false,
       error: err.message,
