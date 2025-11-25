@@ -15,7 +15,7 @@ export default function Navigation() {
 
   return (
     <nav className="w-full py-3 my-30">
-      <ul className="max-w-1200 w-full mx-auto flex justify-center gap-[120px]">
+      <ul className="flex justify-between w-full mx-auto max-w-1200">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
 
@@ -25,7 +25,7 @@ export default function Navigation() {
                 href={item.href}
                 className={`font-semibold text-20 hover:no-underline px-16 py-8 rounded transition-colors ${
                   isActive
-                    ? "bg-[var(--main-color)] text-white"
+                    ? "bg-(--main-color) text-white"
                     : "hover:bg-gray-100"
                 }`}
               >
