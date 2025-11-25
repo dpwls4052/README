@@ -35,7 +35,10 @@ export async function createBook(books) {
 
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.error || "책 등록 실패");
+
+    const error = new Error(err.error || "책 등록 실패");
+    error.message = err.message || "UNKNOWN_ERROR";
+    throw error;
   }
 }
 

@@ -231,7 +231,10 @@ export async function POST(req) {
 
     if (!Array.isArray(body) || body.length === 0) {
       return new Response(
-        JSON.stringify({ error: "책 정보 배열을 전달해야 합니다." }),
+        JSON.stringify({
+          error: "책 정보 배열을 전달해야 합니다.",
+          message: "NO_BOOK_LIST",
+        }),
         { status: 400 }
       );
     }
@@ -242,7 +245,10 @@ export async function POST(req) {
     for (const item of body) {
       if (!item.title) {
         return new Response(
-          JSON.stringify({ error: "각 책은 title가 필요합니다." }),
+          JSON.stringify({
+            error: "각 책은 title가 필요합니다.",
+            message: "NO_TITLE",
+          }),
           { status: 400 }
         );
       }
