@@ -1,11 +1,4 @@
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import AddToCartButton from "../common/AddToCartButton";
-import BuyNowButton from "../common/BuyNowButton";
-import WishListButton from "../common/WishListButton";
-import noimg from "@/assets/no_image.png";
-
-const BestsellerItemSkeleton = ({ book, userId }) => {
+const BestsellerItemSkeleton = () => {
   return (
     <div className="bg-(--bg-color) p-8 flex flex-col justify-between gap-15 w-266 mx-auto">
       {/* 도서 이미지 */}
