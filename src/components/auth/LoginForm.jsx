@@ -68,7 +68,7 @@ const LoginForm = () => {
         <Link href="/findId" className="hover:underline">
           아이디 찾기
         </Link>
-        <Link href="/findPw" className="hover:underline">
+        <Link href="/findpw" className="hover:underline">
           비밀번호 찾기
         </Link>
         <Link href="/signUp" className="hover:underline">
