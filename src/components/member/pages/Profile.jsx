@@ -238,13 +238,13 @@ export default function Profile() {
       const endpointMap = {
         name: "update/name",
         phone: "update/phone",
-        email: "update/email",
+        // email: "update/email",
       };
 
       const payload = { userId };
       if (modalField === "name") payload.newName = modalValue;
       else if (modalField === "phone") payload.newPhone = modalValue;
-      else if (modalField === "email") payload.newEmail = modalValue;
+      // else if (modalField === "email") payload.newEmail = modalValue;
 
       const res = await fetch(`/api/user/${endpointMap[modalField]}`, {
         method: "POST",
@@ -623,22 +623,25 @@ export default function Profile() {
           <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
           <div className="space-y-3 text-18 font-normal">
             {fields.map(({ label, field, value }) => (
-              <div key={field} className="flex gap-20 items-center mt-15">
-                <p>
-                  <b>{label} :</b> {value}
-                </p>
-                <button
-                  className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
-                  onClick={() => {
-                    setModalField(field);
-                    setModalValue(value);
-                    setModalOpen(true);
-                  }}
-                >
-                  수정
-                </button>
-              </div>
-            ))}
+  <div key={field} className="flex gap-20 items-center mt-15">
+    <p>
+      <b>{label} :</b> {value}
+    </p>
+    {field !== "email" && (
+      <button
+        className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
+        onClick={() => {
+          setModalField(field);
+          setModalValue(value);
+          setModalOpen(true);
+        }}
+      >
+        수정
+      </button>
+    )}
+  </div>
+))}
+
             {/* 배송주소 */}
             <div className="flex gap-20 items-center mt-10">
               <p>
