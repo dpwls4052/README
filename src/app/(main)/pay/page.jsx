@@ -319,49 +319,82 @@ const persistPendingOrder = async () => {
 
   return orderPayload;
 };
-  const handlePaymentClick = async () => {
-    // alert() 대신 커스텀 모달 사용 필요
-    if (!agreed) { console.error("구매 조건 및 결제 진행에 동의해주세요."); return; }
-    if (!widgetReady) { console.error("결제 준비 중입니다. 잠시만 기다려주세요."); return; }
-    if (orderItems.length === 0) { console.error("주문할 상품이 없습니다."); return; }
+const handlePaymentClick = async () => {
+  // 기존 유효성 검사들...
+  if (!agreed) { console.error("구매 조건 및 결제 진행에 동의해주세요."); return; }
+  if (!widgetReady) { console.error("결제 준비 중입니다. 잠시만 기다려주세요."); return; }
+  if (orderItems.length === 0) { console.error("주문할 상품이 없습니다."); return; }
 
-    // 주문자 정보 유효성 검사
-    if (!finalName) { console.error("주문자 이름(필수)을 입력/확인해주세요."); return; }
-    if (!finalEmail) { console.error("주문자 이메일(필수)을 입력/확인해주세요."); return; }
-    
-    // 전화번호는 11자리 (010 포함) 또는 10자리인지 확인
-    if (!finalPhone || finalPhone.length < 10) { 
-        console.error("유효한 주문자 연락처(필수)를 입력/확인해주세요."); 
-        return; 
+  // 주문자 정보 유효성 검사
+  if (!finalName) { console.error("주문자 이름(필수)을 입력/확인해주세요."); return; }
+  if (!finalEmail) { console.error("주문자 이메일(필수)을 입력/확인해주세요."); return; }
+  
+  if (!finalPhone || finalPhone.length < 10) { 
+    console.error("유효한 주문자 연락처(필수)를 입력/확인해주세요."); 
+    return; 
+  }
+  
+  // 배송지 정보 유효성 검사
+  if (addressType === "existing") {
+    if (!selectedAddressId || !finalAddress) {
+      console.error("등록된 배송지 중 하나를 선택해주세요.");
+      return;
     }
-    
-    // 배송지 정보 유효성 검사
-    if (addressType === "existing") {
-      if (!selectedAddressId || !finalAddress) {
-        console.error("등록된 배송지 중 하나를 선택해주세요.");
-        return;
-      }
-    } else if (addressType === "new") {
-      if (!newPostcode) { console.error("새 배송지의 우편번호(필수)를 입력해주세요."); return; }
-      if (!newAddress) { console.error("새 배송지의 주소(필수)를 입력해주세요."); return; }
-      // 상세주소는 필수가 아니므로 검사 제외
-    }
-    
-    // 최종 주소 정보 확인
-    if (!finalAddress?.postcode || !finalAddress?.address1) {
-        console.error("유효한 배송지 정보를 선택/입력해주세요.");
-        return;
-    }
+  } else if (addressType === "new") {
+    if (!newPostcode) { console.error("새 배송지의 우편번호(필수)를 입력해주세요."); return; }
+    if (!newAddress) { console.error("새 배송지의 주소(필수)를 입력해주세요."); return; }
+  }
+  
+  if (!finalAddress?.postcode || !finalAddress?.address1) {
+    console.error("유효한 배송지 정보를 선택/입력해주세요.");
+    return;
+  }
 
-    await persistPendingOrder();
+  // ✅ 새로 추가: 재고 검증
+  try {
+    const stockValidationRes = await fetch("/api/order/validateStock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderItems: orderItems.map(item => ({
+          book_id: item.book_id || item.id || item.bookId,
+          title: item.title,
+          quantity: item.quantity,
+        })),
+      }),
+    });
 
-    if (simulatePayment) {
-      router.push("/pay/success");
+    const stockResult = await stockValidationRes.json();
+
+    if (!stockResult.success) {
+      // 재고 부족 시 사용자에게 알림
+      const issueMessages = stockResult.stockIssues
+        .map(issue => `• ${issue.title}: ${issue.issue}`)
+        .join("\n");
+
+      alert(`재고가 부족합니다.\n\n${issueMessages}\n\n장바구니 페이지로 이동합니다.`);
+      
+      router.push("/cart");
       return;
     }
 
-    setTriggerPayment((prev) => prev + 1);
-  };
+    console.log("✅ 재고 검증 완료");
+  } catch (error) {
+    console.error("재고 검증 중 오류:", error);
+    alert("재고 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+    return;
+  }
+
+  // 재고 검증 통과 후 기존 결제 로직 진행
+  await persistPendingOrder();
+
+  if (simulatePayment) {
+    router.push("/pay/success");
+    return;
+  }
+
+  setTriggerPayment((prev) => prev + 1);
+};
   // ----------------------------------------------------
   // Hooks 호출 완료 후 조건부 리턴 (로딩 상태)
   // ----------------------------------------------------
@@ -399,7 +432,7 @@ const persistPendingOrder = async () => {
               {isOrderInfoOpen && (
                 <div className="p-5 space-y-4">
                   {orderItems.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-15 px-10 gap-15 border-b border-gray-200">
+                    <div key={item.book_id || item.id || item.bookId || `item-${index}`} className="flex justify-between items-center py-15 px-10 gap-15 border-b border-gray-200">
                       <div className="flex items-start gap-20 flex-1">
                         <img src={item.image} alt={item.title} className="w-100 h-140 rounded-lg object-cover" />
                         <div className="flex flex-col gap-1 flex-1">
