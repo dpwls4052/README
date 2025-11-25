@@ -22,7 +22,11 @@ const BookList = () => {
   };
 
   const { category } = useParams();
-  const config = CATEGORY_MAP[category] ?? { title: "전체도서", prefix: null, id: null };
+  const config = CATEGORY_MAP[category] ?? {
+    title: "전체도서",
+    prefix: null,
+    id: null,
+  };
 
   const wantRandom = category === "recommend" || category === "season";
 
@@ -39,7 +43,7 @@ const BookList = () => {
 
   // "기타" 카테고리 여부 확인용 - 모든 2depth 카테고리 이름 배열
   const allSubCategoryNames = useMemo(() => {
-    return categories.map(c => c.name);
+    return categories.map((c) => c.name);
   }, [categories]);
 
   // useBooks에 전달할 category 배열 생성
@@ -78,17 +82,17 @@ const BookList = () => {
 
     // "기타" 선택 시: 18개 카테고리에 속하지 않은 책들만 필터링
     if (selectedCategory === "기타") {
-      result = books.filter(book => {
+      result = books.filter((book) => {
         const bookCategories = book.category || [];
-        
+
         // book.category 배열에서 name 추출
-        const bookCategoryNames = bookCategories.map(cat => cat.name);
-        
+        const bookCategoryNames = bookCategories.map((cat) => cat.name);
+
         // 18개 카테고리 중 하나라도 포함되어 있으면 제외
-        const hasDefinedCategory = bookCategoryNames.some(name => 
+        const hasDefinedCategory = bookCategoryNames.some((name) =>
           allSubCategoryNames.includes(name)
         );
-        
+
         // 18개 카테고리에 속하지 않으면 기타에 포함
         return !hasDefinedCategory;
       });
@@ -99,13 +103,13 @@ const BookList = () => {
     // 추천도서/계절도서: 랜덤으로 10개만 표시
     if (wantRandom && result.length > 0) {
       const shuffled = [...result];
-      
+
       // Fisher-Yates 셔플 알고리즘
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      
+
       return shuffled.slice(0, 10);
     }
 
@@ -113,29 +117,37 @@ const BookList = () => {
   }, [books, selectedCategory, allSubCategoryNames, wantRandom]);
 
   return (
-    <>
+    <div className="w-full px-20 mx-auto max-w-1200">
       <Navigation />
 
-      <div className="mx-auto py-80 max-w-1200">
+      <div className="py-40 mx-auto">
         <p className="mb-10 text-2xl font-bold">{config.title}</p>
 
         {/* 하위 카테고리 선택 UI */}
         {!wantRandom && categories.length > 0 && (
-          <div className="flex gap-12 mb-20 flex-wrap">
+          <div className="flex flex-wrap gap-12 mb-20">
             {/* 전체 버튼 추가 */}
             <button
               className={`px-12 py-6 border rounded 
-                ${selectedCategory === null ? "bg-[var(--main-color)] text-white" : "hover:bg-gray-100"}`}
+                ${
+                  selectedCategory === null
+                    ? "bg-(--main-color) text-white"
+                    : "hover:bg-gray-100"
+                }`}
               onClick={() => setSelectedCategory(null)}
             >
               전체
             </button>
-            
+
             {categories.map((c) => (
               <button
                 key={c.category_id}
                 className={`px-12 py-6 border rounded 
-                  ${selectedCategory === c.name ? "bg-[var(--main-color)] text-white" : "hover:bg-gray-100"}`}
+                  ${
+                    selectedCategory === c.name
+                      ? "bg-(--main-color) text-white"
+                      : "hover:bg-gray-100"
+                  }`}
                 onClick={() => setSelectedCategory(c.name)}
               >
                 {c.name}
@@ -174,7 +186,7 @@ const BookList = () => {
             {!wantRandom && hasNext && (
               <div className="p-20 mt-20 text-center">
                 <button
-                  className="bg-[var(--main-color)] w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer hover:opacity-90"
+                  className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer hover:opacity-90"
                   onClick={() => fetchMoreBooks()}
                 >
                   더보기 +
@@ -184,7 +196,7 @@ const BookList = () => {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
