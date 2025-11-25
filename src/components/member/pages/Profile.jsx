@@ -100,32 +100,33 @@ export default function Profile() {
   useEffect(() => {
   if (!userId) return;
 
-  const fetchCounts = async () => {
-    // 주문 개수
-    const { count: orders } = await supabase
-      .from("orders")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+    const fetchCounts = async () => {
+      // 주문 개수
+      const { count: orders } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
 
-    // 찜 개수
-    const { count: wishlist } = await supabase
-      .from("wishlist")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+      // 찜 개수
+      const { count: wishlist } = await supabase
+        .from("wishlist")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("status", true);
 
-    // 리뷰 개수
-    const { count: reviews } = await supabase
-      .from("review")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+      // 리뷰 개수
+      const { count: reviews } = await supabase
+        .from("review")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
 
-    setOrderCount(orders || 0);
-    setWishlistCount(wishlist || 0);
-    setReviewCount(reviews || 0);
-  };
+      setOrderCount(orders || 0);
+      setWishlistCount(wishlist || 0);
+      setReviewCount(reviews || 0);
+    };
 
-  fetchCounts();
-}, [userId]);
+    fetchCounts();
+  }, [userId]);
 
 
 
@@ -175,29 +176,29 @@ export default function Profile() {
   }, [userId]);
 
   // 최근 본 도서 불러오기
-useEffect(() => {
-  if (!userId) return;
+  useEffect(() => {
+    if (!userId) return;
 
-  const fetchRecentBooks = async () => {
-    try {
-      const res = await fetch("/api/user/recentBooks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
+    const fetchRecentBooks = async () => {
+      try {
+        const res = await fetch("/api/user/recentBooks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (data.success) {
-        setRecentBooks(data.books);
+        if (data.success) {
+          setRecentBooks(data.books);
+        }
+      } catch (err) {
+        console.error("최근 본 도서 불러오기 실패:", err);
       }
-    } catch (err) {
-      console.error("최근 본 도서 불러오기 실패:", err);
-    }
-  };
+    };
 
-  fetchRecentBooks();
-}, [userId]);
+    fetchRecentBooks();
+  }, [userId]);
 
 
   // 주소 목록 조회
@@ -665,7 +666,7 @@ useEffect(() => {
                 <div
                   key={index}
                   className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
-                  onClick={() => window.location.href = `/product/detail/${book.id}`}
+                  onClick={() => window.location.href = `/product/detail/${book.book_id}`}
                 >
                   <div className="w-full h-[250px] bg-gray-100 flex items-center justify-center">
                     <img
