@@ -23,7 +23,7 @@ export default function Navigation() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`font-semibold text-20 hover:no-underline px-16 py-8 rounded transition-colors ${
+                className={`font-semibold md:text-20 sm:text-18 text-16 hover:no-underline px-16 py-8 rounded transition-colors ${
                   isActive
                     ? "bg-(--main-color) text-white"
                     : "hover:bg-gray-100"
