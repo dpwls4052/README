@@ -62,6 +62,7 @@ export default function Profile() {
       } catch (err) {
         if (err.code === "auth/requires-recent-login") {
           alert("보안을 위해 다시 로그인 후 탈퇴해주세요.");
+          window.location.href = "/login";
           return;
         }
         throw err;
