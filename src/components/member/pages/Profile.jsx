@@ -58,7 +58,7 @@ export default function Profile() {
       // Firebase 계정 삭제
       try {
         await deleteUser(firebaseUser);
-        console.log("🔥 Firebase 계정 삭제 완료");
+        console.log("Firebase 계정 삭제 완료");
       } catch (err) {
         if (err.code === "auth/requires-recent-login") {
           alert("보안을 위해 다시 로그인 후 탈퇴해주세요.");
