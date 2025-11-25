@@ -37,7 +37,6 @@ export default function useUserReviews(userId) {
             rating: r.rate,
             content: r.review,
             date: r.created_at ? r.created_at.slice(0, 10) : "",
-            avatar: "https://bit.ly/dan-abramov", // 나중에 프로필 생기면 교체
             bookId: r.book_id,
           }));
           setReviews(mapped);

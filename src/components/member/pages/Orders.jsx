@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { FiPackage, FiTruck, FiCheckCircle } from "react-icons/fi";
 import useUserReviews from "@/hooks/review/useUserReviews";
+import useDeleteReview from "@/hooks/review/useDeleteReview";
+import { toast } from "sonner";
 
 export default function Orders() {
   const router = useRouter();
@@ -15,6 +17,8 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("전체");
+
+  const { deleteReview, deleting } = useDeleteReview();
 
   const {
     reviews: userReviews,
@@ -171,6 +175,27 @@ export default function Orders() {
 
   const handleCreateReview = (bookId) => {
     router.push(`/member?MemberTab=createreview&bookId=${bookId}`);
+  };
+  const handleEditReview = (bookId, reviewId) => {
+    router.push(
+      `/member?MemberTab=createreview&bookId=${bookId}&reviewId=${reviewId}`
+    );
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!confirm("이 리뷰를 삭제할까요?")) return;
+
+    try {
+      await deleteReview(reviewId);
+      toast.success("리뷰를 삭제했습니다.");
+
+      // 간단하게 새로고침 or router.refresh()
+      window.location.reload();
+      // 또는 상태에서 직접 제거하는 방식으로 갱신해도 되고
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "리뷰 삭제 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -333,6 +358,7 @@ export default function Orders() {
                                             userReview.id
                                           )
                                         }
+                                        disabled={deleting}
                                         className="px-15 py-8 bg-[var(--main-color)] text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
                                       >
                                         리뷰 수정
@@ -341,6 +367,7 @@ export default function Orders() {
                                         onClick={() =>
                                           handleDeleteReview(userReview.id)
                                         }
+                                        disabled={deleting}
                                         className="px-15 py-8 bg-red-500 text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
                                       >
                                         삭제
