@@ -6,6 +6,8 @@ import { FaExclamationCircle } from "react-icons/fa";
 import { useAuth } from "@/hooks/common/useAuth";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import useUserReviews from "@/hooks/review/useUserReviews";
+import useDeleteReview from "@/hooks/review/useDeleteReview";
+import { toast } from "sonner";
 
 export default function Reviews() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function Reviews() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState(null);
 
+  const { deleteReview, deleting } = useDeleteReview();
   // ✅ 내 리뷰 가져오기 (userId 기준)
   const {
     reviews: userReviews,
@@ -113,18 +116,52 @@ export default function Reviews() {
   );
 
   // ✅ 분류: 작성 가능한 리뷰 / 작성한 리뷰
-  const availableItems = deliveredItems.filter(
+  const availableItemsRaw = deliveredItems.filter(
     (item) => !userReviewMap[item.book_id]
   );
   const writtenItemsRaw = deliveredItems.filter(
     (item) => !!userReviewMap[item.book_id]
   );
+  // ✅ 작성 가능한 리뷰도 book_id 기준으로 한 번만 나오도록 dedupe
+  const availableMap = new Map();
 
-  // ✅ writtenItems에 리뷰 정보까지 합쳐서 사용
-  const writtenItems = writtenItemsRaw.map((item) => ({
-    ...item,
-    review: userReviewMap[item.book_id],
-  }));
+  availableItemsRaw.forEach((item) => {
+    const existing = availableMap.get(item.book_id);
+
+    if (!existing) {
+      // 아직 없으면 그냥 넣기
+      availableMap.set(item.book_id, item);
+    } else {
+      // 이미 있으면, 더 최근 주문 기준으로 교체하고 싶으면 여기서 비교
+      // 예: 날짜 비교해서 더 최신 주문만 남기기
+      const existingDate = new Date(existing.date);
+      const currentDate = new Date(item.date);
+
+      if (currentDate > existingDate) {
+        availableMap.set(item.book_id, item);
+      }
+    }
+  });
+
+  const availableItems = Array.from(availableMap.values());
+  // ✅ 여기서 book_id 기준으로 dedupe
+  const writtenMap = new Map();
+
+  writtenItemsRaw.forEach((item) => {
+    const review = userReviewMap[item.book_id];
+    if (!review) return;
+
+    // 이미 같은 book_id가 있다면, 어떤 걸 남길지 정책 정할 수 있음
+    // 예: 리뷰 작성일이 더 최신인 걸 남기기 (여기서는 대충 첫 번째 것만 사용)
+    if (!writtenMap.has(item.book_id)) {
+      writtenMap.set(item.book_id, {
+        ...item,
+        review, // review 정보 합치기
+      });
+    }
+  });
+
+  const writtenItems = Array.from(writtenMap.values());
 
   // ✅ 정렬 (간단 버전)
   const sortItems = (items) => {
@@ -149,7 +186,6 @@ export default function Reviews() {
 
   const sortedAvailableItems = sortItems(availableItems);
   const sortedWrittenItems = sortItems(writtenItems);
-
   const totalWrittenCount = writtenItems.length;
 
   const handleCreateReview = (bookId) => {
@@ -160,6 +196,22 @@ export default function Reviews() {
     router.push(
       `/member?MemberTab=createreview&bookId=${bookId}&reviewId=${reviewId}`
     );
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!confirm("이 리뷰를 삭제할까요?")) return;
+
+    try {
+      await deleteReview(reviewId);
+      toast.success("리뷰를 삭제했습니다.");
+
+      // 간단하게 새로고침 or router.refresh()
+      window.location.reload();
+      // 또는 상태에서 직접 제거하는 방식으로 갱신해도 되고
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "리뷰 삭제 중 오류가 발생했습니다.");
+    }
   };
 
   if (!userId) {
@@ -178,11 +230,11 @@ export default function Reviews() {
 
   return (
     <ProtectedRoute>
-      <div className="w-full bg-gray-50 min-h-screen py-10 flex justify-center">
-        <div className="w-full max-w-5xl bg-white rounded-xl shadow-sm p-8">
+      <div className="w-full min-h-screen py-10 flex justify-center">
+        <div className="w-full max-w-5xl p-8">
           {/* 🏷️ 헤더 */}
-          <div className="flex justify-between items-center border-b pb-4 mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">리뷰</h1>
+          <div className="flex justify-between items-center pb-4 mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">리뷰 관리</h1>
           </div>
 
           {/* 🧭 상단 탭 */}
@@ -209,24 +261,10 @@ export default function Reviews() {
             </button>
           </div>
 
-          {/* 📁 하위 탭 (지금은 구매 리뷰만) */}
-          <div className="flex bg-gray-100 rounded-t-md">
-            <button
-              onClick={() => setSubTab("purchase")}
-              className={`flex-1 py-3 text-sm ${
-                subTab === "purchase"
-                  ? "bg-white border-t border-l border-r border-gray-200 font-medium"
-                  : "text-gray-500"
-              }`}
-            >
-              구매 리뷰
-            </button>
-          </div>
-
           {/* 📋 내용 영역 */}
-          <div className="p-8 border rounded-b-md min-h-[300px]">
+          <div className="p-8 min-h-[300px]">
             {/* 안내 문구 */}
-            <p className="text-gray-700 mb-3">
+            <p className="font-normal text-black my-10">
               {tab === "available"
                 ? "구매하신 상품 중 리뷰를 작성할 수 있는 도서 목록입니다."
                 : "작성하신 리뷰를 확인하고 관리할 수 있습니다."}
@@ -234,14 +272,17 @@ export default function Reviews() {
 
             {/* 정렬 옵션 */}
             <div className="flex justify-end mb-6">
-              <select
-                className="border border-gray-300 rounded px-3 py-2 text-sm"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="order">결제 완료 순</option>
-                <option value="review">리뷰 작성일 순</option>
-              </select>
+              {tab === "written" && (
+                <select
+                  className="border border-gray-300 rounded px-3 py-2 text-sm"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="order">결제 완료 순</option>
+
+                  <option value="review">리뷰 작성일 순</option>
+                </select>
+              )}
             </div>
 
             {/* 로딩 / 에러 처리 */}
@@ -285,23 +326,27 @@ export default function Reviews() {
                         {sortedAvailableItems.map((item) => (
                           <div
                             key={`${item.order_number}-${item.book_id}`}
-                            className="flex gap-4 items-center border rounded-lg p-4 bg-[var(--bg-color)]"
+                            className="flex gap-4 justify-between items-center border rounded-sm p-20 bg-[var(--bg-color)]"
                           >
-                            <img
-                              src={item.cover || "https://placehold.co/80x110"}
-                              alt={item.title}
-                              className="w-80 h-110 object-cover rounded border"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium text-16 mb-2">
-                                {item.title}
-                              </p>
-                              <p className="text-xs text-gray-500 mb-1">
-                                주문번호: {item.order_number}
-                              </p>
-                              <p className="text-xs text-gray-500 mb-3">
-                                주문일: {convertToKoreaTime(item.date)}
-                              </p>
+                            <div className="flex items-start gap-6">
+                              <img
+                                src={
+                                  item.cover || "https://placehold.co/80x110"
+                                }
+                                alt={item.title}
+                                className="w-80 h-110 object-cover rounded border"
+                              />
+                              <div className=" mt-5">
+                                <p className="font-medium text-16 mb-2">
+                                  {item.title}
+                                </p>
+                                <p className="text-xs text-gray-500 mb-1">
+                                  주문번호: {item.order_number}
+                                </p>
+                                <p className="text-xs text-gray-500 mb-3">
+                                  주문일: {convertToKoreaTime(item.date)}
+                                </p>
+                              </div>
                             </div>
                             <button
                               onClick={() => handleCreateReview(item.book_id)}
@@ -324,7 +369,7 @@ export default function Reviews() {
                           size={40}
                           className="text-gray-400 mb-3"
                         />
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm font-normal text-gray-500 mb-4">
                           아직 작성한 리뷰가 없습니다.
                         </p>
                       </div>
@@ -333,9 +378,9 @@ export default function Reviews() {
                         {sortedWrittenItems.map((item) => (
                           <div
                             key={`${item.order_number}-${item.book_id}`}
-                            className="border rounded-lg p-4 bg-[var(--bg-color)]"
+                            className="border rounded-sm p-20 bg-[var(--bg-color)]"
                           >
-                            <div className="flex gap-4">
+                            <div className="flex gap-6">
                               <img
                                 src={
                                   item.cover || "https://placehold.co/80x110"
@@ -343,18 +388,18 @@ export default function Reviews() {
                                 alt={item.title}
                                 className="w-80 h-110 object-cover rounded border"
                               />
-                              <div className="flex-1">
+                              <div className="flex-1 mt-5">
                                 <div className="flex justify-between mb-2">
                                   <div>
-                                    <p className="font-medium text-16 mb-1">
+                                    <p className="font-medium text-16 mb-5">
                                       {item.title}
                                     </p>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs font-normal text-gray-500">
                                       주문일: {convertToKoreaTime(item.date)}
                                     </p>
                                   </div>
-                                  <div className="text-right text-sm text-gray-500">
-                                    <p>
+                                  <div className="text-right font-normal text-12 text-gray-500">
+                                    <p className=" w-125">
                                       리뷰 작성일:{" "}
                                       {item.review?.date ||
                                         item.review?.createdAt}
@@ -363,12 +408,12 @@ export default function Reviews() {
                                 </div>
 
                                 {/* 평점 */}
-                                <div className="text-yellow-500 text-sm mb-2">
+                                <div className="text-yellow-500 text-sm mb-5">
                                   {"⭐".repeat(item.review?.rating || 0)}
                                 </div>
 
                                 {/* 리뷰 내용 */}
-                                <p className="text-sm text-gray-800 whitespace-pre-line mb-3">
+                                <p className="text-sm font-medium text-gray-800 whitespace-pre-line mb-3">
                                   {item.review?.content}
                                 </p>
 
@@ -380,11 +425,18 @@ export default function Reviews() {
                                         item.review?.id
                                       )
                                     }
-                                    className="px-12 py-6 border border-[var(--main-color)] text-[var(--main-color)] rounded text-xs hover:bg-[var(--main-color)] hover:text-white transition cursor-pointer"
+                                    className="px-15 py-8 bg-[var(--main-color)] text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
                                   >
                                     리뷰 수정
                                   </button>
-                                  {/* 삭제는 나중에 API 붙일 때 구현 */}
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteReview(item.review?.id)
+                                    }
+                                    className="px-15 py-8 bg-red-500 text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
+                                  >
+                                    삭제
+                                  </button>
                                 </div>
                               </div>
                             </div>
