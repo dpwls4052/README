@@ -6,10 +6,16 @@ import { useAuth } from "@/hooks/common/useAuth";
 import Modal from "@/components/common/Modal";
 import AddressInput from "@/components/common/AddressInput";
 import { getAuth, deleteUser } from "firebase/auth";
+import { supabase } from "@/lib/supabaseClient"; 
+
 
 
 export default function Profile() {
   const { userId } = useAuth();
+  const [orderCount, setOrderCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+
 
   console.log("Profile 렌더링 - userId:", userId);
 
@@ -34,7 +40,7 @@ export default function Profile() {
     address: "",
     detailAddress: "",
   });
-  // ✅ 최근 본 도서 상태
+  // 최근 본 도서 상태
   const [recentBooks, setRecentBooks] = useState([]);
 
   const handleDeleteAccount = async () => {
@@ -49,12 +55,11 @@ export default function Profile() {
         return;
       }
 
-      // 1️⃣ Firebase 계정 삭제
+      // Firebase 계정 삭제
       try {
         await deleteUser(firebaseUser);
         console.log("🔥 Firebase 계정 삭제 완료");
       } catch (err) {
-        // 🔥 Firebase는 보안 때문에 최근 로그인 안 했으면 삭제 막음
         if (err.code === "auth/requires-recent-login") {
           alert("보안을 위해 다시 로그인 후 탈퇴해주세요.");
           return;
@@ -62,7 +67,7 @@ export default function Profile() {
         throw err;
       }
 
-      // 2️⃣ Supabase users 테이블 유저 삭제
+      // Supabase users 테이블 유저 삭제
       const res = await fetch("/api/user/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,14 +81,14 @@ export default function Profile() {
         return;
       }
 
-      console.log("🔥 Supabase 사용자 정보 삭제 완료");
+      console.log("Supabase 사용자 정보 삭제 완료");
 
       alert("회원 탈퇴가 완료되었습니다.");
 
-      // 3️⃣ 쿠키 삭제 (로그아웃)
+      // 쿠키 삭제 (로그아웃)
       document.cookie = "auth_token=; expires=Thu, 01 Jan 1970; path=/;";
 
-      // 4️⃣ 홈으로 이동
+      // 홈으로 이동
       window.location.href = "/";
 
     } catch (err) {
@@ -91,6 +96,37 @@ export default function Profile() {
       alert("회원 탈퇴 중 오류 발생: " + err.message);
     }
   };
+
+  useEffect(() => {
+  if (!userId) return;
+
+  const fetchCounts = async () => {
+    // 주문 개수
+    const { count: orders } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    // 찜 개수
+    const { count: wishlist } = await supabase
+      .from("wishlist")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    // 리뷰 개수
+    const { count: reviews } = await supabase
+      .from("review")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    setOrderCount(orders || 0);
+    setWishlistCount(wishlist || 0);
+    setReviewCount(reviews || 0);
+  };
+
+  fetchCounts();
+}, [userId]);
+
 
 
 
@@ -112,7 +148,7 @@ export default function Profile() {
   // 기본 주소 가져오기
   useEffect(() => {
     if (!userId) return;
-    fetchAddressList(); // 페이지 처음 렌더링 시 주소 목록 가져오기
+    fetchAddressList();
   }, [userId]);
 
   // 사용자 정보 조회
@@ -138,7 +174,7 @@ export default function Profile() {
     fetchUser();
   }, [userId]);
 
-  // ✅ 최근 본 도서 불러오기 (Supabase + 사용자별)
+  // 최근 본 도서 불러오기
 useEffect(() => {
   if (!userId) return;
 
@@ -560,14 +596,14 @@ useEffect(() => {
                 <p className="text-sm font-normal text-gray-500">주문 내역</p>
                 <div className="flex gap-8 items-center">
                   <FaBookOpen className="mx-auto text-2xl text-green-700" />
-                  <p className="text-lg font-semibold">5</p>
+                  <p className="text-lg font-semibold">{orderCount}</p>
                 </div>
               </div>
               <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
                 <p className="text-sm font-normal text-gray-500">찜한 도서</p>
                 <div className="flex gap-8 items-center">
                   <FaRegHeart className="mx-auto text-2xl text-pink-600" />
-                  <p className="text-lg font-semibold">8</p>
+                  <p className="text-lg font-semibold">{wishlistCount}</p>
                 </div>
               </div>
               <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
@@ -575,7 +611,7 @@ useEffect(() => {
 
                 <div className="flex gap-8 items-center">
                   <FaGift className="mx-auto text-2xl text-yellow-600" />
-                  <p className="text-lg font-semibold">3</p>
+                  <p className="text-lg font-semibold">{reviewCount}</p>
                 </div>
               </div>
             </div>
