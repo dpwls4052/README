@@ -5,6 +5,7 @@ const SearchSection = ({
   hasNext,
   loadMore,
   handleAddBook,
+  addedBookList,
 }) => {
   return (
     <div className="w-full rounded-md h-full flex flex-col bg-(--bg-color) overflow-hidden">
@@ -22,7 +23,10 @@ const SearchSection = ({
             <div className="text-end">
               <button
                 onClick={() => handleAddBook(book)}
-                className="bg-(--main-color) text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer"
+                disabled={addedBookList.find(
+                  (addedBook) => addedBook.isbn === book.isbn
+                )}
+                className="bg-(--main-color) text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 추가
               </button>

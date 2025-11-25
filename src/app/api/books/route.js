@@ -289,13 +289,40 @@ export async function POST(req) {
       })
     );
 
-    const { error } = await supabase
-      .from("book")
-      .upsert(booksToInsert, { onConflict: "isbn" });
+    // ISBN이 있는 책들의 ISBN만 추출
+    const isbnsToCheck = booksToInsert
+      .filter((book) => book.isbn)
+      .map((book) => book.isbn);
 
-    if (error) {
-      console.error("Books insert error:", error);
-      throw error;
+    // 기존 ISBN 조회
+    let existingIsbns = [];
+    if (isbnsToCheck.length > 0) {
+      const { data, error: selectError } = await supabase
+        .from("book")
+        .select("isbn")
+        .in("isbn", isbnsToCheck);
+
+      if (selectError) {
+        console.error("ISBN check error:", selectError);
+        throw selectError;
+      }
+
+      existingIsbns = data.map((row) => row.isbn);
+    }
+
+    // 기존 ISBN이 아닌 책들만 필터링
+    const newBooks = booksToInsert.filter(
+      (book) => !book.isbn || !existingIsbns.includes(book.isbn)
+    );
+
+    // 새로운 책이 있을 때만 삽입
+    if (newBooks.length > 0) {
+      const { error } = await supabase.from("book").insert(newBooks);
+
+      if (error) {
+        console.error("Books insert error:", error);
+        throw error;
+      }
     }
 
     return new Response(null, { status: 201 });

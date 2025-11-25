@@ -42,13 +42,9 @@ const AddBookModal = ({ fetchBooks }) => {
 
   const handleAddBook = (book) => {
     if (addedBookList.find((addedBook) => addedBook.isbn === book.isbn)) return;
-    setAladinBookList((prev) =>
-      prev.filter((aladinBook) => aladinBook.isbn !== book.isbn)
-    );
     setAddedBookList((prev) => [{ ...book, stock: 1, salesCount: 0 }, ...prev]);
   };
   const handleDeleteBook = (book) => {
-    setAladinBookList((prev) => [book, ...prev]);
     setAddedBookList((prev) =>
       prev.filter((addedBook) => addedBook.isbn !== book.isbn)
     );
@@ -97,6 +93,7 @@ const AddBookModal = ({ fetchBooks }) => {
               hasNext={hasNext}
               loadMore={loadMore}
               handleAddBook={handleAddBook}
+              addedBookList={addedBookList}
             />
             <AddedSection
               addedBookList={addedBookList}
