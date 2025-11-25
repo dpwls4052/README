@@ -104,8 +104,8 @@ export default function Recommend() {
               >
                 <Image
                   src={
-                    book.highResCover || 
-                    book.cover?.replace(/coversum/gi, "cover500") || 
+                    book.highResCover ||
+                    book.cover?.replace(/coversum/gi, "cover500") ||
                     noimg
                   }
                   alt={book.title || "도서"}

@@ -14,7 +14,7 @@ import "swiper/css/pagination";
 
 export default function Banner() {
   return (
-    <div className="w-[1200px] rounded-xl overflow-hidden">
+    <div className="w-full overflow-hidden max-w-1200 rounded-xl">
       <Swiper
         className="home-banner"
         style={{
@@ -31,7 +31,7 @@ export default function Banner() {
           <Image
             src={banner1}
             alt="배너1"
-            className="w-full h-auto object-cover"
+            className="object-cover w-full h-auto"
           />
         </SwiperSlide>
 
@@ -39,7 +39,7 @@ export default function Banner() {
           <Image
             src={banner2}
             alt="배너2"
-            className="w-full h-auto object-cover"
+            className="object-cover w-full h-auto"
           />
         </SwiperSlide>
 
@@ -47,7 +47,7 @@ export default function Banner() {
           <Image
             src={banner3}
             alt="배너3"
-            className="w-full h-auto object-cover"
+            className="object-cover w-full h-auto"
           />
         </SwiperSlide>
 
@@ -55,7 +55,7 @@ export default function Banner() {
           <Image
             src={banner4}
             alt="배너4"
-            className="w-full h-auto object-cover"
+            className="object-cover w-full h-auto"
           />
         </SwiperSlide>
       </Swiper>

@@ -48,7 +48,7 @@ const Bestseller = () => {
     <div className="w-full p-0 mx-auto text-center my-100 max-w-1200">
       <p className="font-semibold text-32">베스트셀러</p>
 
-      <div className="grid w-full grid-cols-1 gap-40 md:grid-cols-4 my-80">
+      <div className="grid w-full grid-cols-1 gap-40 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 my-80">
         {loading ? (
           Array.from({ length: 8 }, (_, i) => (
             <BestsellerItemSkeleton key={i} />
