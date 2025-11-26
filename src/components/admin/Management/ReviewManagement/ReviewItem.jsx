@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const ReviewItem = ({ review }) => {
+const ReviewItem = ({ review, handleDelete, handleRestore }) => {
   const utcString = review.createdAt.replace(" ", "T") + "Z";
   const koreaTime = new Date(utcString).toLocaleString("ko-KR", {
     timeZone: "Asia/Seoul",
@@ -36,7 +36,14 @@ const ReviewItem = ({ review }) => {
         <p className="my-10">{review.review}</p>
       </div>
 
-      <button className="shrink-0 bg-(--main-color) text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer">
+      <button
+        onClick={() =>
+          review.status
+            ? handleDelete(review.reviewId)
+            : handleRestore(review.reviewId)
+        }
+        className="shrink-0 bg-(--main-color) text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer"
+      >
         {review.status ? "숨기기" : "해제"}
       </button>
     </li>
