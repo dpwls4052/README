@@ -63,6 +63,10 @@ export default function PaymentPage() {
   const [triggerPayment, setTriggerPayment] = useState(0);
   const simulatePayment = process.env.NEXT_PUBLIC_SIMULATE_PAYMENT === "true";
 
+  // --- 주문 중복 방지 --- 
+  const [isProcessing, setIsProcessing] = useState(false); // ✅ 이 줄 추가
+// const simulatePayment = process.env.NEXT_PUBLIC_SIMULATE_PAYMENT === "true";
+
 
   // 1. 주문 상품 데이터 로드 (Local Storage)
   useEffect(() => {
@@ -320,14 +324,35 @@ const persistPendingOrder = async () => {
   return orderPayload;
 };
 const handlePaymentClick = async () => {
-  // 기존 유효성 검사들...
-  if (!agreed) { console.error("구매 조건 및 결제 진행에 동의해주세요."); return; }
-  if (!widgetReady) { console.error("결제 준비 중입니다. 잠시만 기다려주세요."); return; }
-  if (orderItems.length === 0) { console.error("주문할 상품이 없습니다."); return; }
+  // ✅ 이미 처리 중이면 리턴
+  if (isProcessing) {
+    console.log("⚠️ 이미 결제 처리 중입니다.");
+    return;
+  }
+
+  // 기존 유효성 검사들
+  if (!agreed) { 
+    console.error("구매 조건 및 결제 진행에 동의해주세요."); 
+    return; 
+  }
+  if (!widgetReady) { 
+    console.error("결제 준비 중입니다. 잠시만 기다려주세요."); 
+    return; 
+  }
+  if (orderItems.length === 0) { 
+    console.error("주문할 상품이 없습니다."); 
+    return; 
+  }
 
   // 주문자 정보 유효성 검사
-  if (!finalName) { console.error("주문자 이름(필수)을 입력/확인해주세요."); return; }
-  if (!finalEmail) { console.error("주문자 이메일(필수)을 입력/확인해주세요."); return; }
+  if (!finalName) { 
+    console.error("주문자 이름(필수)을 입력/확인해주세요."); 
+    return; 
+  }
+  if (!finalEmail) { 
+    console.error("주문자 이메일(필수)을 입력/확인해주세요."); 
+    return; 
+  }
   
   if (!finalPhone || finalPhone.length < 10) { 
     console.error("유효한 주문자 연락처(필수)를 입력/확인해주세요."); 
@@ -341,8 +366,14 @@ const handlePaymentClick = async () => {
       return;
     }
   } else if (addressType === "new") {
-    if (!newPostcode) { console.error("새 배송지의 우편번호(필수)를 입력해주세요."); return; }
-    if (!newAddress) { console.error("새 배송지의 주소(필수)를 입력해주세요."); return; }
+    if (!newPostcode) { 
+      console.error("새 배송지의 우편번호(필수)를 입력해주세요."); 
+      return; 
+    }
+    if (!newAddress) { 
+      console.error("새 배송지의 주소(필수)를 입력해주세요."); 
+      return; 
+    }
   }
   
   if (!finalAddress?.postcode || !finalAddress?.address1) {
@@ -350,8 +381,11 @@ const handlePaymentClick = async () => {
     return;
   }
 
-  // ✅ 새로 추가: 재고 검증
+  // ✅ 처리 시작
+  setIsProcessing(true);
+
   try {
+    // 재고 검증
     const stockValidationRes = await fetch("/api/order/validateStock", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -367,33 +401,33 @@ const handlePaymentClick = async () => {
     const stockResult = await stockValidationRes.json();
 
     if (!stockResult.success) {
-      // 재고 부족 시 사용자에게 알림
       const issueMessages = stockResult.stockIssues
         .map(issue => `• ${issue.title}: ${issue.issue}`)
         .join("\n");
 
       alert(`재고가 부족합니다.\n\n${issueMessages}\n\n장바구니 페이지로 이동합니다.`);
       
+      setIsProcessing(false); // ✅ 처리 중단
       router.push("/cart");
       return;
     }
 
     console.log("✅ 재고 검증 완료");
+
+    await persistPendingOrder();
+
+    if (simulatePayment) {
+      router.push("/pay/success");
+      return; // ✅ 페이지 이동하면 자동으로 처리 종료
+    }
+
+    setTriggerPayment((prev) => prev + 1);
+    
   } catch (error) {
-    console.error("재고 검증 중 오류:", error);
-    alert("재고 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
-    return;
+    console.error("결제 처리 중 오류:", error);
+    alert("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    setIsProcessing(false); // ✅ 에러 발생 시 다시 활성화
   }
-
-  // 재고 검증 통과 후 기존 결제 로직 진행
-  await persistPendingOrder();
-
-  if (simulatePayment) {
-    router.push("/pay/success");
-    return;
-  }
-
-  setTriggerPayment((prev) => prev + 1);
 };
   // ----------------------------------------------------
   // Hooks 호출 완료 후 조건부 리턴 (로딩 상태)
@@ -657,7 +691,18 @@ const handlePaymentClick = async () => {
                 </div>
                 
                 <div className="mt-20">
-                  <button onClick={handlePaymentClick} className="w-full py-15 bg-[var(--main-color)] rounded-md text-white text-lg font-bold hover:opacity-90 transition-opacity">결제 진행</button>
+                  {/* <button onClick={handlePaymentClick} className="w-full py-15 bg-[var(--main-color)] rounded-md text-white text-lg font-bold hover:opacity-90 transition-opacity">결제 진행</button> */}
+                  <button 
+                    onClick={handlePaymentClick} 
+                    disabled={isProcessing}
+                    className={`w-full py-15 rounded-md text-white text-lg font-bold transition-all ${
+                      isProcessing 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-[var(--main-color)] hover:opacity-90 cursor-pointer'
+                    }`}
+                  >
+                    {isProcessing ? '처리 중...' : '결제 진행'}
+                  </button>
                 </div>
               </div>
             </div>
