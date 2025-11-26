@@ -165,11 +165,11 @@ const BookList = () => {
           </div>
         )}
 
-        {loading ? (
+        {loading && displayBooks.length === 0 ? (
           <div className="flex items-center justify-center h-300">
             <p>Loading...</p>
           </div>
-        ) : displayBooks.length === 0 ? (
+        ) : !loading && displayBooks.length === 0 ? (
           <div className="flex items-center justify-center h-300">
             <p className="text-gray-500">해당 카테고리에 도서가 없습니다.</p>
           </div>
@@ -186,10 +186,11 @@ const BookList = () => {
             {!wantRandom && hasNext && (
               <div className="p-20 mt-20 text-center">
                 <button
-                  className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer hover:opacity-90"
-                  onClick={() => fetchMoreBooks()}
+                  className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer hover:opacity-90 disabled:bg-gray-400"
+                  onClick={fetchMoreBooks}
+                  disabled={loading}
                 >
-                  더보기 +
+                  {loading ? "로딩 중..." : "더보기 +"}
                 </button>
               </div>
             )}
