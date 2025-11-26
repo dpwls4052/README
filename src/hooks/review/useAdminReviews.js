@@ -74,6 +74,7 @@ export const useAdminReviews = ({
   return {
     reviews,
     setReviews,
+    setReviews,
     fetchReviews,
     fetchMoreReviews,
     loading,
