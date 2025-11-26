@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import EditBookModal from "./EditBookModal";
 import Image from "next/image";
 import DeleteBookModal from "./DeleteBookModal";
@@ -7,6 +7,7 @@ import { useBooks } from "@/hooks/book/useBooks";
 import { useDeleteBook } from "@/hooks/book/useDeleteBook";
 import { useUpdateBook } from "@/hooks/book/useUpdateBook";
 import SearchBar from "@/components/common/SearchBar";
+import { useScroll } from "@/contexts/ScrollContext";
 
 const BookManagement = () => {
   const [searchQuery, setSearchQuery] = useState(""); // 입력중인 검색어
@@ -37,13 +38,24 @@ const BookManagement = () => {
     setSearch(searchQuery); // 검색 버튼 클릭 시 실제 검색어 업데이트
   };
 
+  const scrollRef = useRef(null);
+  const { setScrollContainerRef } = useScroll();
+
+  useEffect(() => {
+    setScrollContainerRef(scrollRef);
+    return () => setScrollContainerRef(null); // cleanup
+  }, []);
+
   return (
     <section className="flex flex-col w-full h-full gap-20">
       <div className="flex items-center justify-between">
         <h1 className="text-32 text-(--main-color)">도서 관리</h1>
         <AddBookModal fetchBooks={fetchBooks} />
       </div>
-      <article className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide relative">
+      <article
+        ref={scrollRef}
+        className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide relative"
+      >
         <div className="sticky top-0 flex justify-center py-20 bg-(--bg-color)">
           <SearchBar
             query={searchQuery}

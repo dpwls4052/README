@@ -1,8 +1,9 @@
 import { useAdminReviews } from "@/hooks/review/useAdminReviews";
 import ReviewItem from "./ReviewItem";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useDeleteReview from "@/hooks/review/useDeleteReview";
 import useRestoreReview from "@/hooks/review/useRestoreReview";
+import { useScroll } from "@/contexts/ScrollContext";
 
 const sorting = [
   { label: "최신순", orderField: "created_at", orderDirection: "desc" },
@@ -73,12 +74,23 @@ const ReviewManagement = () => {
     );
   };
 
+  const scrollRef = useRef(null);
+  const { setScrollContainerRef } = useScroll();
+
+  useEffect(() => {
+    setScrollContainerRef(scrollRef);
+    return () => setScrollContainerRef(null); // cleanup
+  }, []);
+
   return (
     <section className="flex flex-col w-full h-full gap-20 ">
       <div className="flex items-center justify-between h-40">
         <h1 className="text-32 text-(--main-color)">리뷰 관리</h1>
       </div>
-      <div className="overflow-y-auto bg-(--bg-color) scrollbar-hide rounded-lg flex-1">
+      <div
+        ref={scrollRef}
+        className="overflow-y-auto bg-(--bg-color) scrollbar-hide rounded-lg flex-1"
+      >
         <div className="flex items-start justify-between p-20">
           <div className="flex flex-wrap gap-10">
             <input

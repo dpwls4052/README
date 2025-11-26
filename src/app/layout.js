@@ -1,4 +1,6 @@
+import ScrollTopBtn from "@/components/common/ScrollTopBtn";
 import "./globals.css";
+import ScrollProviderWrapper from "@/components/common/ScrollProviderWrapper";
 
 export const metadata = {
   title: "Create Next App",
@@ -8,7 +10,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <ScrollProviderWrapper>
+          {children}
+          <ScrollTopBtn />
+        </ScrollProviderWrapper>
+      </body>
     </html>
   );
 }

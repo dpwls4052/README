@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/common/useAuth";
 import { FiPackage, FiTruck, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { useScroll } from "@/contexts/ScrollContext";
 
 const DeliveryManagement = () => {
   const { userId } = useAuth();
@@ -140,13 +141,24 @@ const DeliveryManagement = () => {
     cancelled: orderList.filter((o) => o.shippingStatus === "주문취소").length,
   };
 
+  const scrollRef = useRef(null);
+  const { setScrollContainerRef } = useScroll();
+
+  useEffect(() => {
+    setScrollContainerRef(scrollRef);
+    return () => setScrollContainerRef(null); // cleanup
+  }, []);
+
   if (loading) return <p className="mt-20 text-center">로딩 중...</p>;
   if (!userId) return <p className="mt-20 text-center">로그인이 필요합니다.</p>;
   if (!isAdmin)
     return <p className="mt-20 text-center">관리자 권한이 없습니다.</p>;
 
   return (
-    <section className="flex justify-center w-full overflow-y-scroll bg-white scrollbar-hide">
+    <section
+      ref={scrollRef}
+      className="flex justify-center w-full overflow-y-scroll bg-white scrollbar-hide"
+    >
       <div className="w-full p-10">
         {/* 상단 헤더 */}
         <div className="flex items-center justify-between">
