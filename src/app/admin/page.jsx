@@ -7,7 +7,6 @@ import {
   BookManagement,
   ReviewManagement,
   DeliveryManagement,
-  FAQManagement,
 } from "@/components/admin/Management";
 import { useAuth } from "@/hooks/common/useAuth";
 
@@ -35,7 +34,6 @@ const Admin = () => {
     book: BookManagement,
     review: ReviewManagement,
     delivery: DeliveryManagement,
-    faq: FAQManagement,
   };
 
   // TODO 스켈레톤 만들기
