@@ -36,6 +36,7 @@ export async function GET(req) {
       cover: book.cover,
       description: book.description,
       link: book.link,
+      mallType: book.mallType,
     };
     books.push(bookData);
   }
