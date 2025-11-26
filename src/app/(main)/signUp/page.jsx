@@ -11,13 +11,11 @@ const SignupPage = () => {
         alt="README Logo"
         width={200}
         height={200}
-        className="mb-8 object-contain"
+        className="mb-8 object-contain py-25"
       />
 
       {/* 회원가입 폼을 감싸는 카드 */}
-      <div className="bg-white p-12 rounded-lg shadow-md max-w-[90%]">
         <SignupForm />
-      </div>
     </div>
   );
 };

@@ -34,46 +34,43 @@ export default function FindPasswordForm() {
   return (
     <form
       onSubmit={handleFindPassword}
-      className="w-[400px] mx-auto flex flex-col gap-6 bg-white p-8 rounded-xl shadow-md"
+      className="w-[600px] min-h-[350px] mx-auto flex flex-col bg-white p-25 rounded-xl shadow-md"
     >
-      {/* 제목 */}
-      <h2 className="text-2xl font-bold text-center">비밀번호 찾기</h2>
-
+      <div className="flex flex-col gap-6 flex-1 justify-center">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="name" className="font-semibold text-gray-700 text-3xl text-center">
+            비밀번호 찾기
+          </label>
+        </div>
       {/* 이메일 입력 */}
-      <div className="flex flex-col gap-2">
-        <label className="font-semibold text-gray-700">이메일</label>
-        <input
-          type="email"
-          placeholder="test@test.com"
-          className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-700"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="email" className="font-semibold text-gray-700 py-8 text-base">
+            이메일
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="이메일 주소를 입력하세요"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+          />
+        </div>
 
       {/* 전화번호 입력 */}
-      <div className="flex flex-col gap-2">
-        <label className="font-semibold text-gray-700">전화번호</label>
-        <input
-          type="text"
-          placeholder="01012345678"
-          className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-700"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-      </div>
-
-      {/* 버튼 */}
-      <button
-        type="submit"
-        disabled={loading}
-        className={`w-full py-2 rounded-lg font-bold text-white transition
-          ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
-      >
-        {loading ? "처리 중..." : "비밀번호 찾기"}
-      </button>
+        <div className="w-full py-8 pb-20">
+          <label className="font-semibold text-gray-700 py-8 text-base">전화번호</label>
+          <input
+            type="text"
+            placeholder="01000000000"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+          />
+        </div>
+    </div>
 
       {/* 결과 출력 */}
       {result && (
@@ -81,7 +78,7 @@ export default function FindPasswordForm() {
       )}
 
       {/* 아래 링크 */}
-      <div className="flex justify-between text-sm text-green-800 font-medium mt-4">
+      <div className="flex justify-between text-sm text-green-800 font-medium mt-4 pb-10">
         <Link href="/login" className="hover:underline">
           로그인
         </Link>
@@ -92,6 +89,16 @@ export default function FindPasswordForm() {
           회원가입
         </Link>
       </div>
+
+      {/* 버튼 */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full h-[40px] py-2 rounded-3xl font-bold text-white transition 
+            ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
+        >
+        {loading ? "처리 중..." : "비밀번호 찾기"}
+      </button>
     </form>
   );
 }

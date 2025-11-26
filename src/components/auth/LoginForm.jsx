@@ -29,67 +29,76 @@ const LoginForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[400px] mx-auto flex flex-col gap-6 bg-white p-8 rounded-xl shadow-md"
+      className="w-[600px] min-h-[350px] mx-auto flex flex-col bg-white p-25 rounded-xl shadow-md"
     >
-      {/* 이메일 입력 */}
-      <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="font-semibold text-gray-700">
-          이메일
-        </label>
-        <input
-          id="email"
-          type="email"
-          placeholder="이메일 주소를 입력하세요"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-700"
-        />
+      {/* ✅ 위쪽 입력 영역 */}
+      <div className="flex flex-col gap-6 flex-1 justify-center">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="name" className="font-semibold text-gray-700 text-3xl text-center">
+            로그인
+          </label>
+        </div>
+        {/* 이메일 입력 */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="email" className="font-semibold text-gray-700 py-8 text-base">
+            이메일
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="이메일 주소를 입력하세요"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+          />
+        </div>
+
+        {/* 비밀번호 입력 */}
+        <div className="flex flex-col gap-6">
+          <label htmlFor="password" className="font-semibold text-gray-700 py-8 text-base">
+            비밀번호
+          </label>
+          <input
+            id="password"
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+          />
+        </div>
+
+        {/* 링크 모음 */}
+        <div className="flex justify-between text-sm text-green-800 font-medium py-8">
+          <Link href="/findId" className="hover:underline">
+            아이디 찾기
+          </Link>
+          <Link href="/findpw" className="hover:underline">
+            비밀번호 찾기
+          </Link>
+          <Link href="/signUp" className="hover:underline">
+            회원가입
+          </Link>
+        </div>
       </div>
 
-      {/* 비밀번호 입력 */}
-      <div className="flex flex-col gap-2">
-        <label htmlFor="password" className="font-semibold text-gray-700">
-          비밀번호
-        </label>
-        <input
-          id="password"
-          type="password"
-          placeholder="비밀번호를 입력하세요"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-green-700"
-        />
+      {/* ✅ 아래 버튼 + 에러 메시지 */}
+      <div className="mt-8">
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full h-[40px] py-2 rounded-3xl font-bold text-white transition 
+            ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
+        >
+          {loading ? "로그인 중..." : "로그인"}
+        </button>
+
+        {error && (
+          <p className="text-red-500 text-center text-sm mt-2">{error}</p>
+        )}
       </div>
-
-      {/* 링크들 */}
-      <div className="flex justify-between text-sm text-green-800 font-medium">
-        <Link href="/findId" className="hover:underline">
-          아이디 찾기
-        </Link>
-        <Link href="/findpw" className="hover:underline">
-          비밀번호 찾기
-        </Link>
-        <Link href="/signUp" className="hover:underline">
-          회원가입
-        </Link>
-      </div>
-
-      {/* 로그인 버튼 */}
-      <button
-        type="submit"
-        disabled={loading}
-        className={`w-full py-2 rounded-lg font-bold text-white transition 
-          ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
-      >
-        {loading ? "로그인 중..." : "로그인"}
-      </button>
-
-      {/* 에러 메시지 */}
-      {error && (
-        <p className="text-red-500 text-center text-sm mt-2">{error}</p>
-      )}
     </form>
   );
 };
