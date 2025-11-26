@@ -43,7 +43,7 @@ const SignupForm = () => {
 
   if (emailSent) {
     return (
-      <div className="w-[500px] mx-auto flex flex-col justify-center items-center gap-6 p-8 bg-white rounded-lg shadow-md">
+      <div className="w-[600px] mx-auto flex flex-col justify-center items-center gap-6 p-8 bg-white rounded-lg shadow-md">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,71 +88,76 @@ const SignupForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[500px] mx-auto flex flex-col justify-center items-center gap-6"
+      className="w-[600px] min-h-[350px] mx-auto flex flex-col bg-white p-30 rounded-xl shadow-md"
     >
       <div className="w-full space-y-6">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="name" className="font-semibold text-gray-700 text-3xl text-center">
+            회원가입
+          </label>
+        </div>
         {/* 이름 입력 */}
         <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">이름</label>
+          <label className="block text-base font-semibold mb-1 py-8">이름</label>
           <input
             type="text"
             placeholder="이름을 입력하세요"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full p-3 border border-gray-300 text-base rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
         {/* 이메일 입력 */}
         <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">이메일</label>
+          <label className="block text-sm font-semibold mb-1 py-8 text-base">이메일</label>
           <input
             type="email"
             placeholder="이메일 주소를 입력하세요"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full p-3 border border-gray-300 rounded-md text-base shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
         {/* 비밀번호 입력 */}
         <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">비밀번호</label>
+          <label className="block text-sm font-semibold mb-1 py-8 text-base">비밀번호</label>
           <input
             type="password"
             placeholder="비밀번호 (6자 이상)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full p-3 border border-gray-300 rounded-md text-base shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
         {/* 비밀번호 확인 */}
         <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">비밀번호 확인</label>
+          <label className="block text-sm font-semibold mb-1 py-8 text-base">비밀번호 확인</label>
           <input
             type="password"
             placeholder="비밀번호를 다시 입력하세요"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full p-3 border border-gray-300 rounded-md text-base shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
         {/* 전화번호 입력 */}
-        <div className="w-full">
-          <label className="block text-sm font-semibold mb-1">전화번호</label>
+        <div className="w-full py-8 pb-20">
+          <label className="block text-sm font-semibold mb-1 pb-10 text-base">전화번호</label>
           <input
             type="text"
             placeholder="01000000000"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full p-3 border border-gray-300 rounded-md text-base shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
@@ -160,9 +165,8 @@ const SignupForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full h-[45px] bg-[#0A400C] text-white font-bold rounded-md transition-colors ${
-            loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#13661A]"
-          }`}
+                    className={`w-full h-[40px] py-2 rounded-3xl font-bold text-white transition 
+            ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
         >
           {loading ? "가입 중..." : "회원가입"}
         </button>
@@ -173,7 +177,7 @@ const SignupForm = () => {
         )}
 
         {/* 로그인 이동 */}
-        <div className="flex justify-center items-center gap-2 text-sm mt-2">
+        <div className="flex justify-center items-center gap-2 text-sm mt-2 pt-8">
           <span>이미 계정이 있으신가요?</span>
           <Link
             href="/login"

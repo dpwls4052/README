@@ -12,7 +12,7 @@ export default function LoginPage() {
         alt="README Logo"
         width={200}
         height={200}
-        className="mb-8 object-contain"
+        className="mb-8 object-contain py-25"
       />
       <LoginForm />
     </div>
