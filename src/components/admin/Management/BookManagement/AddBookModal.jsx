@@ -52,8 +52,8 @@ const AddBookModal = ({ fetchBooks }) => {
 
   const { addBook } = useCreateBook();
 
-  const handleSaveBook = () => {
-    addBook(addedBookList);
+  const handleSaveBook = async () => {
+    await addBook(addedBookList);
     reset();
     closeModal();
     fetchBooks(1, false);
