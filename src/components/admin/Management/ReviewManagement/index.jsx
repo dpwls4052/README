@@ -1,6 +1,9 @@
 import { useAdminReviews } from "@/hooks/review/useAdminReviews";
 import ReviewItem from "./ReviewItem";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import useDeleteReview from "@/hooks/review/useDeleteReview";
+import useRestoreReview from "@/hooks/review/useRestoreReview";
+import { useScroll } from "@/contexts/ScrollContext";
 
 const sorting = [
   { label: "최신순", orderField: "created_at", orderDirection: "desc" },
@@ -18,17 +21,29 @@ const ReviewManagement = () => {
     orderField: "created_at",
     orderDirection: "desc",
   });
-  const { reviews, fetchReviews, fetchMoreReviews, loading, hasNext } =
-    useAdminReviews(appliedFilters);
+  const {
+    reviews,
+    setReviews,
+    fetchReviews,
+    fetchMoreReviews,
+    loading,
+    hasNext,
+  } = useAdminReviews(appliedFilters);
 
   const handleReviewSearch = () => {
     setAppliedFilters({
+      ...appliedFilters,
       userEmail,
       bookId,
     });
   };
   const handleReset = () => {
-    setAppliedFilters({});
+    setAppliedFilters({
+      userEmail: undefined,
+      bookId: undefined,
+      orderField: "created_at",
+      orderDirection: "desc",
+    });
     setUserEmail("");
     setBookId("");
   };
@@ -40,13 +55,42 @@ const ReviewManagement = () => {
       orderDirection: selectedSort.orderDirection,
     });
   };
+  const { deleteReview } = useDeleteReview();
+  const handleDelete = async (reviewId) => {
+    const data = await deleteReview(reviewId);
+    setReviews((reviews) =>
+      reviews.map((r) =>
+        r.reviewId === data.review_id ? { ...r, status: false } : r
+      )
+    );
+  };
+  const { restoreReview } = useRestoreReview();
+  const handleRestore = async (reviewId) => {
+    const data = await restoreReview(reviewId);
+    setReviews((reviews) =>
+      reviews.map((r) =>
+        r.reviewId === data.review_id ? { ...r, status: true } : r
+      )
+    );
+  };
+
+  const scrollRef = useRef(null);
+  const { setScrollContainerRef } = useScroll();
+
+  useEffect(() => {
+    setScrollContainerRef(scrollRef);
+    return () => setScrollContainerRef(null); // cleanup
+  }, []);
 
   return (
     <section className="flex flex-col w-full h-full gap-20 ">
       <div className="flex items-center justify-between h-40">
         <h1 className="text-32 text-(--main-color)">리뷰 관리</h1>
       </div>
-      <div className="overflow-y-auto bg-(--bg-color) scrollbar-hide rounded-lg flex-1">
+      <div
+        ref={scrollRef}
+        className="overflow-y-auto bg-(--bg-color) scrollbar-hide rounded-lg flex-1"
+      >
         <div className="flex items-start justify-between p-20">
           <div className="flex flex-wrap gap-10">
             <input
@@ -94,7 +138,12 @@ const ReviewManagement = () => {
         </div>
         {reviews &&
           reviews.map((review) => (
-            <ReviewItem review={review} key={review.reviewId} />
+            <ReviewItem
+              review={review}
+              key={review.reviewId}
+              handleDelete={handleDelete}
+              handleRestore={handleRestore}
+            />
           ))}
         {hasNext && (
           <div className="p-20 text-center">

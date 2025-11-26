@@ -29,9 +29,11 @@ export default function useBookReviews(bookId) {
         const data = await res.json();
 
         if (Array.isArray(data)) {
+          // API에서 이미 author, firstChar가 포함되어 있음
           const mapped = data.map((r) => ({
             id: r.review_id,
-            author: r.user_id ? r.user_id.slice(0, 8) : "익명",
+            author: r.author || "익**",
+            firstChar: r.firstChar || "익",
             rating: r.rate,
             content: r.review,
             date: r.created_at ? r.created_at.slice(0, 10) : "",
@@ -42,7 +44,7 @@ export default function useBookReviews(bookId) {
           setReviews([]);
         }
       } catch (err) {
-        if (err.name === "AbortError") return; // 페이지 벗어나면 abort됨
+        if (err.name === "AbortError") return;
         console.error("리뷰 fetch 오류:", err);
         setError("리뷰를 불러오는 중 오류가 발생했습니다.");
       } finally {

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import WishListButton from "@/components/common/WishListButton";
 import AddToCartButton from "@/components/common/AddToCartButton";
-import BuyNowButton from "@/components/common/BuyNowButton"; // ✅ 추가
+import BuyNowButton from "@/components/common/BuyNowButton";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useBook } from "@/hooks/book/useBook";
 import useBookReviews from "@/hooks/review/useBookReviews";
@@ -84,34 +84,42 @@ const ProductDetail = () => {
     loading: reviewLoading,
     error: reviewError,
   } = useBookReviews(bookId);
+  
   const [activeTab, setActiveTab] = useState("description");
   const { book, loading, error } = useBook(bookId);
 
+  // 배경색 생성 함수 (첫 글자 기반으로 일관된 색상)
+  const getAvatarColor = (char) => {
+    if (!char) return "#4ECDC4";
+    const colors = [
+      "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A",
+      "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2",
+      "#F8B739", "#52B788", "#E76F51", "#2A9D8F"
+    ];
+    const charCode = char.charCodeAt(0);
+    return colors[charCode % colors.length];
+  };
 
+  // 텍스트 안 이미지 URL을 <img> 태그로 변환
+  const renderDescriptionWithImages = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif))/gi;
+    const parts = text.split(urlRegex);
 
-// 텍스트 안 이미지 URL을 <img> 태그로 변환
-const renderDescriptionWithImages = (text) => {
-  const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif))/gi;
-  const parts = text.split(urlRegex);
+    return parts.map((part, idx) => {
+      if (part.match(urlRegex)) {
+        return (
+          <img
+            key={idx}
+            src={part}
+            alt="description image"
+            className="my-4 w-auto max-w-full rounded-md"
+          />
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
+  };
 
-  return parts.map((part, idx) => {
-    if (part.match(urlRegex)) {
-      // 이미지 URL이면 <img>로 렌더링
-      return (
-        <img
-          key={idx}
-          src={part}
-          alt="description image"
-          className="my-4 w-auto max-w-full rounded-md"
-        />
-      );
-    }
-    return <span key={idx}>{part}</span>;
-  });
-};
-
-
-  
   const bookInfo = book
     ? {
         ...book,
@@ -119,54 +127,49 @@ const renderDescriptionWithImages = (text) => {
       }
     : null;
 
-    // ✅ 최근 본 도서 저장 기능 추가
-useEffect(() => {
-  if (!bookInfo) return;
+  // 최근 본 도서 저장 기능 추가
+  useEffect(() => {
+    if (!bookInfo) return;
 
-  const stored = JSON.parse(localStorage.getItem("recentBooks")) || [];
+    const stored = JSON.parse(localStorage.getItem("recentBooks")) || [];
 
-  const newBook = {
-    id: bookInfo.bookId,
-    title: bookInfo.title,
-    author: bookInfo.author,
-    image: bookInfo.cover,
-  };
+    const newBook = {
+      id: bookInfo.bookId,
+      title: bookInfo.title,
+      author: bookInfo.author,
+      image: bookInfo.cover,
+    };
 
-  // 중복 제거 + 최신순 유지
-  const filtered = stored.filter((b) => b.id !== newBook.id);
-  const updated = [newBook, ...filtered].slice(0, 10);
+    const filtered = stored.filter((b) => b.id !== newBook.id);
+    const updated = [newBook, ...filtered].slice(0, 10);
 
-  localStorage.setItem("recentBooks", JSON.stringify(updated));
-}, [bookInfo]);
+    localStorage.setItem("recentBooks", JSON.stringify(updated));
+  }, [bookInfo]);
 
-// ✅ Supabase 최근 본 도서 저장 (API 사용)
-useEffect(() => {
-  if (!bookInfo || !userId) return;
+  // Supabase 최근 본 도서 저장 (API 사용)
+  useEffect(() => {
+    if (!bookInfo || !userId) return;
 
-  const saveRecentBook = async () => {
-    try {
-      await fetch("/api/user/recentBooks/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          bookId: bookInfo.bookId,
-          title: bookInfo.title,
-          author: bookInfo.author,
-          image: bookInfo.cover,
-        }),
-      });
-    } catch (err) {
-      console.error("최근 본 도서 저장 실패:", err);
-    }
-  };
+    const saveRecentBook = async () => {
+      try {
+        await fetch("/api/user/recentBooks/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            bookId: bookInfo.bookId,
+            title: bookInfo.title,
+            author: bookInfo.author,
+            image: bookInfo.cover,
+          }),
+        });
+      } catch (err) {
+        console.error("최근 본 도서 저장 실패:", err);
+      }
+    };
 
-  saveRecentBook();
-}, [bookInfo, userId]);
-
-
-
-
+    saveRecentBook();
+  }, [bookInfo, userId]);
 
   if (loading) {
     return (
@@ -200,9 +203,7 @@ useEffect(() => {
   const totalReviews = reviews?.length || 0;
   const averageRating =
     totalReviews > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(
-          1
-        )
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
       : 0;
 
   const highResCover =
@@ -268,20 +269,14 @@ useEffect(() => {
             </div>
           )}
 
-
-          {/* 버튼 영역 - 수정됨 */}
+          {/* 버튼 영역 */}
           <div className="flex gap-6 py-20">
-            {/* 위시리스트 버튼 */}
             <WishListButton userId={userId} bookId={bookInfo.bookId} />
-
-            {/* 장바구니 버튼 */}
             <AddToCartButton
               book={{ bookId: bookInfo.bookId }}
               iconMode={false}
               className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
-
-            {/* ✅ 바로구매 버튼 - 컴포넌트로 변경 */}
             <BuyNowButton
               book={{
                 bookId: bookInfo.bookId,
@@ -323,7 +318,7 @@ useEffect(() => {
               {tab === "description"
                 ? "상품설명"
                 : tab === "reviews"
-                ? `리뷰 (${reviews?.length})`
+                ? `리뷰 (${reviews?.length || 0})`
                 : `자주 묻는 질문 (${bookInfo.faqs?.length})`}
             </button>
           ))}
@@ -384,15 +379,18 @@ useEffect(() => {
               {reviews.map((item) => (
                 <div key={item.id} className="p-25 rounded-sm bg-(--bg-color) ">
                   <div className="flex gap-10">
-                    <img
-                      src={item.avatar}
-                      alt={item.author}
-                      className="object-cover rounded-full w-30 h-30"
-                    />
+                    {/* 원형 아바타 - 첫 글자 표시 */}
+                    <div 
+                      className="flex items-center justify-center rounded-full w-40 h-40 font-bold text-white text-18"
+                      style={{ backgroundColor: getAvatarColor(item.firstChar || "익") }}
+                    >
+                      {item.firstChar || "익"}
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-10">
+                        {/* 마스킹된 이름 */}
                         <span className="font-semibold text-black text-20">
-                          {item.author}
+                          {item.author || "익**"}
                         </span>
                         <span className="font-normal text-gray-500 text-16">
                           {item.date}
