@@ -18,7 +18,7 @@ export async function POST(req) {
     }
 
     const { data, error } = await supabase
-      .from("review") // 테이블 이름 그대로 review
+      .from("review")
       .insert({
         book_id: bookId,
         user_id: userId,
@@ -57,7 +57,16 @@ export async function GET(req) {
 
   let query = supabase
     .from("review")
-    .select("review_id, book_id, user_id, rate, review, status, created_at")
+    .select(`
+      review_id, 
+      book_id, 
+      user_id, 
+      rate, 
+      review, 
+      status, 
+      created_at,
+      users (name)
+    `)
     .eq("status", true)
     .order("created_at", { ascending: false });
 
@@ -84,7 +93,23 @@ export async function GET(req) {
     );
   }
 
-  return NextResponse.json(data, { status: 200 });
+  // 사용자 이름 마스킹 처리
+  const maskedData = data.map(review => {
+    const fullName = review.users?.name || "익명";
+    const firstChar = fullName.charAt(0);
+    const maskedName = firstChar + "**";
+    
+    // users 객체 제거하고 필드 추가
+    const { users, ...reviewData } = review;
+    
+    return {
+      ...reviewData,
+      author: maskedName,
+      firstChar: firstChar
+    };
+  });
+
+  return NextResponse.json(maskedData, { status: 200 });
 }
 
 // PATCH /api/reviews  → 리뷰 수정
@@ -105,7 +130,7 @@ export async function PATCH(req) {
     // ✅ 1) 삭제/복구 (status가 boolean으로 온 경우)
     if (typeof status === "boolean") {
       const { data, error } = await supabase
-        .from("review") // ⚠️ 테이블명 꼭 확인
+        .from("review")
         .update({
           status,
         })
