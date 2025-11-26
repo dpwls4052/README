@@ -1,40 +1,43 @@
-// app/pay/success/page.js
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; // ✅ useRef 추가
 import { useRouter } from 'next/navigation';
 import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
-import { useCartCount } from '@/hooks/common/useCartCount'; // ✅ 추가
+import { useCartCount } from '@/hooks/common/useCartCount';
 
 export default function PaymentSuccessPage() {
     const router = useRouter();
-    const { removeFromCart } = useCartCount(); // ✅ 추가
+    const { removeFromCart } = useCartCount();
     const [loading, setLoading] = useState(true);
     const [isDbSaved, setIsDbSaved] = useState(false);
     const [error, setError] = useState(null);
     const [orderNumber, setOrderNumber] = useState('');
     const [orderInfo, setOrderInfo] = useState(null);
-
+    
+    const hasRun = useRef(false); // ✅ 실행 여부 추적
 
     useEffect(() => {
+        // ✅ 이미 실행되었으면 리턴
+        if (hasRun.current) {
+            console.log("⚠️ 이미 실행됨 - 중복 방지");
+            return;
+        }
+        
+        hasRun.current = true; // ✅ 실행 플래그 설정
+        
         console.log("🚀 Success 페이지 useEffect 시작");
         
-        // 1. URL 파라미터 유효성 검사 제거됨
-        
-        // 2. 로컬 스토리지에서 주문 데이터 로드
         const storedData = localStorage.getItem("pendingOrderData");
         console.log("📦 로컬스토리지 데이터:", storedData ? "있음" : "없음");
         
         if (!storedData) {
-            // ✅ 이미 DB에 저장되어 있다면 (orderNumber가 있으면) 에러 표시 안함
             if (isDbSaved && orderNumber) {
                 console.log("✅ 이미 처리 완료된 주문 (정상)");
                 setLoading(false);
                 return;
             }
             
-            // ✅ 정말 데이터가 없는 경우만 에러
-            console.log("⚠️ pendingOrderData 없음 - 결제 페이지에서 데이터 저장 실패 가능성");
+            console.log("⚠️ pendingOrderData 없음");
             setError('주문 정보(pendingOrderData)를 찾을 수 없습니다. 결제 페이지로 돌아가 다시 시도해주세요.');
             setLoading(false);
             return;
@@ -43,20 +46,16 @@ export default function PaymentSuccessPage() {
         let orderPayload;
         try {
             orderPayload = JSON.parse(storedData);
-            // console.log("✅ orderPayload 파싱 성공:", orderPayload);
         } catch (parseError) {
-            // console.error("❌ pendingOrderData 파싱 실패:", parseError);
             setError("주문 정보 형식이 올바르지 않습니다. 결제 페이지로 돌아가 다시 시도해주세요.");
             setLoading(false);
             return;
         }
         setOrderInfo(orderPayload);
         
-        // 3. 서버에 최종 주문 데이터 전송 (DB 저장)
         const saveOrderToDB = async () => {
             try {
                 const finalPayload = orderPayload;
-                // console.log("📮 API 호출 시작:", finalPayload);
 
                 const res = await fetch("/api/order/create", {
                     method: "POST",
@@ -64,16 +63,13 @@ export default function PaymentSuccessPage() {
                     body: JSON.stringify(finalPayload),
                 });
 
-                // console.log("📡 API 응답 상태:", res.status, res.ok);
                 const result = await res.json();
-                // console.log("📊 API 응답 데이터:", result);
 
                 if (res.ok && result.success) {
-                    // console.log("✅ 주문 저장 성공!");
+                    console.log("✅ 주문 저장 성공!");
                     setIsDbSaved(true);
                     setOrderNumber(result.orderNumber);
                     
-                    // ✅ 성공적으로 저장 후 헤더 카운트 업데이트
                     if (orderPayload.orderItems && Array.isArray(orderPayload.orderItems)) {
                         console.log("🛒 장바구니 카운트 업데이트 시작:", orderPayload.orderItems.length, "개");
                         orderPayload.orderItems.forEach(item => {
@@ -85,26 +81,24 @@ export default function PaymentSuccessPage() {
                         });
                     }
                     
-                    // 로컬 스토리지 데이터 삭제
                     localStorage.removeItem("pendingOrderData");
-                    // console.log("🗑️ pendingOrderData 삭제 완료");
+                    console.log("🗑️ pendingOrderData 삭제 완료");
                 } else {
-                    // console.error("❌ DB 저장 실패:", result.errorMessage);
+                    console.error("❌ DB 저장 실패:", result.errorMessage);
                     setError(`주문 저장 실패: ${result.errorMessage || '알 수 없는 오류'}`);
                 }
             } catch (e) {
-                // console.error("💥 주문 API 통신 오류:", e);
+                console.error("💥 주문 API 통신 오류:", e);
                 setError(`서버 통신 오류: ${e.message}`);
             } finally {
                 setLoading(false);
-                // console.log("🏁 saveOrderToDB 종료");
+                console.log("🏁 saveOrderToDB 종료");
             }
         };
 
         saveOrderToDB();
         
-        // ✅ cleanup 함수에서 플래그 유지 (리셋하지 않음)
-    }, [removeFromCart]); // ✅ 의존성 배열에 추가
+    }, []);
 
     // ✅ cartData 로컬스토리지 정리는 제거 (API에서 이미 처리됨)
     // useEffect(() => {

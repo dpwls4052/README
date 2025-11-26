@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/hooks/common/useAuth";
-import { useCartCount } from "@/hooks/common/useCartCount"; // 🌟 추가
+import { useCartCount } from "@/hooks/common/useCartCount";
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -64,7 +64,7 @@ const Cart = () => {
           count: item.amount,
           stock: item.stock,
           image: item.cover,
-          selected: item.stock > 0, // 재고 0이면 선택 불가
+          selected: item.stock > 0,
         }));
       setItems(mappedItems);
     } catch (err) {
@@ -78,13 +78,21 @@ const Cart = () => {
     fetchCart();
   }, [userId]);
 
+  // 선택 가능한 상품들 (재고가 있는 상품들)
+  const availableItems = items.filter((item) => item.stock > 0);
+  // 실제 선택된 상품들
   const selectedItems = items.filter((item) => item.selected);
+  
   const itemsTotal = selectedItems.reduce(
     (acc, item) => acc + item.price * item.count,
     0
   );
   const shippingFee = itemsTotal > 0 && itemsTotal < 30000 ? 3000 : 0;
   const totalAmount = itemsTotal + shippingFee;
+
+  // 전체선택 체크 상태: 선택 가능한 상품이 있고, 선택 가능한 상품 모두가 선택된 경우
+  const isAllSelected = availableItems.length > 0 && 
+                        availableItems.every(item => item.selected);
 
   const handleSelectAll = (e) => {
     const checked = e.target.checked;
@@ -167,7 +175,7 @@ const Cart = () => {
     const orderItems = selectedItems.map((item) => {
       if (item.count > item.stock) {
         hasAdjusted = true;
-        item.count = item.stock; // 재고로 조정
+        item.count = item.stock;
       }
       return {
         book_id: item.id,
@@ -228,12 +236,12 @@ const Cart = () => {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={selectedItems.length === items.length}
+                      checked={isAllSelected}
                       onChange={handleSelectAll}
                       className="w-20 h-20"
                     />
                     <span className="font-medium text-black ml-10">
-                      전체선택 ({selectedItems.length}/{items.length})
+                      전체선택 ({selectedItems.length}/{availableItems.length})
                     </span>
                   </label>
                   <div className="flex gap-4">
@@ -263,7 +271,7 @@ const Cart = () => {
                         checked={item.selected}
                         onChange={() => handleSelect(item.id)}
                         className="w-20 h-20"
-                        disabled={item.stock === 0} // 재고 0이면 선택 불가
+                        disabled={item.stock === 0}
                       />
                       <img
                         src={item.image}
@@ -284,20 +292,19 @@ const Cart = () => {
                           {item.price.toLocaleString()}원
                         </p>
                         <div className="flex items-center gap-2">
-  <span
-    className={`px-2 py-1 font-medium text-14 whitespace-nowrap ${
-      item.stock > 10
-        ? "bg-[var(--sub-color)]/20 text-[var(--main-color)]"
-        : item.stock > 0
-        ? "bg-orange-100 text-orange-600"
-        : "bg-gray-100 text-gray-600"
-    }`}
-    style={{ width: "auto", display: "inline-block" }}
-  >
-    {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
-  </span>
-</div>
-
+                          <span
+                            className={`px-2 py-1 font-medium text-14 whitespace-nowrap ${
+                              item.stock > 10
+                                ? "bg-[var(--sub-color)]/20 text-[var(--main-color)]"
+                                : item.stock > 0
+                                ? "bg-orange-100 text-orange-600"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                            style={{ width: "auto", display: "inline-block" }}
+                          >
+                            {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
