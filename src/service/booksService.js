@@ -60,5 +60,5 @@ export async function updateBook(bookId, updatedData) {
 }
 
 export const deleteBook = async (bookId) => {
-  return updateBook(bookId, { status: false });
+  return updateBook(bookId, { stock: 0 });
 };
