@@ -9,9 +9,9 @@ export default function SearchResultPage() {
   return (
     <>
       <Navigation />
-      <Suspense fallback={<div>Loading...</div>}>
+      {/* <Suspense fallback={<div>Loading...</div>}> */}
         <SearchContent />
-      </Suspense>
+      {/* </Suspense> */}
     </>
   );
 }
