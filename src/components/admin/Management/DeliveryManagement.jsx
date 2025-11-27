@@ -1,80 +1,57 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@/hooks/common/useAuth";
 import { FiPackage, FiTruck, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useScroll } from "@/contexts/ScrollContext";
+import { auth } from "@/lib/firebase";
+import axios from "axios";
 
 const DeliveryManagement = () => {
-  const { userId } = useAuth();
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("전체");
 
   // 관리자 권한 확인 및 주문 내역 조회
   useEffect(() => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        // 관리자 권한 확인 및 주문 조회
-        const res = await fetch(`/api/order/admin/getAllOrders`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId }),
+        const idToken = await auth.currentUser.getIdToken();
+
+        const res = await axios.get("/api/order/admin/getAllOrders", {
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+          },
         });
-
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("서버 응답이 올바르지 않습니다.");
-        }
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          if (res.status === 403) {
-            setIsAdmin(false);
-            throw new Error("관리자 권한이 없습니다.");
-          }
-          throw new Error(data.error || "주문 내역 조회 실패");
-        }
-
-        setIsAdmin(true);
-        setOrders(data);
+        setOrders(res.data);
       } catch (err) {
         console.error("주문 조회 에러:", err);
-        alert(err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [userId]);
+  }, []);
 
   // 배송 상태 변경
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const res = await fetch(`/api/order/admin/updateShippingStatus`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
+      const idToken = await auth.currentUser.getIdToken();
+
+      const res = await axios.patch(
+        "/api/order/admin/updateShippingStatus",
+        {
           order_id: orderId,
           shipping_status: newStatus,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || "상태 변경 실패");
+        },
+        {
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+          },
+        }
+      );
 
       // 상태 업데이트
       setOrders((prev) =>
@@ -88,7 +65,7 @@ const DeliveryManagement = () => {
       alert("배송 상태가 변경되었습니다.");
     } catch (err) {
       console.error("상태 변경 에러:", err);
-      alert(err.message);
+      alert(err.response?.data?.error || err.message || "상태 변경 실패");
     }
   };
 
@@ -150,9 +127,6 @@ const DeliveryManagement = () => {
   }, []);
 
   if (loading) return <p className="mt-20 text-center">로딩 중...</p>;
-  if (!userId) return <p className="mt-20 text-center">로그인이 필요합니다.</p>;
-  if (!isAdmin)
-    return <p className="mt-20 text-center">관리자 권한이 없습니다.</p>;
 
   return (
     <section className="flex justify-center w-full h-full bg-white ">
