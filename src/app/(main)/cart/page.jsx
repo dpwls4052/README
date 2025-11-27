@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useCartCount } from "@/hooks/common/useCartCount";
+import { auth } from "@/lib/firebase";
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -39,18 +40,33 @@ const Minus = ({ size = 16 }) => (
 
 const Cart = () => {
   const router = useRouter();
-  const { userId } = useAuth();
+  const { userId, user } = useAuth();
   const { removeFromCart } = useCartCount();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Authorization 헤더 생성 함수
+  const getAuthHeaders = async () => {
+    if (!auth.currentUser) return {};
+    const token = await auth.currentUser.getIdToken();
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    };
+  };
+
   // 장바구니 불러오기
   const fetchCart = async () => {
-    if (!userId) return;
+    if (!userId || !user) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/user/cart?user_id=${userId}`);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/user/cart`, {
+        method: "GET",
+        headers,
+      });
+      
       if (!res.ok) throw new Error("장바구니 조회 실패");
       const data = await res.json();
 
@@ -76,7 +92,7 @@ const Cart = () => {
 
   useEffect(() => {
     fetchCart();
-  }, [userId]);
+  }, [userId, user]);
 
   // 선택 가능한 상품들 (재고가 있는 상품들)
   const availableItems = items.filter((item) => item.stock > 0);
@@ -119,9 +135,10 @@ const Cart = () => {
     if (newCount > item.stock) return alert("재고가 부족합니다.");
 
     try {
+      const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ cartId: item.cartId, delta }),
       });
       fetchCart();
@@ -136,9 +153,10 @@ const Cart = () => {
     if (selected.length === 0) return alert("선택된 상품이 없습니다");
 
     try {
+      const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ cartIds: selected.map((i) => i.cartId) }),
       });
 
@@ -153,9 +171,10 @@ const Cart = () => {
   const handleDeleteAll = async () => {
     if (items.length === 0) return;
     try {
+      const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ cartIds: items.map((i) => i.cartId) }),
       });
 
@@ -215,8 +234,8 @@ const Cart = () => {
   return (
     <ProtectedRoute>
       <div className="min-h-screen py-10 bg-white">
-        <div className="max-w-1200 mx-auto px-5 pt-50">
-          <h1 className="text-3xl font-bold mb-20">장바구니</h1>
+        <div className="max-w-full min-[900px]:max-w-1200 mx-auto px-4 md:px-5 pt-8 md:pt-50">
+          <h1 className="text-2xl md:text-3xl font-bold mb-8 md:mb-20">장바구니</h1>
 
           {loading ? (
             <div className="text-center py-10">
@@ -229,31 +248,31 @@ const Cart = () => {
               <p className="text-gray-500">장바구니가 비어 있습니다.</p>
             </div>
           ) : (
-            <div className="flex flex-col lg:flex-row gap-20">
+            <div className="flex flex-col lg:flex-row gap-8 md:gap-20">
               {/* 좌측 - 아이템 */}
               <div className="flex-[2] flex flex-col gap-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isAllSelected}
                       onChange={handleSelectAll}
-                      className="w-20 h-20"
+                      className="w-4 h-4 md:w-20 md:h-20"
                     />
-                    <span className="font-medium text-black ml-10">
+                    <span className="font-medium text-black text-sm md:text-base ml-2 md:ml-10">
                       전체선택 ({selectedItems.length}/{availableItems.length})
                     </span>
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex gap-2 md:gap-4">
                     <button
                       onClick={handleDeleteSelected}
-                      className="px-12 py-6 font-normal text-sm bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90"
+                      className="px-3 md:px-12 py-2 md:py-6 font-normal text-xs md:text-sm bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90"
                     >
                       선택삭제
                     </button>
                     <button
                       onClick={handleDeleteAll}
-                      className="px-12 py-6 font-normal text-sm bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90"
+                      className="px-3 md:px-12 py-2 md:py-6 font-normal text-xs md:text-sm bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90"
                     >
                       전체삭제
                     </button>
@@ -263,37 +282,37 @@ const Cart = () => {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-center py-15 px-4 gap-15 border-b border-gray-200"
+                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 md:py-15 px-2 md:px-4 gap-3 md:gap-15 border-b border-gray-200"
                   >
-                    <div className="flex items-start gap-20 flex-1">
+                    <div className="flex items-start gap-3 md:gap-20 flex-1 w-full">
                       <input
                         type="checkbox"
                         checked={item.selected}
                         onChange={() => handleSelect(item.id)}
-                        className="w-20 h-20"
+                        className="w-4 h-4 md:w-20 md:h-20 mt-1 flex-shrink-0"
                         disabled={item.stock === 0}
                       />
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-100 h-140 object-cover rounded-md border border-gray-300 cursor-pointer"
+                        className="w-16 md:w-100 h-24 md:h-140 object-cover rounded-md border border-gray-300 cursor-pointer flex-shrink-0"
                         onClick={() =>
                           router.push(`/product/detail/${item.id}`)
                         }
                       />
                       <div
-                        className="flex flex-col gap-1 flex-1 cursor-pointer"
+                        className="flex flex-col gap-1 flex-1 cursor-pointer min-w-0"
                         onClick={() => router.push(`/product/detail/${item.id}`)}
                       >
-                        <p className="text-base font-medium text-black ">
+                        <p className="text-sm md:text-base font-medium text-black line-clamp-2">
                           {item.name}
                         </p>
-                        <p className="text-lg font-bold text-[var(--main-color)]">
+                        <p className="text-base md:text-lg font-bold text-[var(--main-color)]">
                           {item.price.toLocaleString()}원
                         </p>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2 py-1 font-medium text-14 whitespace-nowrap ${
+                            className={`px-2 py-1 font-medium text-xs md:text-14 whitespace-nowrap ${
                               item.stock > 10
                                 ? "bg-[var(--sub-color)]/20 text-[var(--main-color)]"
                                 : item.stock > 0
@@ -307,22 +326,22 @@ const Cart = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-auto sm:ml-0">
                       <button
                         onClick={() => handleCountChange(item, -1)}
                         disabled={item.count <= 1}
-                        className="p-4 bg-[var(--sub-color)] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:cursor-pointer"
+                        className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:cursor-pointer"
                       >
-                        <Minus />
+                        <Minus size={14} />
                       </button>
-                      <span className="font-medium min-w-[40px] text-center text-black">
+                      <span className="font-medium min-w-[30px] md:min-w-[40px] text-center text-black text-sm md:text-base">
                         {item.count}
                       </span>
                       <button
                         onClick={() => handleCountChange(item, 1)}
-                        className="p-4 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90 hover:cursor-pointer"
+                        className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90 hover:cursor-pointer"
                       >
-                        <Plus />
+                        <Plus size={14} />
                       </button>
                     </div>
                   </div>
@@ -331,18 +350,18 @@ const Cart = () => {
 
               {/* 우측 - 결제 정보 */}
               <div className="flex-[1] lg:sticky lg:top-100 h-fit">
-                <div className="bg-[var(--bg-color)] p-20 rounded-md shadow-sm">
-                  <h2 className="text-xl font-bold mb-30 text-black">
+                <div className="bg-[var(--bg-color)] p-4 md:p-20 rounded-md shadow-sm">
+                  <h2 className="text-lg md:text-xl font-bold mb-6 md:mb-30 text-black">
                     결제 정보
                   </h2>
-                  <div className="flex flex-col gap-25 mb-4">
-                    <div className="flex font-normal justify-between text-black">
+                  <div className="flex flex-col gap-4 md:gap-25 mb-4">
+                    <div className="flex font-normal justify-between text-black text-sm md:text-base">
                       <span>상품 금액</span>
                       <span className="font-medium">
                         {itemsTotal.toLocaleString()}원
                       </span>
                     </div>
-                    <div className="flex font-normal justify-between text-black">
+                    <div className="flex font-normal justify-between text-black text-sm md:text-base">
                       <span>배송비</span>
                       <span className="font-medium">
                         {shippingFee === 0
@@ -351,7 +370,7 @@ const Cart = () => {
                       </span>
                     </div>
                     <div className="border-b border-gray-300 my-2" />
-                    <div className="flex justify-between text-lg font-bold text-black">
+                    <div className="flex justify-between text-base md:text-lg font-bold text-black">
                       <span>결제 예정 금액</span>
                       <span className="text-[var(--main-color)]">
                         {totalAmount.toLocaleString()}원
@@ -360,11 +379,11 @@ const Cart = () => {
                   </div>
                   <button
                     onClick={handlePay}
-                    className="w-full mt-20 py-16 bg-[var(--main-color)] text-white rounded-sm font-semibold text-18 hover:opacity-90 transition hover:cursor-pointer"
+                    className="w-full mt-4 md:mt-20 py-3 md:py-16 bg-[var(--main-color)] text-white rounded-sm font-semibold text-base md:text-18 hover:opacity-90 transition hover:cursor-pointer"
                   >
                     주문하기
                   </button>
-                  <p className="text-sm font-light text-gray-500 mt-10 text-center">
+                  <p className="text-xs md:text-sm font-light text-gray-500 mt-2 md:mt-10 text-center">
                     30,000원 이상 구매 시 배송비 무료
                   </p>
                 </div>
