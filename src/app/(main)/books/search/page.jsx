@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 
 import Navigation from "@/components/main/Navigation";
 import { Suspense } from "react";
@@ -9,9 +8,9 @@ export default function SearchResultPage() {
   return (
     <>
       <Navigation />
-      {/* <Suspense fallback={<div>Loading...</div>}> */}
+      <Suspense fallback={<div>Loading...</div>}>
         <SearchContent />
-      {/* </Suspense> */}
+      </Suspense>
     </>
   );
 }
