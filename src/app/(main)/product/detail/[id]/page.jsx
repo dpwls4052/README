@@ -173,9 +173,9 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="px-6 py-8 mx-auto mt-20 max-w-7xl">
+      <div className="px-4 md:px-6 py-8 mx-auto mt-8 md:mt-20 max-w-7xl">
         <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-xl text-(--main-color)">로딩 중...</div>
+          <div className="text-lg md:text-xl text-(--main-color)">로딩 중...</div>
         </div>
       </div>
     );
@@ -183,15 +183,15 @@ const ProductDetail = () => {
 
   if (error || !bookInfo) {
     return (
-      <div className="px-6 py-8 mx-auto mt-20 max-w-7xl">
+      <div className="px-4 md:px-6 py-8 mx-auto mt-8 md:mt-20 max-w-7xl">
         <div className="flex flex-col justify-center items-center min-h-[60vh]">
-          <div className="mb-6 text-xl text-red-500">
+          <div className="mb-6 text-lg md:text-xl text-red-500">
             {error || "책을 찾을 수 없습니다."}
           </div>
           <button
             onClick={() => router.back()}
             style={{ borderRadius: "var(--radius-15)" }}
-            className="px-8 py-3 bg-(--main-color) text-white font-medium hover:opacity-90 transition-opacity"
+            className="px-6 md:px-8 py-2 md:py-3 bg-(--main-color) text-white font-medium hover:opacity-90 transition-opacity"
           >
             뒤로 가기
           </button>
@@ -210,45 +210,45 @@ const ProductDetail = () => {
     bookInfo.cover?.replace(/coversum/gi, "cover500") || bookInfo.cover;
 
   return (
-    <div className="mx-auto max-w-1200 mt-50 px-60">
+    <div className="mx-auto max-w-full min-[900px]:max-w-1200 mt-8 min-[900px]:mt-50 px-4 min-[900px]:px-60">
       {/* 상품 정보 영역 */}
-      <div className="flex mb-80 gap-80">
+      <div className="flex flex-col min-[900px]:flex-row mb-12 min-[900px]:mb-80 gap-8 min-[900px]:gap-80">
         {/* 이미지 */}
-        <div className="w-400 h-auto rounded-md overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+        <div className="w-full min-[900px]:w-400 h-auto rounded-md overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.12)] mx-auto min-[900px]:mx-0">
           <Image
             src={highResCover}
             alt={bookInfo.title}
             width={600}
             height={600}
-            className="object-contain"
+            className="object-contain w-full"
           />
         </div>
 
         {/* 정보 */}
-        <div className="flex flex-col py-20 space-y-6 flex-2">
+        <div className="flex flex-col py-4 min-[900px]:py-20 space-y-4 min-[900px]:space-y-6 flex-1 min-[900px]:flex-2">
           <div>
-            <p className="mb-2 font-normal text-gray-500 text-16">
+            <p className="mb-2 font-normal text-gray-500 text-sm min-[900px]:text-16">
               {bookInfo.category.map((c) => c.name).join(" > ")}
             </p>
-            <h1 className="text-3xl font-bold text-black my-25">
+            <h1 className="text-xl min-[900px]:text-3xl font-bold text-black my-3 min-[900px]:my-25">
               {bookInfo.title}
             </h1>
-            <p className="font-normal text-gray-700 text-18">
+            <p className="font-normal text-gray-700 text-sm min-[900px]:text-18">
               {bookInfo.author} | {bookInfo.publisher} | {bookInfo.pubDate}
             </p>
           </div>
 
-          <div className="py-20 text-right border-b border-gray-200 ">
-            <p className="text-4xl font-bold text-(--main-color)">
+          <div className="py-4 min-[900px]:py-20 text-right border-b border-gray-200">
+            <p className="text-2xl min-[900px]:text-4xl font-bold text-(--main-color)">
               {bookInfo.priceStandard?.toLocaleString()}원
             </p>
           </div>
 
-          <div className="flex items-center justify-between my-0 border-b border-gray-200 py-15">
-            <span className="font-semibold text-black text-20">재고량</span>
+          <div className="flex items-center justify-between my-0 border-b border-gray-200 py-3 min-[900px]:py-15">
+            <span className="font-semibold text-black text-base min-[900px]:text-20">재고량</span>
             <span
               style={{ borderRadius: "var(--radius-5)" }}
-              className={`px-10 py-6 font-medium text-20 ${
+              className={`px-3 min-[900px]:px-10 py-2 min-[900px]:py-6 font-medium text-base min-[900px]:text-20 ${
                 bookInfo.stock > 10
                   ? "bg-(--sub-color)/20 text-(--main-color)"
                   : bookInfo.stock > 0
@@ -261,21 +261,21 @@ const ProductDetail = () => {
           </div>
 
           {bookInfo.salesCount !== undefined && bookInfo.salesCount !== null && (
-            <div className="flex items-center justify-between my-0 border-b border-gray-200 py-15">
-              <span className="font-semibold text-black text-20">판매량</span>
-              <span className="text-(--main-color) font-medium text-20">
+            <div className="flex items-center justify-between my-0 border-b border-gray-200 py-3 min-[900px]:py-15">
+              <span className="font-semibold text-black text-base min-[900px]:text-20">판매량</span>
+              <span className="text-(--main-color) font-medium text-base min-[900px]:text-20">
                 {bookInfo.salesCount.toLocaleString()}권
               </span>
             </div>
           )}
 
           {/* 버튼 영역 */}
-          <div className="flex gap-6 py-20">
+          <div className="flex flex-col sm:flex-row gap-3 min-[900px]:gap-6 py-4 min-[900px]:py-20">
             <WishListButton userId={userId} bookId={bookInfo.bookId} />
             <AddToCartButton
               book={{ bookId: bookInfo.bookId }}
               iconMode={false}
-              className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold text-base min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <BuyNowButton
               book={{
@@ -285,7 +285,7 @@ const ProductDetail = () => {
                 priceStandard: bookInfo.priceStandard,
                 stock: bookInfo.stock,
               }}
-              className="h-50 flex-1 bg-(--sub-color) text-white px-6 py-15 rounded font-semibold text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold text-base min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -294,7 +294,7 @@ const ProductDetail = () => {
               href={bookInfo.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-14 text-(--sub-color) hover:text-(--main-color) font-medium hover:underline transition-colors text-right"
+              className="text-xs min-[900px]:text-14 text-(--sub-color) hover:text-(--main-color) font-medium hover:underline transition-colors text-right"
             >
               알라딘에서 보기 →
             </a>
@@ -303,12 +303,12 @@ const ProductDetail = () => {
       </div>
 
       {/* 탭 */}
-      <div className="pt-12 ">
-        <div className="flex border-b-2 border-gray-200 gap-30">
+      <div className="pt-6 min-[900px]:pt-12">
+        <div className="flex border-b-2 border-gray-200 gap-4 min-[900px]:gap-30 overflow-x-auto">
           {["description", "reviews", "faq"].map((tab) => (
             <button
               key={tab}
-              className={`pb-10 px-2 font-normal text-20 transition-colors ${
+              className={`pb-2 min-[900px]:pb-10 px-2 font-normal text-sm min-[900px]:text-20 transition-colors whitespace-nowrap ${
                 activeTab === tab
                   ? "border-b-2 border-(--main-color) text-(--main-color) -mb-2"
                   : "text-gray-600 hover:text-(--main-color)"
@@ -325,36 +325,36 @@ const ProductDetail = () => {
         </div>
 
         {/* 탭 내용 */}
-        <div className="mt-15">
+        <div className="mt-4 min-[900px]:mt-15">
           {activeTab === "description" && (
             <div
               style={{ borderRadius: "var(--radius-15)" }}
-              className="bg-(--bg-color) p-15"
+              className="bg-(--bg-color) p-4 min-[900px]:p-15"
             >
-              <div className="font-light leading-relaxed text-black whitespace-pre-line text-18 flex flex-col items-center">
+              <div className="font-light leading-relaxed text-black whitespace-pre-line text-sm min-[900px]:text-18 flex flex-col items-center">
                 {renderDescriptionWithImages(bookInfo.description)}
               </div>
             </div>
           )}
 
           {activeTab === "reviews" && (
-            <div className="space-y-10">
+            <div className="space-y-3 min-[900px]:space-y-10">
               <div
                 style={{ borderRadius: "var(--radius-15)" }}
-                className="flex items-center gap-12 p-15"
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-3 min-[900px]:gap-12 p-4 min-[900px]:p-15"
               >
-                <span className="font-semibold text-black text-16">
+                <span className="font-semibold text-black text-sm min-[900px]:text-16">
                   전체 리뷰 {totalReviews}개
                 </span>
-                <span className="text-(--main-color) font-semibold text-20">
+                <span className="text-(--main-color) font-semibold text-base min-[900px]:text-20">
                   평균 ⭐ {averageRating}
                 </span>
               </div>
 
               {/* 로딩 상태 */}
               {reviewLoading && (
-                <div className="p-25 rounded-sm bg-(--bg-color)">
-                  <p className="text-18 text-gray-600">
+                <div className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-sm min-[900px]:text-18 text-gray-600">
                     리뷰를 불러오는 중입니다...
                   </p>
                 </div>
@@ -362,42 +362,42 @@ const ProductDetail = () => {
 
               {/* 에러 상태 */}
               {reviewError && (
-                <div className="p-25 rounded-sm bg-(--bg-color)">
-                  <p className="text-18 text-red-500">{reviewError}</p>
+                <div className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-sm min-[900px]:text-18 text-red-500">{reviewError}</p>
                 </div>
               )}
 
               {/* 리뷰 없음 */}
               {!reviewLoading && !reviewError && reviews.length === 0 && (
-                <div className="p-25 rounded-sm bg-(--bg-color)">
-                  <p className="text-18 text-gray-600">
+                <div className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                  <p className="text-sm min-[900px]:text-18 text-gray-600">
                     아직 등록된 리뷰가 없습니다.
                   </p>
                 </div>
               )}
 
               {reviews.map((item) => (
-                <div key={item.id} className="p-25 rounded-sm bg-(--bg-color) ">
-                  <div className="flex gap-10">
+                <div key={item.id} className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                  <div className="flex gap-3 min-[900px]:gap-10">
                     {/* 원형 아바타 - 첫 글자 표시 */}
                     <div 
-                      className="flex items-center justify-center rounded-full w-40 h-40 font-bold text-white text-18"
+                      className="flex items-center justify-center rounded-full w-10 h-10 min-[900px]:w-40 min-[900px]:h-40 font-bold text-white text-base min-[900px]:text-18 flex-shrink-0"
                       style={{ backgroundColor: getAvatarColor(item.firstChar || "익") }}
                     >
                       {item.firstChar || "익"}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-10">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2 min-[900px]:mb-10">
                         {/* 마스킹된 이름 */}
-                        <span className="font-semibold text-black text-20">
+                        <span className="font-semibold text-black text-base min-[900px]:text-20">
                           {item.author || "익**"}
                         </span>
-                        <span className="font-normal text-gray-500 text-16">
+                        <span className="font-normal text-gray-500 text-xs min-[900px]:text-16 whitespace-nowrap ml-2">
                           {item.date}
                         </span>
                       </div>
-                      <div className=" text-16">{"⭐".repeat(item.rating)}</div>
-                      <p className="mt-20 font-light leading-relaxed text-black text-18">
+                      <div className="text-sm min-[900px]:text-16">{"⭐".repeat(item.rating)}</div>
+                      <p className="mt-3 min-[900px]:mt-20 font-light leading-relaxed text-black text-sm min-[900px]:text-18">
                         {item.content}
                       </p>
                     </div>
@@ -408,13 +408,13 @@ const ProductDetail = () => {
           )}
 
           {activeTab === "faq" && (
-            <div className="space-y-10">
+            <div className="space-y-3 min-[900px]:space-y-10">
               {bookInfo.faqs.map((faq) => (
-                <div key={faq.id} className="p-25 rounded-sm  bg-(--bg-color)">
-                  <p className="font-bold text-(--main-color) mb-20 text-20">
+                <div key={faq.id} className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                  <p className="font-bold text-(--main-color) mb-3 min-[900px]:mb-20 text-base min-[900px]:text-20">
                     Q. {faq.question}
                   </p>
-                  <p className="pl-20 font-light leading-relaxed text-black text-18">
+                  <p className="pl-4 min-[900px]:pl-20 font-light leading-relaxed text-black text-sm min-[900px]:text-18">
                     {faq.answer}
                   </p>
                 </div>

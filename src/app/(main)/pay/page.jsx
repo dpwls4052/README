@@ -659,7 +659,10 @@ const handlePaymentClick = async () => {
                   </div>
                   <div className="flex justify-between text-black">
                     <span className="font-normal text-gray-600">도착 예정</span>
-                    <span className="font-medium text-[var(--main-color)]">{new Date().toLocaleDateString()}</span>
+                    <span className="font-medium text-[var(--main-color)]">
+                      {/* {new Date().toLocaleDateString()} */}
+                      주문 후 영업일 2~3일 이내 배송 예정
+                    </span>
                   </div>
                 </div>
                 <hr className="border-gray-200 my-10" />
