@@ -1,3 +1,4 @@
+import { auth } from "@/lib/firebase";
 import axios from "axios";
 
 export async function getBook(id) {
@@ -27,36 +28,40 @@ export async function getBooks({
 }
 
 export async function createBook(books) {
-  const res = await fetch("/api/books", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(books),
-  });
+  const idToken = await auth.currentUser.getIdToken();
 
-  if (!res.ok) {
-    const err = await res.json();
+  try {
+    const res = await axios.post("/api/books", books, {
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+      },
+    });
 
-    const error = new Error(err.error || "책 등록 실패");
-    error.message = err.message || "UNKNOWN_ERROR";
-    throw error;
+    return res.data;
+  } catch (error) {
+    const err = error.response?.data;
+
+    const customError = new Error(err?.error || "책 등록 실패");
+    customError.message = err?.message || "UNKNOWN_ERROR";
+    throw customError;
   }
 }
 
 export async function updateBook(bookId, updatedData) {
   if (!bookId) throw new Error("bookId가 필요합니다.");
 
-  const res = await fetch(`/api/books/${bookId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedData),
-  });
+  const idToken = await auth.currentUser.getIdToken();
 
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "책 편집 실패");
+  try {
+    const res = await axios.patch(`/api/books/${bookId}`, updatedData, {
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || "책 편집 실패");
   }
-
-  return await res.json();
 }
 
 export const deleteBook = async (bookId) => {

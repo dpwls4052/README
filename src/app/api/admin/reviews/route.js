@@ -1,7 +1,30 @@
+import { authenticate } from "@/lib/authenticate";
 import { supabase } from "@/lib/supabaseClient";
+import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
+    const auth = await authenticate(req);
+
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+
+    const { user_id } = auth;
+
+    const { data: roleData } = await supabase
+      .from("roles")
+      .select("role_name")
+      .eq("user_id", user_id)
+      .single();
+
+    if (roleData?.role_name !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
 
     // 쿼리 파라미터

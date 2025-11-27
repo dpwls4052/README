@@ -1,3 +1,4 @@
+import { auth } from "@/lib/firebase";
 import axios from "axios";
 
 export const getAdminReviews = async ({
@@ -22,7 +23,13 @@ export const getAdminReviews = async ({
   if (minRating) params.append("minRating", minRating.toString());
   if (maxRating) params.append("maxRating", maxRating.toString());
 
-  const response = await axios.get(`/api/admin/reviews?${params.toString()}`);
+  const idToken = await auth.currentUser.getIdToken();
+
+  const response = await axios.get(`/api/admin/reviews?${params.toString()}`, {
+    headers: {
+      "Authorization": `Bearer ${idToken}`,
+    },
+  });
 
   return response.data;
 };
