@@ -200,10 +200,10 @@ export default function Orders() {
 
   return (
     <ProtectedRoute>
-      <div className="w-full min-h-screen flex justify-center bg-white">
+      <div className="w-full min-h-screen flex lg:ml-50">
         <div className="w-full max-w-5xl p-10 space-y-50">
           {/* 상단 헤더 */}
-          <div className="flex justify-between items-center border-b py-50">
+          <div className="flex  flex-col justify-between items-start gap-15 border-b py-50 md:flex-row md:items-center md:gap-0">
             <section>
               <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
                 주문 내역
@@ -277,7 +277,7 @@ export default function Orders() {
                   {/* 주문 헤더 */}
                   <div className="flex justify-between items-center border-b pb-15">
                     <div className="space-y-5">
-                      <p className="font-semibold text-18">
+                      <p className="font-semibold text-14 w-min md:text-18 md:w-auto">
                         주문번호: {order.orderNumber}
                       </p>
                       <p className="text-sm text-gray-600">
@@ -286,7 +286,7 @@ export default function Orders() {
                     </div>
                     <div className="text-right">
                       <span
-                        className={`px-12 py-6 rounded text-sm font-medium ${
+                        className={`px-10 py-6 rounded text-sm font-medium md:px-12 ${
                           order.shippingStatus === "배송완료"
                             ? "bg-green-100 text-green-700"
                             : order.shippingStatus === "배송중"
@@ -307,7 +307,7 @@ export default function Orders() {
                       return (
                         <div
                           key={idx}
-                          className="flex items-center cursor-pointer p-15"
+                          className="flex gap-5 cursor-pointer flex-col mb-25 md:flex-row md:items-center md:p-15 md:gap-15"
                         >
                           <div
                             onClick={

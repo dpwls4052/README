@@ -2,8 +2,8 @@ import { USER_TAB } from "@/constants/userMenu";
 
 const SideBar = ({ tabIndex, handleClickTab }) => {
   return (
-    <aside className="w-[240px] bg-[#0A400C] sticky top-0 rounded-xl">
-      <div className="flex flex-col p-2.5 space-y-2">
+    <aside className=" bg-[#0A400C] sticky top-0 rounded-xl lg:w-[240px]">
+      <div className="flex flex-row p-2.5 space-y-2 lg:flex-col">
         {USER_TAB.map((tab, idx) => (
           <div
             key={tab.value}
