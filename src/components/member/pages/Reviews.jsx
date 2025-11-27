@@ -230,7 +230,7 @@ export default function Reviews() {
 
   return (
     <ProtectedRoute>
-      <div className="w-full min-h-screen py-10 flex justify-center">
+      <div className="w-full min-h-screen flex lg:ml-50">
         <div className="w-full max-w-5xl p-8">
           {/* 🏷️ 헤더 */}
           <div className="flex justify-between items-center pb-4 mb-6">
@@ -326,9 +326,9 @@ export default function Reviews() {
                         {sortedAvailableItems.map((item) => (
                           <div
                             key={`${item.order_number}-${item.book_id}`}
-                            className="flex gap-4 justify-between items-center border rounded-sm p-20 bg-[var(--bg-color)]"
+                            className="flex flex-col gap-4 justify-between items-end border rounded-sm p-10 bg-[var(--bg-color)] md:flex-row md:p-20"
                           >
-                            <div className="flex items-start gap-6">
+                            <div className="flex items-start gap-6 w-full">
                               <img
                                 src={
                                   item.cover || "https://placehold.co/80x110"
@@ -337,7 +337,7 @@ export default function Reviews() {
                                 className="w-80 h-110 object-cover rounded border"
                               />
                               <div className=" mt-5">
-                                <p className="font-medium text-16 mb-2">
+                                <p className="font-medium text-16 mb-2 overflow-hidden text-ellipsis w-150 line-clamp-1 md:w-600">
                                   {item.title}
                                 </p>
                                 <p className="text-xs text-gray-500 mb-1">
@@ -378,7 +378,7 @@ export default function Reviews() {
                         {sortedWrittenItems.map((item) => (
                           <div
                             key={`${item.order_number}-${item.book_id}`}
-                            className="border rounded-sm p-20 bg-[var(--bg-color)]"
+                            className="border rounded-sm p-10 bg-[var(--bg-color)]  md:p-20"
                           >
                             <div className="flex gap-6">
                               <img
@@ -391,10 +391,10 @@ export default function Reviews() {
                               <div className="flex-1 mt-5">
                                 <div className="flex justify-between mb-2">
                                   <div>
-                                    <p className="font-medium text-16 mb-5">
+                                    <p className="font-medium text-16 mb-5 overflow-hidden text-ellipsis w-[80px] line-clamp-1 md:w-600">
                                       {item.title}
                                     </p>
-                                    <p className="text-xs font-normal text-gray-500">
+                                    <p className="text-12 font-normal text-gray-500 ">
                                       주문일: {convertToKoreaTime(item.date)}
                                     </p>
                                   </div>
@@ -413,7 +413,7 @@ export default function Reviews() {
                                 </div>
 
                                 {/* 리뷰 내용 */}
-                                <p className="text-sm font-medium text-gray-800 whitespace-pre-line mb-3">
+                                <p className="text-sm font-medium text-gray-800 whitespace-pre-line mb-3 overflow-hidden text-ellipsis w-[120px] line-clamp-1 md:w-200">
                                   {item.review?.content}
                                 </p>
 

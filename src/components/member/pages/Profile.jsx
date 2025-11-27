@@ -6,16 +6,13 @@ import { useAuth } from "@/hooks/common/useAuth";
 import Modal from "@/components/common/Modal";
 import AddressInput from "@/components/common/AddressInput";
 import { getAuth, deleteUser } from "firebase/auth";
-import { supabase } from "@/lib/supabaseClient"; 
-
-
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Profile() {
   const { userId } = useAuth();
   const [orderCount, setOrderCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
-
 
   console.log("Profile 렌더링 - userId:", userId);
 
@@ -91,7 +88,6 @@ export default function Profile() {
 
       // 홈으로 이동
       window.location.href = "/";
-
     } catch (err) {
       console.error(err);
       alert("회원 탈퇴 중 오류 발생: " + err.message);
@@ -99,7 +95,7 @@ export default function Profile() {
   };
 
   useEffect(() => {
-  if (!userId) return;
+    if (!userId) return;
 
     const fetchCounts = async () => {
       // 주문 개수
@@ -128,9 +124,6 @@ export default function Profile() {
 
     fetchCounts();
   }, [userId]);
-
-
-
 
   // 다음 우편번호 API 스크립트 로드
   useEffect(() => {
@@ -200,7 +193,6 @@ export default function Profile() {
 
     fetchRecentBooks();
   }, [userId]);
-
 
   // 주소 목록 조회
   const fetchAddressList = async () => {
@@ -576,10 +568,10 @@ export default function Profile() {
   ];
 
   return (
-    <div className="w-full min-h-fit flex justify-center">
+    <div className="w-full min-h-fit flex lg:ml-50">
       <div className="w-full max-w-5xl p-10 space-y-50">
         {/* 상단 정보 */}
-        <div className="flex justify-between items-center border-b py-50">
+        <div className="flex flex-col justify-between items-start gap-15 border-b py-50 md:flex-row md:items-center md:gap-0">
           <section className="flex justify-between items-center  pb-6">
             <div>
               <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
@@ -624,27 +616,27 @@ export default function Profile() {
           <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
           <div className="space-y-3 text-18 font-normal">
             {fields.map(({ label, field, value }) => (
-  <div key={field} className="flex gap-20 items-center mt-15">
-    <p>
-      <b>{label} :</b> {value}
-    </p>
-    {field !== "email" && (
-      <button
-        className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
-        onClick={() => {
-          setModalField(field);
-          setModalValue(value);
-          setModalOpen(true);
-        }}
-      >
-        수정
-      </button>
-    )}
-  </div>
-))}
+              <div key={field} className="flex gap-20 items-center mt-15">
+                <p>
+                  <b>{label} :</b> {value}
+                </p>
+                {field !== "email" && (
+                  <button
+                    className="text-sm px-8 py-3 border rounded-sm hover:bg-[var(--sub-color)] hover:text-white transition cursor-pointer"
+                    onClick={() => {
+                      setModalField(field);
+                      setModalValue(value);
+                      setModalOpen(true);
+                    }}
+                  >
+                    수정
+                  </button>
+                )}
+              </div>
+            ))}
 
             {/* 배송주소 */}
-            <div className="flex gap-20 items-center mt-10">
+            <div className="flex flex-col gap-20 items-start mt-10 md:flex-row md:items-center">
               <p>
                 <b>배송주소 :</b> {displayAddress}
               </p>
@@ -665,31 +657,31 @@ export default function Profile() {
           {recentBooks.length === 0 ? (
             <p className="text-gray-500 text-sm">최근 본 도서가 없습니다.</p>
           ) : (
-            <div className="flex justify-between gap-10">
+            <div className=" flex flex-col items-center justify-between gap-10 md:flex-row">
               {recentBooks.slice(0, 4).map((book, index) => (
                 <div
                   key={index}
                   className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
-                  onClick={() => window.location.href = `/product/detail/${book.book_id}`}
+                  onClick={() =>
+                    (window.location.href = `/product/detail/${book.book_id}`)
+                  }
                 >
-                  <div className="w-full h-[250px] bg-gray-100 flex items-center justify-center">
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </div>
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className=" object-cover w-250 h-300 md:h-[250px] md:w-full"
+                  />
                   <div className="p-5 text-sm">
                     <p className="font-medium truncate">{book.title}</p>
-                    <p className="text-gray-500 text-xs truncate">{book.author}</p>
+                    <p className="text-gray-500 text-xs truncate">
+                      {book.author}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </section>
-
-
 
         {/* 개인 설정 */}
         <section>

@@ -100,7 +100,7 @@ const CreateReview = () => {
           </div>
 
           {/* 버튼 */}
-          <div className="flex gap-10 mt-10">
+          <div className="flex gap-10 mt-10 justify-end">
             <button
               type="submit"
               disabled={submitting}

@@ -28,7 +28,7 @@ const MyPage = () => {
     TAB_COMPONENTS[tabValues[tabIndex]] ?? (() => <div>준비 중</div>);
 
   return (
-    <main className="flex p-5 bg-white gap-5">
+    <main className="flex flex-col p-5 bg-white gap-5 lg:flex-row">
       {/* 🔹 사이드바 */}
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />
 
