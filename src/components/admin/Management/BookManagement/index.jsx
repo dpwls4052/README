@@ -29,7 +29,9 @@ const BookManagement = () => {
   const handleDeleteBook = async (bookId) => {
     const removedBook = await removeBook(bookId);
     setBooks((prev) =>
-      prev.filter((book) => book.bookId !== removedBook.bookId)
+      prev.map((book) =>
+        book.bookId === removedBook.bookId ? { ...book, ...removedBook } : book
+      )
     );
   };
 

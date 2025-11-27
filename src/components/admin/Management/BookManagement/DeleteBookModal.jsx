@@ -9,22 +9,25 @@ const DeleteBookModal = ({ book, handleDeleteBook }) => {
   return (
     <>
       <button
-        className="flex-1 bg-[#E5484D] text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer"
+        className="bg-[#E5484D] text-white py-10 px-16 rounded h-40 font-normal hover:cursor-pointer"
         onClick={openModal}
       >
-        삭제
+        판매 중지
       </button>
       <Modal
-        title="삭제하시겠습니까?"
+        title="판매 중지하시겠습니까?"
         open={isModalOpen}
         onOpenChange={toggleModal}
-        confirmText="삭제"
+        confirmText="판매 중지"
         cancelText="취소"
-        onConfirm={() => handleDeleteBook(book.bookId)}
+        onConfirm={() => {
+          handleDeleteBook(book.bookId);
+          closeModal();
+        }}
         onCancel={closeModal}
         maxSize="max-w-lg"
       >
-        <p>{book.title}</p>
+        <p className="text-center">{book.title}</p>
       </Modal>
     </>
   );
