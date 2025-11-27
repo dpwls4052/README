@@ -58,7 +58,7 @@ const BookManagement = () => {
         ref={scrollRef}
         className="flex-1 rounded-xl bg-(--bg-color) overflow-y-scroll scrollbar-hide relative"
       >
-        <div className="sticky top-0 flex justify-center py-20 bg-(--bg-color)">
+        <div className="sticky top-0 flex justify-center py-20 bg-(--bg-color) px-20">
           <SearchBar
             query={searchQuery}
             setQuery={setSearchQuery}

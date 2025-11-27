@@ -41,9 +41,11 @@ const Admin = () => {
   if (loading) return <div>로딩 중...</div>;
   if (!isAdmin) return <div>권한을 확인하는 중...</div>;
   return (
-    <div className="flex gap-20 p-20 h-dvh">
+    <div className="flex flex-col gap-20 p-20 md:flex-row h-dvh">
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />
-      <ActiveComponent />
+      <div className="flex-1 overflow-y-hidden">
+        <ActiveComponent />
+      </div>
     </div>
   );
 };

@@ -155,57 +155,54 @@ const DeliveryManagement = () => {
     return <p className="mt-20 text-center">관리자 권한이 없습니다.</p>;
 
   return (
-    <section
-      ref={scrollRef}
-      className="flex justify-center w-full overflow-y-scroll bg-white scrollbar-hide"
-    >
+    <section className="flex justify-center w-full h-full bg-white ">
       <div className="w-full p-10">
         {/* 상단 헤더 */}
-        <div className="flex items-center justify-between">
+        <div className="">
           <h1 className="text-32 text-(--main-color)">배송 관리</h1>
 
           {/* 주문 통계 */}
-          <div className="flex text-center gap-30">
+          <div className="border flex my-20 text-center gap-30 bg-(--bg-color) px-10 py-20 rounded-2xl justify-center flex-wrap">
             <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-sm font-normal text-gray-500">결제완료</p>
+              <p className="font-normal text-14">결제완료</p>
               <div className="flex items-center gap-8">
                 <FiCheckCircle className="text-2xl text-purple-600" />
-                <p className="text-lg font-semibold">{stats.paid}</p>
+                <p className="font-semibold text-16">{stats.paid}</p>
               </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-sm font-normal text-gray-500">배송준비</p>
+              <p className="font-normal text-14">배송준비</p>
               <div className="flex items-center gap-8">
                 <FiPackage className="text-2xl text-orange-600" />
-                <p className="text-lg font-semibold">{stats.preparing}</p>
+                <p className="font-semibold text-16">{stats.preparing}</p>
               </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-sm font-normal text-gray-500">배송중</p>
+              <p className="font-normal text-14">배송중</p>
               <div className="flex items-center gap-8">
                 <FiTruck className="text-2xl text-blue-600" />
-                <p className="text-lg font-semibold">{stats.shipping}</p>
+                <p className="font-semibold text-16">{stats.shipping}</p>
               </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-sm font-normal text-gray-500">배송완료</p>
+              <p className="font-normal text-14">배송완료</p>
               <div className="flex items-center gap-8">
                 <FiCheckCircle className="text-2xl text-green-700" />
-                <p className="text-lg font-semibold">{stats.delivered}</p>
+                <p className="font-semibold text-16">{stats.delivered}</p>
               </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-6">
-              <p className="text-sm font-normal text-gray-500">주문취소</p>
+              <p className="font-normal text-14">주문취소</p>
               <div className="flex items-center gap-8">
                 <FiXCircle className="text-2xl text-red-600" />
-                <p className="text-lg font-semibold">{stats.cancelled}</p>
+                <p className="font-semibold text-16">{stats.cancelled}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* 탭 메뉴 */}
-        <div className="flex pb-2 my-20 overflow-x-auto overflow-y-visible border-b-2 border-gray-200 flex-nowrap gap-30">
+        <div className="flex gap-20 pb-2 mb-10 overflow-x-auto overflow-y-visible border-b-2 border-gray-200 md:gap-30 flex-nowrap">
           {[
             "전체",
             "결제완료",
@@ -216,7 +213,7 @@ const DeliveryManagement = () => {
           ].map((tab) => (
             <button
               key={tab}
-              className={`pb-10 px-2 font-normal text-20 transition-colors shrink-0 box-border ${
+              className={`pb-10 px-2 font-normal md:text-16 text-14 transition-colors shrink-0 box-border ${
                 activeTab === tab
                   ? "border-b-2 border-(--main-color) text-(--main-color) -mb-2"
                   : "text-gray-600 hover:text-(--main-color)"
@@ -229,7 +226,10 @@ const DeliveryManagement = () => {
         </div>
 
         {/* 주문 목록 */}
-        <div className="space-y-20">
+        <div
+          ref={scrollRef}
+          className="h-full space-y-20 overflow-y-scroll scrollbar-hide"
+        >
           {filteredOrders.length === 0 ? (
             <div className="py-40 text-center text-gray-500">
               <p className="text-lg">
