@@ -6,13 +6,14 @@ import Modal from "@/components/common/Modal";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useCart } from "@/hooks/common/useCart";
 import { useCartCount } from "@/hooks/common/useCartCount";
+import { auth } from "@/lib/firebase";
 import { FiShoppingCart } from "react-icons/fi";
 
 export default function AddToCartButton({ book, iconMode = false, className = "" }) {
   const router = useRouter();
-  const { userId } = useAuth();
+  const { userId, user } = useAuth();
   const { goToCart } = useCart();
-  const { addToCart } = useCartCount(); // 🌟 addToCart 가져오기
+  const { addToCart } = useCartCount();
 
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
 
   const handleAddToCart = async () => {
     // 1. 로그인 체크
-    if (!userId) {
+    if (!userId || !user) {
       setLoginModalOpen(true);
       return;
     }
@@ -34,16 +35,22 @@ export default function AddToCartButton({ book, iconMode = false, className = ""
 
     setLoading(true);
     try {
+      // Firebase 토큰 가져오기
+      const token = await auth.currentUser.getIdToken();
+
       const res = await fetch("/api/user/cart", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, book_id: book.bookId }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ book_id: book.bookId }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "장바구니 추가 실패");
 
-      // 🌟 성공 시 bookId 추가 (이미 있으면 자동으로 무시됨)
+      // 성공 시 bookId 추가 (이미 있으면 자동으로 무시됨)
       addToCart(book.bookId);
 
       setCartModalOpen(true);

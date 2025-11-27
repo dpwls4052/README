@@ -1,15 +1,27 @@
 import { supabase } from "@/lib/supabaseClient";
 import { NextResponse } from "next/server";
+import { authenticate } from "@/lib/authenticate";
 
 export async function POST(req) {
   console.log("🚀 주문 생성 API 시작");
   
   try {
+    // 인증 확인
+    const auth = await authenticate(req);
+    if (auth.error) {
+      console.error("❌ 인증 실패:", auth.error);
+      return NextResponse.json(
+        { success: false, errorMessage: auth.error },
+        { status: auth.status }
+      );
+    }
+    const { user_id } = auth;
+    // console.log("✅ 인증된 사용자:", user_id);
+
     const body = await req.json();
     console.log("📦 받은 데이터:", JSON.stringify(body, null, 2));
     
     const {
-      userId,
       orderItems,
       price,
       name,
@@ -23,8 +35,8 @@ export async function POST(req) {
     } = body;
 
     // 1️⃣ 필수 필드 검증
-    if (!userId || !orderItems || orderItems.length === 0 || !price) {
-      console.error("❌ 필수 필드 누락:", { userId, orderItemsLength: orderItems?.length, price });
+    if (!orderItems || orderItems.length === 0 || !price) {
+      // console.error("❌ 필수 필드 누락:", { user_id, orderItemsLength: orderItems?.length, price });
       return NextResponse.json(
         { success: false, errorMessage: "필수 주문 정보가 누락되었습니다." },
         { status: 400 }
@@ -41,8 +53,8 @@ export async function POST(req) {
     const orderRows = orderItems.map((item) => {
       const row = {
         order_number: orderNumber,
-        user_id: userId,
-        book_id: item.book_id || null, // ✅ book_id 추가
+        user_id: user_id,
+        book_id: item.book_id || null,
         title: item.title || "",
         cover: item.cover || item.image || "",
         book_price: Number(item.price) || 0,
@@ -85,7 +97,7 @@ export async function POST(req) {
 
     console.log("✅ orders 테이블 삽입 성공:", insertedData?.length || 0, "개");
 
-    // 5️⃣ 장바구니에서 구매한 상품 삭제 (book_id 기준)
+    // 5️⃣ 장바구니에서 구매한 상품 삭제 (book_id 기준, 본인 것만)
     const purchasedBookIds = orderItems
       .map(item => item.book_id)
       .filter(Boolean);
@@ -96,7 +108,7 @@ export async function POST(req) {
       const { error: cartDeleteError } = await supabase
         .from('cart')
         .delete()
-        .eq('user_id', userId)
+        .eq('user_id', user_id) // 본인 장바구니만 삭제
         .in('book_id', purchasedBookIds);
 
       if (cartDeleteError) {
