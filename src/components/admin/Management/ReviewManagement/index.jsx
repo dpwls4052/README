@@ -98,14 +98,14 @@ const ReviewManagement = () => {
               value={userEmail}
               onChange={(e) => setUserEmail(e.target.value)}
               placeholder="사용자 이메일을 입력하세요."
-              className="px-10 py-20 border border-black rounded-full h-30 w-250"
+              className="p-10 border rounded-full text-14 w-200"
             />
             <input
               type="text"
               value={bookId}
               onChange={(e) => setBookId(e.target.value)}
               placeholder="도서 ID를 입력하세요."
-              className="px-10 py-20 border border-black rounded-full h-30 w-200"
+              className="p-10 border rounded-full text-14 w-200"
             />
             <div className="flex gap-10">
               <button
