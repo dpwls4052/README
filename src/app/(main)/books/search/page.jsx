@@ -1,3 +1,6 @@
+"use client";
+export const dynamic = "force-dynamic";
+
 import Navigation from "@/components/main/Navigation";
 import { Suspense } from "react";
 import SearchContent from "@/components/books/SearchContent";
