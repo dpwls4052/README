@@ -133,12 +133,20 @@ export function useAuth() {
     setRole(null);
   };
 
-  const fetchUserRole = async (userId) => {
+  const fetchUserRole = async () => {
     try {
+      if (!auth.currentUser) {
+        setRole(null);
+        return;
+      }
+
+      const idToken = await auth.currentUser.getIdToken();
+
       const res = await fetch(`/api/auth/role`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId }),
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${idToken}`,
+        },
       });
 
       const data = await res.json();
