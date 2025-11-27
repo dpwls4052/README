@@ -1,6 +1,7 @@
 // app/api/reviews/route.js
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import { authenticate } from "@/lib/authenticate";
 
 // -------------------------------------------
 // POST /api/reviews  → 리뷰 생성
@@ -8,9 +9,18 @@ import { supabase } from "@/lib/supabaseClient";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { bookId, userId, rate, review } = body;
+    const { bookId, rate, review } = body;
 
-    if (!bookId || !userId || !rate || !review) {
+    const auth = await authenticate(req);
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+    const { user_id } = auth;
+
+    if (!bookId || !user_id || !rate || !review) {
       return NextResponse.json(
         { message: "bookId, userId, rate, review는 필수입니다." },
         { status: 400 }
@@ -21,7 +31,7 @@ export async function POST(req) {
       .from("review")
       .insert({
         book_id: bookId,
-        user_id: userId,
+        user_id: user_id,
         rate,
         review,
         status: true,
@@ -53,11 +63,16 @@ export async function POST(req) {
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const bookIdParam = searchParams.get("bookId");
-  const userId = searchParams.get("userId");
 
+  const auth = await authenticate(req);
+  let userId = null;
+  if (!auth.error) {
+    userId = auth.user_id; // 로그인한 사용자라면 userId 세팅
+  }
   let query = supabase
     .from("review")
-    .select(`
+    .select(
+      `
       review_id, 
       book_id, 
       user_id, 
@@ -66,7 +81,8 @@ export async function GET(req) {
       status, 
       created_at,
       users (name)
-    `)
+    `
+    )
     .eq("status", true)
     .order("created_at", { ascending: false });
 
@@ -94,18 +110,18 @@ export async function GET(req) {
   }
 
   // 사용자 이름 마스킹 처리
-  const maskedData = data.map(review => {
+  const maskedData = data.map((review) => {
     const fullName = review.users?.name || "익명";
     const firstChar = fullName.charAt(0);
     const maskedName = firstChar + "**";
-    
+
     // users 객체 제거하고 필드 추가
     const { users, ...reviewData } = review;
-    
+
     return {
       ...reviewData,
       author: maskedName,
-      firstChar: firstChar
+      firstChar: firstChar,
     };
   });
 
@@ -127,7 +143,14 @@ export async function PATCH(req) {
       );
     }
 
-    // ✅ 1) 삭제/복구 (status가 boolean으로 온 경우)
+    // 인증: 로그인한 유저만 수정/삭제 가능
+    const auth = await authenticate(req);
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+    const { user_id } = auth;
+
+    // 1) 삭제/복구 (status가 boolean으로 온 경우)
     if (typeof status === "boolean") {
       const { data, error } = await supabase
         .from("review")
@@ -135,6 +158,7 @@ export async function PATCH(req) {
           status,
         })
         .eq("review_id", reviewId)
+        .eq("user_id", user_id)
         .select();
 
       console.log("status update result:", { data, error });
@@ -175,6 +199,7 @@ export async function PATCH(req) {
         review,
       })
       .eq("review_id", reviewId)
+      .eq("user_id", user_id)
       .select();
 
     console.log("review update result:", { data, error });

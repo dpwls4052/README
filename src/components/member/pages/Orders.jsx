@@ -8,6 +8,7 @@ import { FiPackage, FiTruck, FiCheckCircle } from "react-icons/fi";
 import useUserReviews from "@/hooks/review/useUserReviews";
 import useDeleteReview from "@/hooks/review/useDeleteReview";
 import { toast } from "sonner";
+import { auth } from "@/lib/firebase";
 
 export default function Orders() {
   const router = useRouter();
@@ -81,12 +82,14 @@ export default function Orders() {
     }
 
     const fetchOrders = async () => {
+      const idToken = await auth.currentUser.getIdToken();
       try {
         setLoading(true);
         const res = await fetch(`/api/user/orders/getOrders`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
           },
           body: JSON.stringify({ user_id: userId }),
         });

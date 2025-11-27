@@ -29,18 +29,24 @@ const LoginForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[600px] min-h-[350px] mx-auto flex flex-col bg-white p-25 rounded-xl shadow-md"
+      className="w-[600px] min-h-[350px] mx-auto flex flex-col bg-white p-25 rounded-sm shadow-md"
     >
       {/* ✅ 위쪽 입력 영역 */}
       <div className="flex flex-col gap-6 flex-1 justify-center">
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="font-semibold text-gray-700 text-3xl text-center">
+          <label
+            htmlFor="name"
+            className="font-semibold text-gray-700 text-3xl text-center"
+          >
             로그인
           </label>
         </div>
         {/* 이메일 입력 */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="font-semibold text-gray-700 py-8 text-base">
+          <label
+            htmlFor="email"
+            className="font-semibold text-gray-700 py-8 text-base"
+          >
             이메일
           </label>
           <input
@@ -50,13 +56,16 @@ const LoginForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+            className="w-full px-4 py-8 border rounded-sm outline-none focus:ring-2 focus:ring-green-700 text-base"
           />
         </div>
 
         {/* 비밀번호 입력 */}
         <div className="flex flex-col gap-6">
-          <label htmlFor="password" className="font-semibold text-gray-700 py-8 text-base">
+          <label
+            htmlFor="password"
+            className="font-semibold text-gray-700 py-8 text-base"
+          >
             비밀번호
           </label>
           <input
@@ -66,7 +75,7 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-8 border rounded-lg outline-none focus:ring-2 focus:ring-green-700 text-base"
+            className="w-full px-4 py-8 border rounded-sm outline-none focus:ring-2 focus:ring-green-700 text-base"
           />
         </div>
 
@@ -89,7 +98,7 @@ const LoginForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full h-[40px] py-2 rounded-3xl font-bold text-white transition 
+          className={`w-full h-[40px] py-2 rounded-sm font-bold text-white transition 
             ${loading ? "bg-gray-400" : "bg-green-800 hover:bg-green-700"}`}
         >
           {loading ? "로그인 중..." : "로그인"}

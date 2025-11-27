@@ -1,6 +1,7 @@
 // hooks/review/useReviewForm.js
 "use client";
 
+import { auth } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 
 export default function useReviewForm({ bookId, userId, reviewId }) {
@@ -65,6 +66,7 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
 
   // 저장 (생성 or 수정)
   const submit = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!bookId || !userId) {
       throw new Error("bookId 또는 userId가 없습니다.");
     }
@@ -80,7 +82,10 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
         // 수정
         const res = await fetch("/api/reviews", {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({
             reviewId: Number(reviewId),
             rate,
@@ -100,10 +105,12 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
         // 🆕 생성
         const res = await fetch("/api/reviews", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({
             bookId: Number(bookId),
-            userId,
             rate,
             review: content.trim(),
           }),
