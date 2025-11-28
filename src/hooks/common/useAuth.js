@@ -8,7 +8,6 @@ import { auth } from "../../lib/firebase";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -18,13 +17,9 @@ export function useAuth() {
       setUser(currentUser);
 
       if (currentUser) {
-        const id = await fetchUserId(currentUser.uid, currentUser.email);
-        if (id) {
-          await fetchUserRole(id);
-        }
+        await fetchUserId(currentUser.uid, currentUser.email);
       } else {
         setUserId(null);
-        setRole(null);
       }
       setLoading(false);
     });
@@ -43,13 +38,9 @@ export function useAuth() {
       const data = await res.json();
       if (res.ok && data.user_id) {
         setUserId(data.user_id);
-        return data.user_id;
       }
-
-      return null;
     } catch (err) {
       console.error("userId fetch error:", err);
-      return null;
     }
   };
 
@@ -70,13 +61,7 @@ export function useAuth() {
         return false;
       }
 
-      const id = await fetchUserId(
-        userCredential.user.uid,
-        userCredential.user.email
-      );
-      if (id) {
-        await fetchUserRole(id);
-      }
+      await fetchUserId(userCredential.user.uid, userCredential.user.email);
       return true;
     } catch (err) {
       if (err.code === "auth/wrong-password") {
@@ -130,39 +115,7 @@ export function useAuth() {
     await signOut(auth);
     setUser(null);
     setUserId(null);
-    setRole(null);
   };
 
-  const fetchUserRole = async () => {
-    try {
-      if (!auth.currentUser) {
-        setRole(null);
-        return;
-      }
-
-      const idToken = await auth.currentUser.getIdToken();
-
-      const res = await fetch(`/api/auth/role`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${idToken}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.role) {
-        setRole(data.role);
-      } else {
-        setRole(null);
-      }
-    } catch (err) {
-      console.error("fetchUserRole error:", err);
-      setRole(null);
-    }
-  };
-
-  const isAdmin = role === "admin";
-
-  return { user, userId, role, isAdmin, loading, error, login, signup, logout };
+  return { user, userId, loading, error, login, signup, logout };
 }

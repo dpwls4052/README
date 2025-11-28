@@ -1,9 +1,9 @@
 import { useAdminReviews } from "@/hooks/review/useAdminReviews";
 import ReviewItem from "./ReviewItem";
 import { useEffect, useRef, useState } from "react";
-import useDeleteReview from "@/hooks/review/useDeleteReview";
-import useRestoreReview from "@/hooks/review/useRestoreReview";
 import { useScroll } from "@/contexts/ScrollContext";
+import useAdminDeleteReview from "@/hooks/review/useAdminDeleteReview";
+import useAdminRestoreReview from "@/hooks/review/useAdminRestoreReview";
 
 const sorting = [
   { label: "최신순", orderField: "created_at", orderDirection: "desc" },
@@ -55,7 +55,7 @@ const ReviewManagement = () => {
       orderDirection: selectedSort.orderDirection,
     });
   };
-  const { deleteReview } = useDeleteReview();
+  const { deleteReview } = useAdminDeleteReview();
   const handleDelete = async (reviewId) => {
     const data = await deleteReview(reviewId);
     setReviews((reviews) =>
@@ -64,7 +64,7 @@ const ReviewManagement = () => {
       )
     );
   };
-  const { restoreReview } = useRestoreReview();
+  const { restoreReview } = useAdminRestoreReview();
   const handleRestore = async (reviewId) => {
     const data = await restoreReview(reviewId);
     setReviews((reviews) =>

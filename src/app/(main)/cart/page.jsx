@@ -66,7 +66,7 @@ const Cart = () => {
         method: "GET",
         headers,
       });
-      
+
       if (!res.ok) throw new Error("장바구니 조회 실패");
       const data = await res.json();
 
@@ -98,7 +98,7 @@ const Cart = () => {
   const availableItems = items.filter((item) => item.stock > 0);
   // 실제 선택된 상품들
   const selectedItems = items.filter((item) => item.selected);
-  
+
   const itemsTotal = selectedItems.reduce(
     (acc, item) => acc + item.price * item.count,
     0
@@ -107,8 +107,8 @@ const Cart = () => {
   const totalAmount = itemsTotal + shippingFee;
 
   // 전체선택 체크 상태: 선택 가능한 상품이 있고, 선택 가능한 상품 모두가 선택된 경우
-  const isAllSelected = availableItems.length > 0 && 
-                        availableItems.every(item => item.selected);
+  const isAllSelected =
+    availableItems.length > 0 && availableItems.every((item) => item.selected);
 
   const handleSelectAll = (e) => {
     const checked = e.target.checked;
@@ -235,23 +235,25 @@ const Cart = () => {
     <ProtectedRoute>
       <div className="min-h-screen py-10 bg-white">
         <div className="max-w-full min-[900px]:max-w-1200 mx-auto px-4 md:px-5 pt-8 md:pt-50">
-          <h1 className="text-2xl md:text-3xl font-bold mb-8 md:mb-20">장바구니</h1>
+          <h1 className="mb-8 text-2xl font-bold md:text-3xl md:mb-20">
+            장바구니
+          </h1>
 
           {loading ? (
-            <div className="text-center py-10">
+            <div className="py-10 text-center">
               <p className="font-normal text-gray-500">
                 장바구니 불러오는 중...
               </p>
             </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-10">
+            <div className="py-10 text-center">
               <p className="text-gray-500">장바구니가 비어 있습니다.</p>
             </div>
           ) : (
-            <div className="flex flex-col lg:flex-row gap-8 md:gap-20">
+            <div className="flex flex-col gap-8 lg:flex-row md:gap-20">
               {/* 좌측 - 아이템 */}
               <div className="flex-[2] flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                <div className="flex flex-col items-start justify-between gap-3 mb-4 sm:flex-row sm:items-center">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -259,7 +261,7 @@ const Cart = () => {
                       onChange={handleSelectAll}
                       className="w-4 h-4 md:w-20 md:h-20"
                     />
-                    <span className="font-medium text-black text-sm md:text-base ml-2 md:ml-10">
+                    <span className="ml-2 text-sm font-medium text-black md:text-base md:ml-10">
                       전체선택 ({selectedItems.length}/{availableItems.length})
                     </span>
                   </label>
@@ -282,29 +284,31 @@ const Cart = () => {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 md:py-15 px-2 md:px-4 gap-3 md:gap-15 border-b border-gray-200"
+                    className="flex flex-col items-start justify-between gap-3 px-2 py-4 border-b border-gray-200 sm:flex-row sm:items-center md:py-15 md:px-4 md:gap-15"
                   >
-                    <div className="flex items-start gap-3 md:gap-20 flex-1 w-full">
+                    <div className="flex items-start flex-1 w-full gap-3 md:gap-20">
                       <input
                         type="checkbox"
                         checked={item.selected}
                         onChange={() => handleSelect(item.id)}
-                        className="w-4 h-4 md:w-20 md:h-20 mt-1 flex-shrink-0"
+                        className="flex-shrink-0 w-4 h-4 mt-1 md:w-20 md:h-20"
                         disabled={item.stock === 0}
                       />
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-16 md:w-100 h-24 md:h-140 object-cover rounded-md border border-gray-300 cursor-pointer flex-shrink-0"
+                        className="flex-shrink-0 object-cover w-16 h-24 border border-gray-300 rounded-md cursor-pointer md:w-100 md:h-140"
                         onClick={() =>
                           router.push(`/product/detail/${item.id}`)
                         }
                       />
                       <div
-                        className="flex flex-col gap-1 flex-1 cursor-pointer min-w-0"
-                        onClick={() => router.push(`/product/detail/${item.id}`)}
+                        className="flex flex-col flex-1 min-w-0 gap-1 cursor-pointer"
+                        onClick={() =>
+                          router.push(`/product/detail/${item.id}`)
+                        }
                       >
-                        <p className="text-sm md:text-base font-medium text-black line-clamp-2">
+                        <p className="text-sm font-medium text-black md:text-base line-clamp-2">
                           {item.name}
                         </p>
                         <p className="text-base md:text-lg font-bold text-[var(--main-color)]">
@@ -351,17 +355,17 @@ const Cart = () => {
               {/* 우측 - 결제 정보 */}
               <div className="flex-[1] lg:sticky lg:top-100 h-fit">
                 <div className="bg-[var(--bg-color)] p-4 md:p-20 rounded-md shadow-sm">
-                  <h2 className="text-lg md:text-xl font-bold mb-6 md:mb-30 text-black">
+                  <h2 className="mb-6 text-lg font-bold text-black md:text-xl md:mb-30">
                     결제 정보
                   </h2>
-                  <div className="flex flex-col gap-4 md:gap-25 mb-4">
-                    <div className="flex font-normal justify-between text-black text-sm md:text-base">
+                  <div className="flex flex-col gap-4 mb-4 md:gap-25">
+                    <div className="flex justify-between text-sm font-normal text-black md:text-base">
                       <span>상품 금액</span>
                       <span className="font-medium">
                         {itemsTotal.toLocaleString()}원
                       </span>
                     </div>
-                    <div className="flex font-normal justify-between text-black text-sm md:text-base">
+                    <div className="flex justify-between text-sm font-normal text-black md:text-base">
                       <span>배송비</span>
                       <span className="font-medium">
                         {shippingFee === 0
@@ -369,8 +373,8 @@ const Cart = () => {
                           : `${shippingFee.toLocaleString()}원`}
                       </span>
                     </div>
-                    <div className="border-b border-gray-300 my-2" />
-                    <div className="flex justify-between text-base md:text-lg font-bold text-black">
+                    <div className="my-2 border-b border-gray-300" />
+                    <div className="flex justify-between text-base font-bold text-black md:text-lg">
                       <span>결제 예정 금액</span>
                       <span className="text-[var(--main-color)]">
                         {totalAmount.toLocaleString()}원
@@ -383,7 +387,7 @@ const Cart = () => {
                   >
                     주문하기
                   </button>
-                  <p className="text-xs md:text-sm font-light text-gray-500 mt-2 md:mt-10 text-center">
+                  <p className="mt-2 text-xs font-light text-center text-gray-500 md:text-sm md:mt-10">
                     30,000원 이상 구매 시 배송비 무료
                   </p>
                 </div>

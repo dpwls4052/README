@@ -171,3 +171,67 @@ export async function GET(req) {
     });
   }
 }
+
+export async function PATCH(req) {
+  try {
+    const body = await req.json();
+    const { reviewId, status } = body;
+
+    if (!reviewId) {
+      return NextResponse.json(
+        { message: "reviewId는 필수입니다." },
+        { status: 400 }
+      );
+    }
+
+    const auth = await authenticate(req);
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+    const { user_id } = auth;
+
+    const { data: roleData } = await supabase
+      .from("roles")
+      .select("role_name")
+      .eq("user_id", user_id)
+      .single();
+
+    if (roleData?.role_name !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { data, error } = await supabase
+      .from("review")
+      .update({
+        status,
+      })
+      .eq("review_id", reviewId)
+      .select();
+
+    if (error) {
+      console.error("리뷰 상태 변경 supabase 오류:", error);
+      return NextResponse.json(
+        { message: "리뷰 상태 변경 중 오류", detail: error.message },
+        { status: 500 }
+      );
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json(
+        {
+          message: "해당 리뷰를 찾을 수 없습니다.",
+          detail: "no row updated",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(data[0], { status: 200 });
+  } catch (e) {
+    console.error("리뷰 PATCH 서버 오류:", e);
+    return NextResponse.json(
+      { message: "리뷰 수정 중 오류", detail: e.message },
+      { status: 500 }
+    );
+  }
+}
