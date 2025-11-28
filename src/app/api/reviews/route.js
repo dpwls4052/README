@@ -63,11 +63,18 @@ export async function POST(req) {
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const bookIdParam = searchParams.get("bookId");
+  const userIdParam = searchParams.get("userId");
 
-  const auth = await authenticate(req);
-  let userId = null;
-  if (!auth.error) {
-    userId = auth.user_id; // 로그인한 사용자라면 userId 세팅
+  let user_id = null;
+  if (userIdParam) {
+    const auth = await authenticate(req);
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+    user_id = auth.user_id;
   }
   let query = supabase
     .from("review")
@@ -95,8 +102,8 @@ export async function GET(req) {
   }
 
   // userId 필터
-  if (userId) {
-    query = query.eq("user_id", userId);
+  if (user_id) {
+    query = query.eq("user_id", user_id);
   }
 
   const { data, error } = await query;

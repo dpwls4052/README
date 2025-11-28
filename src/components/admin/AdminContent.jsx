@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SideBar from "@/components/admin/SideBar";
 import { useTab } from "@/hooks/common/useTab";
 import { ADMIN_TAB } from "@/constants/adminMenu";
@@ -13,18 +13,46 @@ import { useAuth } from "@/hooks/common/useAuth";
 const NotReady = () => <div>준비 중(스켈레톤)</div>;
 
 const AdminContent = () => {
-  const { isAdmin, userId, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!loading && !isAdmin) {
-      alert("관리자 권한이 필요합니다.");
-      if (userId) {
-        window.location.href = "/";
-      } else {
+    const verifyAdminAccess = async () => {
+      if (authLoading) return;
+
+      if (!user) {
+        // 로그인 안 됨
         window.location.href = "/login";
+        return;
       }
-    }
-  }, [loading, isAdmin, userId]);
+
+      try {
+        const idToken = await user.getIdToken();
+
+        const res = await fetch("/api/auth/verify-admin", {
+          headers: { "Authorization": `Bearer ${idToken}` },
+        });
+
+        const data = await res.json();
+
+        if (!data.isAdmin) {
+          alert("관리자 권한이 필요합니다.");
+          window.location.href = "/";
+          return;
+        }
+
+        setIsAuthorized(true);
+      } catch (err) {
+        console.error("Admin verification failed:", err);
+        window.location.href = "/";
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyAdminAccess();
+  }, [authLoading, user]);
 
   // 탭 상태
   const tabValues = ADMIN_TAB.map((tab) => tab.value);
@@ -38,8 +66,15 @@ const AdminContent = () => {
 
   // TODO 스켈레톤 만들기
   const ActiveComponent = TAB_COMPONENTS[tabValues[tabIndex]] ?? NotReady;
-  if (loading) return <div>로딩 중...</div>;
-  if (!isAdmin) return <div>권한을 확인하는 중...</div>;
+
+  if (isVerifying) {
+    return <div>권한을 확인하는 중...</div>;
+  }
+
+  if (!isAuthorized) {
+    return null; // 리다이렉트 중
+  }
+
   return (
     <div className="flex flex-col gap-20 p-20 md:flex-row h-dvh">
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />

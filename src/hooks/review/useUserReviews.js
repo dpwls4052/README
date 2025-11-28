@@ -1,5 +1,6 @@
 "use client";
 
+import { auth } from "@/lib/firebase";
 import { useState, useEffect } from "react";
 
 // 마이페이지용: userId 기준으로 리뷰 가져오기
@@ -15,12 +16,18 @@ export default function useUserReviews(userId) {
 
     async function fetchReviews() {
       try {
+        const idToken = await auth.currentUser.getIdToken();
         setLoading(true);
         setError(null);
 
         const res = await fetch(
           `/api/reviews?userId=${encodeURIComponent(userId)}`,
-          { signal: controller.signal }
+          {
+            signal: controller.signal,
+            headers: {
+              "Authorization": `Bearer ${idToken}`,
+            },
+          }
         );
 
         if (!res.ok) {
