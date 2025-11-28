@@ -3,7 +3,7 @@ import { authenticate } from "@/lib/authenticate";
 import { supabase } from "@/lib/supabaseClient";
 import { NextResponse } from "next/server";
 
-export async function POST(req) {
+export async function GET(req) {
   try {
     const auth = await authenticate(req);
 

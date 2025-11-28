@@ -1,7 +1,7 @@
 import { authenticate } from "@/lib/authenticate";
 import { supabase } from "@/lib/supabaseClient";
 
-export async function POST(request) {
+export async function GET(request) {
   try {
     const auth = await authenticate(request);
     if (auth.error) {
