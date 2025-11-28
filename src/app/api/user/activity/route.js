@@ -1,34 +1,35 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import { authenticate } from "@/lib/authenticate";
 
 export async function POST(req) {
   try {
-    const { userId } = await req.json();
-
-    if (!userId) {
+    const auth = await authenticate(req);
+    if (auth.error) {
       return NextResponse.json(
-        { success: false, error: "userId is required" },
-        { status: 400 }
+        { message: auth.error },
+        { status: auth.status }
       );
     }
+    const { user_id } = auth;
 
     // 주문 내역 개수
     const { count: orderCount } = await supabase
       .from("orders")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+      .eq("user_id", user_id);
 
     // 찜한 도서 개수
     const { count: wishlistCount } = await supabase
       .from("wishlist")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+      .eq("user_id", user_id);
 
     // 작성한 리뷰 개수
     const { count: reviewCount } = await supabase
       .from("reviews")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+      .eq("user_id", user_id);
 
     return NextResponse.json({
       success: true,

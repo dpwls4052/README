@@ -7,6 +7,7 @@ import Modal from "@/components/common/Modal";
 import AddressInput from "@/components/common/AddressInput";
 import { getAuth, deleteUser } from "firebase/auth";
 import { supabase } from "@/lib/supabaseClient";
+import { auth } from "@/lib/firebase";
 
 export default function Profile() {
   const { userId } = useAuth();
@@ -41,6 +42,7 @@ export default function Profile() {
   const [recentBooks, setRecentBooks] = useState([]);
 
   const handleDeleteAccount = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
 
     try {
@@ -68,7 +70,10 @@ export default function Profile() {
       // Supabase users 테이블 유저 삭제
       const res = await fetch("/api/user/delete", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ userId }),
       });
 
@@ -151,10 +156,14 @@ export default function Profile() {
     if (!userId) return;
 
     async function fetchUser() {
+      const idToken = await auth.currentUser.getIdToken();
       try {
         const res = await fetch("/api/user/getUser", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({ userId }),
         });
 
@@ -174,10 +183,14 @@ export default function Profile() {
     if (!userId) return;
 
     const fetchRecentBooks = async () => {
+      const idToken = await auth.currentUser.getIdToken();
       try {
         const res = await fetch("/api/user/recentBooks", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({ userId }),
         });
 
@@ -196,12 +209,16 @@ export default function Profile() {
 
   // 주소 목록 조회
   const fetchAddressList = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!userId) return;
 
     try {
       const res = await fetch("/api/user/address/getAddressList", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ userId }),
       });
 
@@ -241,7 +258,9 @@ export default function Profile() {
 
       const res = await fetch(`/api/user/${endpointMap[modalField]}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
@@ -300,6 +319,7 @@ export default function Profile() {
     console.log("전달받은 addressIdx:", addressIdx);
     console.log("현재 userId:", userId);
     console.log("현재 addressList:", addressList);
+    const idToken = await auth.currentUser.getIdToken();
 
     if (!userId) {
       alert("userId가 없습니다. 다시 로그인해주세요.");
@@ -339,7 +359,6 @@ export default function Profile() {
       }
 
       const requestBody = {
-        userId: userId,
         addressIdx: addressIdx,
         nickname: editForm.nickname.trim(),
         postcode: editForm.postcode.trim(),
@@ -352,7 +371,10 @@ export default function Profile() {
 
       const res = await fetch("/api/user/address/updateAddress", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify(requestBody),
       });
 
@@ -376,6 +398,7 @@ export default function Profile() {
 
   // 주소 삭제
   const deleteAddress = async (addressIdx) => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!userId || !addressIdx) {
       alert("userId 또는 addressIdx가 없습니다.");
       console.error("userId:", userId, "addressIdx:", addressIdx);
@@ -404,7 +427,10 @@ export default function Profile() {
       console.log("=== 삭제 API 호출 ===");
       const res = await fetch("/api/user/address/deleteAddress", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           userId: userId,
           addressIdx: addressIdx,
@@ -424,6 +450,7 @@ export default function Profile() {
 
   // 기본 배송지 설정
   const setDefaultAddress = async (addressIdx) => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!userId || !addressIdx) {
       alert("userId 또는 addressIdx가 없습니다.");
       console.error("userId:", userId, "addressIdx:", addressIdx);
@@ -445,9 +472,11 @@ export default function Profile() {
 
       const res = await fetch("/api/user/address/updateAddress", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          userId: userId,
           addressIdx: addressIdx,
           nickname: targetAddr.nickname,
           postcode: targetAddr.postcode,
@@ -470,6 +499,7 @@ export default function Profile() {
 
   // 새 주소 추가
   const addNewAddress = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!newAddressForm.nickname.trim()) {
       alert("주소 닉네임을 입력해주세요.");
       return;
@@ -486,9 +516,11 @@ export default function Profile() {
     try {
       const res = await fetch("/api/user/address/addAddress", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          userId,
           nickname: newAddressForm.nickname.trim(),
           postcode: newAddressForm.postcode.trim(),
           roadAddress: newAddressForm.address.trim(),
