@@ -8,6 +8,7 @@ import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
 import { useCategories } from "@/hooks/book/useCategories";
 import BookListItemSkeleton from "@/components/books/BookListItemSkeleton";
+import { useRandomBooks } from "@/hooks/book/useRandomBooks";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서", id: 1 },
@@ -75,21 +76,40 @@ const BookList = () => {
   console.log("All sub category names:", allSubCategoryNames);
 
   // 카테고리 기반 책 조회
-  const { books, fetchMoreBooks, loading, hasNext } = useBooks({
+  const {
+    books: normalBooks,
+    fetchMoreBooks,
+    loading: normalLoading,
+    hasNext,
+  } = useBooks({
     category: categoryArray,
   });
+
+  const {
+    books: randomBooks,
+    loading: randomLoading,
+    error: randomError,
+  } = useRandomBooks({
+    enabled: wantRandom, // 추천/계절 페이지일 때만 호출
+    type: category, // "recommend" | "season" (추후 확장용)
+  });
+
+  //  화면에서 사용할 loading / books는 모드에 따라 선택
+  const loading = wantRandom ? randomLoading : normalLoading;
+  const books = wantRandom ? randomBooks : normalBooks;
+
   // books 로딩 상태 변할 때
   useEffect(() => {
-    if (!loading) {
+    if (!normalLoading) {
       setHasFetched(true);
     }
-  }, [loading]);
+  }, [normalLoading]);
   // "기타" 선택 시 필터링 + 랜덤 처리
   const displayBooks = useMemo(() => {
     let result = books;
 
     // "기타" 선택 시: 18개 카테고리에 속하지 않은 책들만 필터링
-    if (selectedCategory === "기타") {
+    if (!wantRandom && selectedCategory === "기타") {
       result = books.filter((book) => {
         const bookCategories = book.category || [];
 
@@ -108,19 +128,7 @@ const BookList = () => {
       console.log(`'기타' 카테고리: ${result.length}개 책 표시`);
     }
 
-    // 추천도서/계절도서: 랜덤으로 10개만 표시
-    if (wantRandom && result.length > 0) {
-      const shuffled = [...result];
-
-      // Fisher-Yates 셔플 알고리즘
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-
-      return shuffled.slice(0, 10);
-    }
-
+    //  추천/계절(wantRandom)은 이미 서버에서 랜덤 10개만 받았으므로 그대로 반환
     return result;
   }, [books, selectedCategory, allSubCategoryNames, wantRandom]);
 
@@ -200,7 +208,7 @@ const BookList = () => {
                 <button
                   className="bg-(--main-color) w-200 font-medium text-white p-16 rounded-sm hover:cursor-pointer hover:opacity-90 disabled:bg-gray-400"
                   onClick={fetchMoreBooks}
-                  disabled={loading}
+                  disabled={normalLoading}
                 >
                   {loading ? "로딩 중..." : "더보기 +"}
                 </button>

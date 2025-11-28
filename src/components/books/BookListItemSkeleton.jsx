@@ -4,7 +4,7 @@ const BookListItemSkeleton = () => {
       {/* 왼쪽 영역 */}
       <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-20 flex-1">
         {/* 이미지 영역 스켈레톤 */}
-        <div className="w-full sm:w-140 h-auto sm:h-200 max-w-[160px] mx-auto sm:mx-0 skeletonUI"></div>
+        <div className="w-full w-130 h-auto sm:h-200 max-w-[160px] mx-auto sm:mx-0 skeletonUI"></div>
 
         {/* 텍스트 영역 스켈레톤 */}
         <div className="flex flex-col items-start gap-2 md:gap-6 w-full">

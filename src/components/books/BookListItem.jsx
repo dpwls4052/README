@@ -19,14 +19,14 @@ const BookListItem = ({ book, goDetail }) => {
       >
         <Image
           src={
-            book.highResCover || 
-            book.cover?.replace(/coversum/gi, "cover500") || 
+            book.highResCover ||
+            book.cover?.replace(/coversum/gi, "cover500") ||
             noimg
           }
           alt={book.title || "제목 미상"}
           width={160}
           height={220}
-          className="w-full sm:w-140 h-auto sm:h-200 max-w-[160px] mx-auto sm:mx-0 object-cover rounded-md border border-gray-300"
+          className="w-full w-130 h-auto sm:h-200 max-w-[160px] mx-auto sm:mx-0 object-cover rounded-md border border-gray-300"
         />
         <div className="flex flex-col items-start gap-2 md:gap-6 w-full">
           <p className="mt-1 md:mt-3 font-bold text-base md:text-lg line-clamp-2 max-w-full md:max-w-700">
@@ -46,17 +46,14 @@ const BookListItem = ({ book, goDetail }) => {
         </div>
       </div>
       <div className="flex md:items-end flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-16 mt-4 md:mt-0">
-        <WishListButton
-          userId={userId}
-          bookId={book.bookId}
-        />
+        <WishListButton userId={userId} bookId={book.bookId} />
         <div className="flex flex-row md:flex-col gap-2 md:gap-10 w-full md:w-200 h-auto md:h-100">
-          <AddToCartButton 
+          <AddToCartButton
             book={{
               bookId: book.bookId,
-              stock: book.stock
-            }} 
-            iconMode={false} 
+              stock: book.stock,
+            }}
+            iconMode={false}
           />
           <BuyNowButton
             book={{
