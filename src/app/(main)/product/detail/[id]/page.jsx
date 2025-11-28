@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/common/useAuth";
 import { useBook } from "@/hooks/book/useBook";
 import useBookReviews from "@/hooks/review/useBookReviews";
 import { auth } from "@/lib/firebase";
+import ProductSkeleton from "./ProductSkeleton";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -167,7 +168,7 @@ const ProductDetail = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
           body: JSON.stringify({
             bookId: bookInfo.bookId,
@@ -184,24 +185,39 @@ const ProductDetail = () => {
     saveRecentBook();
   }, [bookInfo, userId]);
 
-  if (loading) {
-    return (
-      <div className="px-4 py-8 mx-auto mt-8 md:px-6 md:mt-20 max-w-7xl">
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-lg md:text-xl text-(--main-color)">
-            로딩 중...
-          </div>
-        </div>
-      </div>
-    );
+  const isLoading = !bookId || loading || (!book && !error);
+
+  if (isLoading) {
+    return <ProductSkeleton />;
   }
 
-  if (error || !bookInfo) {
+  // 2) 에러가 실제로 존재할 때만 에러 화면
+  if (error) {
     return (
       <div className="px-4 py-8 mx-auto mt-8 md:px-6 md:mt-20 max-w-7xl">
         <div className="flex flex-col justify-center items-center min-h-[60vh]">
           <div className="mb-6 text-lg text-red-500 md:text-xl">
             {error || "책을 찾을 수 없습니다."}
+          </div>
+          <button
+            onClick={() => router.back()}
+            style={{ borderRadius: "var(--radius-15)" }}
+            className="px-6 md:px-8 py-2 md:py-3 bg-(--main-color) text-white font-medium hover:opacity-90 transition-opacity"
+          >
+            뒤로 가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3) 이 시점에도 bookInfo가 없으면 진짜로 없는 케이스로 보고 Not Found 처리 (선택)
+  if (!bookInfo) {
+    return (
+      <div className="px-4 py-8 mx-auto mt-8 md:px-6 md:mt-20 max-w-7xl">
+        <div className="flex flex-col justify-center items-center min-h-[60vh]">
+          <div className="mb-6 text-lg text-red-500 md:text-xl">
+            책을 찾을 수 없습니다.
           </div>
           <button
             onClick={() => router.back()}
@@ -297,7 +313,7 @@ const ProductDetail = () => {
             <AddToCartButton
               book={{ bookId: bookInfo.bookId }}
               iconMode={false}
-              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold text-base min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <BuyNowButton
               book={{
@@ -307,7 +323,7 @@ const ProductDetail = () => {
                 priceStandard: bookInfo.priceStandard,
                 stock: bookInfo.stock,
               }}
-              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold text-base min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 min-[900px]:h-50 flex-1 bg-(--sub-color) text-white px-4 min-[900px]:px-6 py-3 min-[900px]:py-15 rounded font-semibold min-[900px]:text-20 hover:opacity-90 hover:cursor-pointer transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -326,7 +342,7 @@ const ProductDetail = () => {
 
       {/* 탭 */}
       <div className="pt-6 min-[900px]:pt-12">
-        <div className="flex border-b-2 border-gray-200 gap-4 min-[900px]:gap-30 overflow-x-auto">
+        <div className="flex border-b-2 border-gray-200 gap-4 min-[900px]:gap-30">
           {["description", "reviews", "faq"].map((tab) => (
             <button
               key={tab}
