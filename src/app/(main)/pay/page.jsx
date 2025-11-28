@@ -132,9 +132,8 @@ export default function PaymentPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
+            "Authorization": `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ userId }),
         });
 
         if (!res.ok) throw new Error("사용자 정보 불러오기 실패");
@@ -162,9 +161,8 @@ export default function PaymentPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ userId }),
       });
 
       const data = await res.json();
@@ -478,7 +476,7 @@ export default function PaymentPage() {
   // ----------------------------------------------------
   if (!userId || (userInfoType === "existing" && !existingUserInfo)) {
     return (
-      <div className="flex justify-center items-center h-screen text-xl font-medium">
+      <div className="flex items-center justify-center h-screen text-xl font-medium">
         사용자 정보를 불러오는 중입니다...
       </div>
     );
@@ -486,22 +484,22 @@ export default function PaymentPage() {
 
   return (
     <ProtectedRoute>
-      <div className="bg-white min-h-screen">
-        <div className="max-w-1200 mx-auto px-5 pt-50">
-          <h1 className="text-3xl font-bold mb-20">주문 / 결제</h1>
+      <div className="min-h-screen bg-white">
+        <div className="px-5 mx-auto max-w-1200 pt-50">
+          <h1 className="mb-20 text-3xl font-bold">주문 / 결제</h1>
         </div>
-        <div className="max-w-1200 mx-auto px-5 py-8 flex flex-col lg:flex-row gap-20">
+        <div className="flex flex-col gap-20 px-5 py-8 mx-auto max-w-1200 lg:flex-row">
           {/* 좌측 */}
           <div className="flex-[2] flex flex-col gap-5">
             {/* 주문 상품 */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-hidden bg-white border border-gray-200 rounded-lg">
               <div
                 className="bg-[var(--bg-color)] p-4 cursor-pointer flex justify-between items-center"
                 onClick={() => setIsOrderInfoOpen(!isOrderInfoOpen)}
               >
-                <div className="p-10 flex items-center gap-10">
+                <div className="flex items-center gap-10 p-10">
                   <FiPackage className="text-[var(--main-color)]" size={20} />
-                  <h2 className="text-18 font-bold">주문 상품</h2>
+                  <h2 className="font-bold text-18">주문 상품</h2>
                   <span className="bg-[var(--sub-color)] text-white font-medium px-12 py-6 rounded-sm">
                     {orderItems.length}개
                   </span>
@@ -524,16 +522,16 @@ export default function PaymentPage() {
                         item.bookId ||
                         `item-${index}`
                       }
-                      className="flex justify-between items-center py-15 px-10 gap-15 border-b border-gray-200"
+                      className="flex items-center justify-between px-10 border-b border-gray-200 py-15 gap-15"
                     >
-                      <div className="flex items-start gap-20 flex-1">
+                      <div className="flex items-start flex-1 gap-20">
                         <img
                           src={item.image}
                           alt={item.title}
-                          className="w-100 h-140 rounded-lg object-cover"
+                          className="object-cover rounded-lg w-100 h-140"
                         />
-                        <div className="flex flex-col gap-1 flex-1">
-                          <p className="text-base font-medium text-black mt-5">
+                        <div className="flex flex-col flex-1 gap-1">
+                          <p className="mt-5 text-base font-medium text-black">
                             {item.title}* {item.quantity}권
                           </p>
                         </div>
@@ -546,10 +544,10 @@ export default function PaymentPage() {
                           <button onClick={() => handleQuantityChange(item.id, 1)} className="p-2 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90  hover:cursor-pointer"><Plus /></button>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-black mb-1">{(item.price * item.quantity).toLocaleString()}원</p>
+                          <p className="mb-1 text-lg font-bold text-black">{(item.price * item.quantity).toLocaleString()}원</p>
                         </div>
                 
-                        <button onClick={() => handleRemoveItem(item.id)} disabled={orderItems.length <= 1} className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-30" title="삭제"><FiX size={20} /></button>
+                        <button onClick={() => handleRemoveItem(item.id)} disabled={orderItems.length <= 1} className="p-2 text-gray-400 transition-colors hover:text-red-500 disabled:opacity-30" title="삭제"><FiX size={20} /></button>
                       </div> */}
                     </div>
                   ))}
@@ -558,11 +556,11 @@ export default function PaymentPage() {
             </div>
 
             {/* 주문자 정보 */}
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-hidden border border-gray-200 rounded-lg">
               <div className="bg-[var(--bg-color)] p-4 border-b border-gray-200">
                 <div className="flex items-center gap-10 p-10">
                   <FiUser className="text-[var(--main-color)]" size={20} />
-                  <h2 className="text-18 font-bold text-black">
+                  <h2 className="font-bold text-black text-18">
                     주문 고객 정보 (필수)
                   </h2>
                 </div>
@@ -595,17 +593,17 @@ export default function PaymentPage() {
 
                 {/* 입력 폼 */}
                 {userInfoType === "existing" && existingUserInfo ? (
-                  <div className="bg-gray-50 p-4 rounded-md space-y-2">
-                    <p className="text-black text-lg">
-                      <span className="font-semibold mr-2">이름:</span>{" "}
+                  <div className="p-4 space-y-2 rounded-md bg-gray-50">
+                    <p className="text-lg text-black">
+                      <span className="mr-2 font-semibold">이름:</span>{" "}
                       {existingUserInfo.name}
                     </p>
-                    <p className="text-black text-lg">
-                      <span className="font-semibold mr-2">이메일:</span>{" "}
+                    <p className="text-lg text-black">
+                      <span className="mr-2 font-semibold">이메일:</span>{" "}
                       {existingUserInfo.email}
                     </p>
-                    <p className="text-black text-lg">
-                      <span className="font-semibold mr-2">연락처:</span>{" "}
+                    <p className="text-lg text-black">
+                      <span className="mr-2 font-semibold">연락처:</span>{" "}
                       {existingUserInfo.phone_number ||
                         "미등록 (정보 수정 필요)"}
                     </p>
@@ -613,7 +611,7 @@ export default function PaymentPage() {
                 ) : (
                   <div className="space-y-4">
                     <div className="flex flex-col gap-8">
-                      <label className="text-16 font-medium text-black mb-2">
+                      <label className="mb-2 font-medium text-black text-16">
                         이름 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -624,7 +622,7 @@ export default function PaymentPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-8">
-                      <label className="text-16 font-medium text-black mb-5 ">
+                      <label className="mb-5 font-medium text-black text-16 ">
                         연락처 <span className="text-red-500">*</span>
                       </label>
                       <div className="flex items-center gap-2">
@@ -657,7 +655,7 @@ export default function PaymentPage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-8">
-                      <label className="text-16 font-medium text-black mb-2 ">
+                      <label className="mb-2 font-medium text-black text-16 ">
                         이메일 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -673,11 +671,11 @@ export default function PaymentPage() {
             </div>
 
             {/* 배송지 */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-hidden bg-white border border-gray-200 rounded-lg">
               <div className="bg-[var(--bg-color)] p-4 border-b border-gray-200">
                 <div className="flex items-center gap-10 p-10">
                   <FiMapPin className="text-[var(--main-color)]" size={20} />
-                  <h2 className="text-18 font-bold text-black">
+                  <h2 className="font-bold text-black text-18">
                     배송지 선택 (필수)
                   </h2>
                 </div>
@@ -741,7 +739,7 @@ export default function PaymentPage() {
                             className="w-4 h-4 text-[var(--main-color)] border-gray-300 focus:ring-[var(--main-color)]"
                           />
                         </div>
-                        <p className="text-sm text-gray-600 mt-5 font-normal">
+                        <p className="mt-5 text-sm font-normal text-gray-600">
                           [{addr.postcode}] {addr.road_address}{" "}
                           {addr.detail_address}
                         </p>
@@ -753,7 +751,7 @@ export default function PaymentPage() {
                 {/* 신규 주소 입력 */}
                 {addressType === "new" && (
                   <>
-                    <div className="text-sm text-red-500 mb-2">
+                    <div className="mb-2 text-sm text-red-500">
                       주소와 우편번호는 필수 입력 항목입니다.
                     </div>
                     <AddressInput
@@ -768,13 +766,13 @@ export default function PaymentPage() {
 
                 {/* 주소 목록이 없고 신규 입력도 아닐 경우 안내 */}
                 {addressType === "existing" && addressList.length === 0 && (
-                  <div className="p-4 border rounded-md text-center text-gray-500 bg-gray-50">
+                  <div className="p-4 text-center text-gray-500 border rounded-md bg-gray-50">
                     등록된 배송지가 없습니다. '신규 입력'을 선택해주세요.
                   </div>
                 )}
 
                 <div className="mt-15">
-                  <label className="text-16 font-medium text-black mb-10 block">
+                  <label className="block mb-10 font-medium text-black text-16">
                     배송메모 (선택)
                   </label>
                   <textarea
@@ -789,14 +787,14 @@ export default function PaymentPage() {
             </div>
 
             {/* 결제 위젯 */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-hidden bg-white border border-gray-200 rounded-lg">
               <div className="bg-[var(--bg-color)] p-4 border-b border-gray-200">
                 <div className="flex items-center gap-10 p-10">
                   <FiCreditCard
                     className="text-[var(--main-color)]"
                     size={20}
                   />
-                  <h2 className="text-18 font-bold text-black">
+                  <h2 className="font-bold text-black text-18">
                     결제방법 선택
                   </h2>
                 </div>
@@ -820,14 +818,14 @@ export default function PaymentPage() {
           >
             <div className="bg-[var(--bg-color)] p-20 rounded-md shadow-sm">
               <div>
-                <h2 className="text-xl font-bold mb-30 text-black">
+                <h2 className="text-xl font-bold text-black mb-30">
                   주문 정보
                 </h2>
                 <div className="flex items-center gap-10 mb-30">
                   <FiTruck className="text-[var(--main-color)]" size={18} />
-                  <h3 className="text-18  font-bold text-black">배송 정보</h3>
+                  <h3 className="font-bold text-black text-18">배송 정보</h3>
                 </div>
-                <div className="flex flex-col gap-25 mb-4">
+                <div className="flex flex-col mb-4 gap-25">
                   <div className="flex justify-between text-black">
                     <span className="font-normal text-gray-600">배송 방법</span>
                     <span className="font-medium">일반배송</span>
@@ -840,8 +838,8 @@ export default function PaymentPage() {
                     </span>
                   </div>
                 </div>
-                <hr className="border-gray-200 my-10" />
-                <div className="flex justify-between text-black mb-2">
+                <hr className="my-10 border-gray-200" />
+                <div className="flex justify-between mb-2 text-black">
                   <span className="font-normal text-gray-600">
                     총 상품 금액
                   </span>
@@ -849,15 +847,15 @@ export default function PaymentPage() {
                     {totalItemPrice.toLocaleString()}원
                   </span>
                 </div>
-                <div className="flex justify-between text-black mb-2">
+                <div className="flex justify-between mb-2 text-black">
                   <span className="font-normal text-gray-600">배송비</span>
                   <span className="font-bold">
                     {deliveryFee.toLocaleString()}원
                   </span>
                 </div>
-                <hr className="border-gray-200 my-10" />
-                <div className="flex justify-between text-black mb-10">
-                  <span className="font-bold text-lg">총 결제 금액</span>
+                <hr className="my-10 border-gray-200" />
+                <div className="flex justify-between mb-10 text-black">
+                  <span className="text-lg font-bold">총 결제 금액</span>
                   <span className="font-bold text-lg text-[var(--main-color)]">
                     {finalPrice.toLocaleString()}원
                   </span>

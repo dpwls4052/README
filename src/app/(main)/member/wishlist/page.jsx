@@ -5,6 +5,7 @@ import AddToCartButton from "@/components/common/AddToCartButton";
 import WishListButton from "@/components/common/WishListButton";
 import { useAuth } from "@/hooks/common/useAuth";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { auth } from "@/lib/firebase";
 
 const Wishlist = () => {
   const [items, setItems] = useState([]);
@@ -21,7 +22,12 @@ const Wishlist = () => {
     const fetchWishlist = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/user/wishlist?user_id=${userId}`);
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`/api/user/wishlist`, {
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+          },
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "위시리스트 조회 실패");
 
@@ -44,19 +50,19 @@ const Wishlist = () => {
     fetchWishlist();
   }, [userId]);
 
-  if (loading) return <p className="text-center mt-20">로딩 중...</p>;
-  if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
+  if (loading) return <p className="mt-20 text-center">로딩 중...</p>;
+  if (!userId) return <p className="mt-20 text-center">로그인이 필요합니다.</p>;
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen py-10 bg-white">
-        <div className="max-w-1200 mx-auto px-5 pt-50">
-          <div className="flex flex-col lg:flex-row gap-20">
+        <div className="px-5 mx-auto max-w-1200 pt-50">
+          <div className="flex flex-col gap-20 lg:flex-row">
             <div className="flex-2 ">
-              <h2 className="text-3xl font-bold mb-20">위시리스트</h2>
+              <h2 className="mb-20 text-3xl font-bold">위시리스트</h2>
               {items.length === 0 ? (
-                <div className="text-center py-20">
-                  <p className="text-gray-500 text-lg">
+                <div className="py-20 text-center">
+                  <p className="text-lg text-gray-500">
                     위시리스트가 비어 있습니다.
                   </p>
                 </div>
@@ -65,31 +71,43 @@ const Wishlist = () => {
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex justify-between items-center py-15 gap-15 border-b border-gray-200"
+                      className="flex items-center justify-between border-b border-gray-200 py-15 gap-15"
                     >
                       <div className="flex items-start gap-20">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-100 h-140 object-cover rounded-md border border-gray-300 cursor-pointer"
-                          onClick={() => window.location.href = `/product/detail/${item.id}`}
+                          className="object-cover border border-gray-300 rounded-md cursor-pointer w-100 h-140"
+                          onClick={() =>
+                            (window.location.href = `/product/detail/${item.id}`)
+                          }
                         />
-                        <div className="flex flex-col gap-1 flex-1 cursor-pointer" onClick={() => window.location.href = `/product/detail/${item.id}`}>
-                          <span className="text-base text-black font-medium mt-5">
+                        <div
+                          className="flex flex-col flex-1 gap-1 cursor-pointer"
+                          onClick={() =>
+                            (window.location.href = `/product/detail/${item.id}`)
+                          }
+                        >
+                          <span className="mt-5 text-base font-medium text-black">
                             {item.name}
                           </span>
                           <span className="text-lg font-bold text-[var(--main-color)]">
                             {item.price.toLocaleString()}원
                           </span>
-                          <span 
+                          <span
                             className={`text-sm font-medium mt-1`}
-                            style={{ color: item.stock > 0 ? "var(--sub-color)" : "rgb(220, 38, 38)" }}
+                            style={{
+                              color:
+                                item.stock > 0
+                                  ? "var(--sub-color)"
+                                  : "rgb(220, 38, 38)",
+                            }}
                           >
                             {item.stock > 0 ? `재고 ${item.stock}권` : "품절"}
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-10 items-center">
+                      <div className="flex items-center gap-10">
                         {/* 🌟 WishListButton 컴포넌트 사용 */}
                         <WishListButton
                           userId={userId}
@@ -97,7 +115,7 @@ const Wishlist = () => {
                           stock={item.stock}
                         />
                         <AddToCartButton
-                          book={{ 
+                          book={{
                             bookId: item.id,
                           }}
                           iconMode={true}
@@ -110,16 +128,16 @@ const Wishlist = () => {
             </div>
 
             <div className="flex-1 bg-[var(--bg-color)] p-20 rounded-md shadow-sm h-fit lg:sticky lg:top-200">
-              <h2 className="text-xl font-bold mb-30 text-black">
+              <h2 className="text-xl font-bold text-black mb-30">
                 위시리스트 정보
               </h2>
-              <div className="flex flex-col gap-25 mb-4">
+              <div className="flex flex-col mb-4 gap-25">
                 <div className="flex justify-between">
-                  <span className="text-black font-normal">상품 수</span>
+                  <span className="font-normal text-black">상품 수</span>
                   <span className="font-bold text-black">{items.length}개</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-black font-normal">총 금액</span>
+                  <span className="font-normal text-black">총 금액</span>
                   <span className="font-bold text-[var(--main-color)]">
                     {items
                       .reduce((acc, i) => acc + i.price, 0)

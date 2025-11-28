@@ -9,6 +9,7 @@ import BuyNowButton from "@/components/common/BuyNowButton";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useBook } from "@/hooks/book/useBook";
 import useBookReviews from "@/hooks/review/useBookReviews";
+import { auth } from "@/lib/firebase";
 
 // Mock 리뷰 및 FAQ 데이터
 const MOCK_DETAIL_TABS_DATA = {
@@ -84,7 +85,7 @@ const ProductDetail = () => {
     loading: reviewLoading,
     error: reviewError,
   } = useBookReviews(bookId);
-  
+
   const [activeTab, setActiveTab] = useState("description");
   const { book, loading, error } = useBook(bookId);
 
@@ -92,9 +93,18 @@ const ProductDetail = () => {
   const getAvatarColor = (char) => {
     if (!char) return "#4ECDC4";
     const colors = [
-      "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A",
-      "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2",
-      "#F8B739", "#52B788", "#E76F51", "#2A9D8F"
+      "#FF6B6B",
+      "#4ECDC4",
+      "#45B7D1",
+      "#FFA07A",
+      "#98D8C8",
+      "#F7DC6F",
+      "#BB8FCE",
+      "#85C1E2",
+      "#F8B739",
+      "#52B788",
+      "#E76F51",
+      "#2A9D8F",
     ];
     const charCode = char.charCodeAt(0);
     return colors[charCode % colors.length];
@@ -112,7 +122,7 @@ const ProductDetail = () => {
             key={idx}
             src={part}
             alt="description image"
-            className="my-4 w-auto max-w-full rounded-md"
+            className="w-auto max-w-full my-4 rounded-md"
           />
         );
       }
@@ -152,11 +162,14 @@ const ProductDetail = () => {
 
     const saveRecentBook = async () => {
       try {
+        const idToken = await auth.currentUser.getIdToken();
         await fetch("/api/user/recentBooks/save", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`,
+          },
           body: JSON.stringify({
-            userId,
             bookId: bookInfo.bookId,
             title: bookInfo.title,
             author: bookInfo.author,
@@ -173,9 +186,11 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="px-4 md:px-6 py-8 mx-auto mt-8 md:mt-20 max-w-7xl">
+      <div className="px-4 py-8 mx-auto mt-8 md:px-6 md:mt-20 max-w-7xl">
         <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-lg md:text-xl text-(--main-color)">로딩 중...</div>
+          <div className="text-lg md:text-xl text-(--main-color)">
+            로딩 중...
+          </div>
         </div>
       </div>
     );
@@ -183,9 +198,9 @@ const ProductDetail = () => {
 
   if (error || !bookInfo) {
     return (
-      <div className="px-4 md:px-6 py-8 mx-auto mt-8 md:mt-20 max-w-7xl">
+      <div className="px-4 py-8 mx-auto mt-8 md:px-6 md:mt-20 max-w-7xl">
         <div className="flex flex-col justify-center items-center min-h-[60vh]">
-          <div className="mb-6 text-lg md:text-xl text-red-500">
+          <div className="mb-6 text-lg text-red-500 md:text-xl">
             {error || "책을 찾을 수 없습니다."}
           </div>
           <button
@@ -203,7 +218,9 @@ const ProductDetail = () => {
   const totalReviews = reviews?.length || 0;
   const averageRating =
     totalReviews > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(
+          1
+        )
       : 0;
 
   const highResCover =
@@ -245,7 +262,9 @@ const ProductDetail = () => {
           </div>
 
           <div className="flex items-center justify-between my-0 border-b border-gray-200 py-3 min-[900px]:py-15">
-            <span className="font-semibold text-black text-base min-[900px]:text-20">재고량</span>
+            <span className="font-semibold text-black text-base min-[900px]:text-20">
+              재고량
+            </span>
             <span
               style={{ borderRadius: "var(--radius-5)" }}
               className={`px-3 min-[900px]:px-10 py-2 min-[900px]:py-6 font-medium text-base min-[900px]:text-20 ${
@@ -260,14 +279,17 @@ const ProductDetail = () => {
             </span>
           </div>
 
-          {bookInfo.salesCount !== undefined && bookInfo.salesCount !== null && (
-            <div className="flex items-center justify-between my-0 border-b border-gray-200 py-3 min-[900px]:py-15">
-              <span className="font-semibold text-black text-base min-[900px]:text-20">판매량</span>
-              <span className="text-(--main-color) font-medium text-base min-[900px]:text-20">
-                {bookInfo.salesCount.toLocaleString()}권
-              </span>
-            </div>
-          )}
+          {bookInfo.salesCount !== undefined &&
+            bookInfo.salesCount !== null && (
+              <div className="flex items-center justify-between my-0 border-b border-gray-200 py-3 min-[900px]:py-15">
+                <span className="font-semibold text-black text-base min-[900px]:text-20">
+                  판매량
+                </span>
+                <span className="text-(--main-color) font-medium text-base min-[900px]:text-20">
+                  {bookInfo.salesCount.toLocaleString()}권
+                </span>
+              </div>
+            )}
 
           {/* 버튼 영역 */}
           <div className="flex flex-col sm:flex-row gap-3 min-[900px]:gap-6 py-4 min-[900px]:py-20">
@@ -363,7 +385,9 @@ const ProductDetail = () => {
               {/* 에러 상태 */}
               {reviewError && (
                 <div className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
-                  <p className="text-sm min-[900px]:text-18 text-red-500">{reviewError}</p>
+                  <p className="text-sm min-[900px]:text-18 text-red-500">
+                    {reviewError}
+                  </p>
                 </div>
               )}
 
@@ -377,12 +401,17 @@ const ProductDetail = () => {
               )}
 
               {reviews.map((item) => (
-                <div key={item.id} className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                <div
+                  key={item.id}
+                  className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)"
+                >
                   <div className="flex gap-3 min-[900px]:gap-10">
                     {/* 원형 아바타 - 첫 글자 표시 */}
-                    <div 
+                    <div
                       className="flex items-center justify-center rounded-full w-10 h-10 min-[900px]:w-40 min-[900px]:h-40 font-bold text-white text-base min-[900px]:text-18 flex-shrink-0"
-                      style={{ backgroundColor: getAvatarColor(item.firstChar || "익") }}
+                      style={{
+                        backgroundColor: getAvatarColor(item.firstChar || "익"),
+                      }}
                     >
                       {item.firstChar || "익"}
                     </div>
@@ -396,7 +425,9 @@ const ProductDetail = () => {
                           {item.date}
                         </span>
                       </div>
-                      <div className="text-sm min-[900px]:text-16">{"⭐".repeat(item.rating)}</div>
+                      <div className="text-sm min-[900px]:text-16">
+                        {"⭐".repeat(item.rating)}
+                      </div>
                       <p className="mt-3 min-[900px]:mt-20 font-light leading-relaxed text-black text-sm min-[900px]:text-18">
                         {item.content}
                       </p>
@@ -410,7 +441,10 @@ const ProductDetail = () => {
           {activeTab === "faq" && (
             <div className="space-y-3 min-[900px]:space-y-10">
               {bookInfo.faqs.map((faq) => (
-                <div key={faq.id} className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)">
+                <div
+                  key={faq.id}
+                  className="p-4 min-[900px]:p-25 rounded-sm bg-(--bg-color)"
+                >
                   <p className="font-bold text-(--main-color) mb-3 min-[900px]:mb-20 text-base min-[900px]:text-20">
                     Q. {faq.question}
                   </p>

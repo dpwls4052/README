@@ -1,10 +1,5 @@
 import { authenticate } from "@/lib/authenticate";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(request) {
   try {
@@ -12,13 +7,6 @@ export async function POST(request) {
     const auth = await authenticate(request);
     const { nickname, postcode, roadAddress, detailAddress, isDefault } = body;
 
-    console.log("받은 데이터:", {
-      nickname,
-      postcode,
-      roadAddress,
-      detailAddress,
-      isDefault,
-    });
     if (auth.error) {
       return NextResponse.json(
         { message: auth.error },

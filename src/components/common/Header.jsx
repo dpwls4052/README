@@ -13,6 +13,7 @@ import { HiOutlineDocumentText } from "react-icons/hi";
 import { useCartCount } from "@/hooks/common/useCartCount";
 import { useWishlistCount } from "@/hooks/common/useWishlistCount";
 import useSearchForm from "@/hooks/common/useSearchForm";
+import { auth } from "@/lib/firebase";
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
@@ -28,10 +29,13 @@ export default function Header() {
 
     async function fetchUser() {
       try {
+        const idToken = await auth.currentUser.getIdToken();
         const res = await fetch("/api/user/getUser", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`,
+          },
         });
 
         if (!res.ok) throw new Error("사용자 정보 불러오기 실패");
@@ -67,7 +71,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full shadow-[0_4px_10px_rgba(153,153,153,0.25)] header-blur px-20">
-      <div className="flex items-center justify-between gap-8 mx-auto py-20 max-w-1200">
+      <div className="flex items-center justify-between gap-8 py-20 mx-auto max-w-1200">
         {/* 로고 */}
         <Link href="/" className="cursor-pointer">
           <Image
@@ -116,7 +120,7 @@ export default function Header() {
             </Link>
 
             {wishlistCount > 0 && (
-              <span className="absolute flex items-center justify-center w-20 h-20 font-medium text-xs text-white bg-red-500 rounded-full -top-4 left-17">
+              <span className="absolute flex items-center justify-center w-20 h-20 text-xs font-medium text-white bg-red-500 rounded-full -top-4 left-17">
                 {wishlistCount}
               </span>
             )}
@@ -170,7 +174,7 @@ export default function Header() {
                   </div>
 
                   {/* 메뉴 아이템 */}
-                  <div className="flex flex-col gap-10 py-20 px-10">
+                  <div className="flex flex-col gap-10 px-10 py-20">
                     <Link
                       href="/member?MemberTab=profile"
                       className="flex items-center ml-6 gap-12 px-4 py-6 text-black font-normal hover:bg-[var(--bg-color)] rounded transition-colors"

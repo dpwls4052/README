@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "sonner";
 import { useWishlistCount } from "@/hooks/common/useWishlistCount"; // 추가
+import { auth } from "@/lib/firebase";
 
 export default function WishListButton({ userId, bookId, stock }) {
   const [isWished, setIsWished] = useState(false);
@@ -17,9 +18,12 @@ export default function WishListButton({ userId, bookId, stock }) {
 
     const checkWishlistStatus = async () => {
       try {
-        const res = await fetch(
-          `/api/user/wishlist?user_id=${userId}&book_id=${bookId}`
-        );
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`/api/user/wishlist?book_id=${bookId}`, {
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+          },
+        });
         const data = await res.json();
         if (res.ok) {
           setIsWished(data.status || false);
@@ -47,12 +51,16 @@ export default function WishListButton({ userId, bookId, stock }) {
       const newIsWished = !isWished;
       setIsWished(newIsWished);
 
+      const idToken = await auth.currentUser.getIdToken();
+
       // DB 요청
       const res = await fetch("/api/user/wishlist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          user_id: userId,
           book_id: bookId,
         }),
       });
@@ -66,10 +74,10 @@ export default function WishListButton({ userId, bookId, stock }) {
       } else {
         // 서버에서 받은 실제 status로 업데이트
         setIsWished(data.status);
-        
+
         // 🌟 여기가 핵심! Context의 count 실시간 업데이트 🌟
-        setCount((prevCount) => data.status ? prevCount + 1 : prevCount - 1);
-        
+        setCount((prevCount) => (data.status ? prevCount + 1 : prevCount - 1));
+
         toast.success(
           data.status
             ? "위시리스트에 추가했습니다."

@@ -1,16 +1,23 @@
+import { authenticate } from "@/lib/authenticate";
 import { supabase } from "@/lib/supabaseClient";
 import { NextResponse } from "next/server";
 
 /**
  * 사용자의 주문 내역 조회 API
- * POST /api/user/orders/getOrders
- * Body: { user_id: string }
+ * GET /api/user/orders/getOrders
  */
-export async function POST(req) {
+export async function GET(req) {
   try {
-    // 1. body에서 user_id 추출
-    const body = await req.json();
-    const { user_id } = body;
+    const auth = await authenticate(req);
+
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+
+    const { user_id } = auth;
 
     // 2. user_id 필수 검증
     if (!user_id) {
@@ -32,11 +39,8 @@ export async function POST(req) {
       throw ordersError;
     }
 
-    console.log(`✅ ${user_id} 사용자의 주문 ${orders.length}건 조회 완료`);
-
     // 4. 성공 응답
     return NextResponse.json(orders, { status: 200 });
-    
   } catch (error) {
     console.error("💥 주문 조회 API 오류:", error);
     return NextResponse.json(
