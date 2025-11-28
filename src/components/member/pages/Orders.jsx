@@ -86,12 +86,11 @@ export default function Orders() {
       try {
         setLoading(true);
         const res = await fetch(`/api/user/orders/getOrders`, {
-          method: "POST",
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ user_id: userId }),
         });
 
         const contentType = res.headers.get("content-type");
@@ -173,8 +172,8 @@ export default function Orders() {
     delivered: orderList.filter((o) => o.shippingStatus === "배송완료").length,
   };
 
-  if (loading) return <p className="text-center mt-20">로딩 중...</p>;
-  if (!userId) return <p className="text-center mt-20">로그인이 필요합니다.</p>;
+  if (loading) return <p className="mt-20 text-center">로딩 중...</p>;
+  if (!userId) return <p className="mt-20 text-center">로그인이 필요합니다.</p>;
 
   const handleCreateReview = (bookId) => {
     router.push(`/member?MemberTab=createreview&bookId=${bookId}`);
@@ -203,15 +202,15 @@ export default function Orders() {
 
   return (
     <ProtectedRoute>
-      <div className="w-full min-h-screen flex lg:ml-50">
+      <div className="flex w-full min-h-screen lg:ml-50">
         <div className="w-full max-w-5xl p-10 space-y-50">
           {/* 상단 헤더 */}
-          <div className="flex  flex-col justify-between items-start gap-15 border-b py-50 md:flex-row md:items-center md:gap-0">
+          <div className="flex flex-col items-start justify-between border-b gap-15 py-50 md:flex-row md:items-center md:gap-0">
             <section>
               <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
                 주문 내역
               </h2>
-              <p className="text-black-900 text-xl font-semibold mb-2">
+              <p className="mb-2 text-xl font-semibold text-black-900">
                 주문하신 상품의 배송 상태를 확인하세요
               </p>
             </section>
@@ -219,23 +218,23 @@ export default function Orders() {
             {/* 주문 통계 */}
             <section>
               <div className="flex gap-40 text-center mr-30">
-                <div className="flex flex-col justify-center items-center gap-6">
+                <div className="flex flex-col items-center justify-center gap-6">
                   <p className="text-sm font-normal text-gray-500">배송준비</p>
-                  <div className="flex gap-8 items-center">
+                  <div className="flex items-center gap-8">
                     <FiPackage className="mx-auto text-2xl text-orange-600" />
                     <p className="text-lg font-semibold">{stats.preparing}</p>
                   </div>
                 </div>
-                <div className="flex flex-col justify-center items-center gap-6">
+                <div className="flex flex-col items-center justify-center gap-6">
                   <p className="text-sm font-normal text-gray-500">배송중</p>
-                  <div className="flex gap-8 items-center">
+                  <div className="flex items-center gap-8">
                     <FiTruck className="mx-auto text-2xl text-blue-600" />
                     <p className="text-lg font-semibold">{stats.shipping}</p>
                   </div>
                 </div>
-                <div className="flex flex-col justify-center items-center gap-6">
+                <div className="flex flex-col items-center justify-center gap-6">
                   <p className="text-sm font-normal text-gray-500">배송완료</p>
-                  <div className="flex gap-8 items-center">
+                  <div className="flex items-center gap-8">
                     <FiCheckCircle className="mx-auto text-2xl text-green-700" />
                     <p className="text-lg font-semibold">{stats.delivered}</p>
                   </div>
@@ -245,7 +244,7 @@ export default function Orders() {
           </div>
 
           {/* 탭 메뉴 */}
-          <div className="flex gap-30 border-b-2 border-gray-200 ">
+          <div className="flex border-b-2 border-gray-200 gap-30 ">
             {["전체", "배송준비", "배송중", "배송완료"].map((tab) => (
               <button
                 key={tab}
@@ -278,7 +277,7 @@ export default function Orders() {
                   className="border rounded-lg p-20 bg-[var(--bg-color)] space-y-15"
                 >
                   {/* 주문 헤더 */}
-                  <div className="flex justify-between items-center border-b pb-15">
+                  <div className="flex items-center justify-between border-b pb-15">
                     <div className="space-y-5">
                       <p className="font-semibold text-14 w-min md:text-18 md:w-auto">
                         주문번호: {order.orderNumber}
@@ -310,7 +309,7 @@ export default function Orders() {
                       return (
                         <div
                           key={idx}
-                          className="flex gap-5 cursor-pointer flex-col mb-25 md:flex-row md:items-center md:p-15 md:gap-15"
+                          className="flex flex-col gap-5 cursor-pointer mb-25 md:flex-row md:items-center md:p-15 md:gap-15"
                         >
                           <div
                             onClick={
@@ -321,18 +320,18 @@ export default function Orders() {
                                     )
                                 : undefined
                             }
-                            className="flex-1 flex gap-15 items-start cursor-pointer"
+                            className="flex items-start flex-1 cursor-pointer gap-15"
                           >
                             <img
                               src={item.cover || "https://placehold.co/80x110"}
                               alt={item.title}
-                              className="w-80 h-110 object-cover rounded border"
+                              className="object-cover border rounded w-80 h-110"
                             />
                             <div className="flex-1">
-                              <p className="font-medium text-16 mb-5">
+                              <p className="mb-5 font-medium text-16">
                                 {item.title}
                               </p>
-                              <p className="text-sm text-gray-600 mb-5">
+                              <p className="mb-5 text-sm text-gray-600">
                                 {item.book_price?.toLocaleString()}원 ×{" "}
                                 {item.amount}개
                               </p>
@@ -350,7 +349,7 @@ export default function Orders() {
 
                             <div>
                               {order.shippingStatus === "배송완료" && (
-                                <div className="mt-10 flex gap-10 justify-end">
+                                <div className="flex justify-end gap-10 mt-10">
                                   {userReview ? (
                                     <>
                                       {/* ✅ 이미 리뷰가 있을 때 → 수정 / 삭제 */}
@@ -371,7 +370,7 @@ export default function Orders() {
                                           handleDeleteReview(userReview.id)
                                         }
                                         disabled={deleting}
-                                        className="px-15 py-8 bg-red-500 text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
+                                        className="py-8 text-sm text-white transition bg-red-500 rounded cursor-pointer px-15 hover:opacity-90"
                                       >
                                         삭제
                                       </button>
@@ -397,7 +396,7 @@ export default function Orders() {
                   </div>
 
                   {/* 주문 합계 */}
-                  <div className="border-t pt-15 flex justify-between items-center">
+                  <div className="flex items-center justify-between border-t pt-15">
                     <p className="font-semibold text-16">총 결제금액</p>
                     <p className="font-bold text-20 text-[var(--main-color)]">
                       {order.totalPrice?.toLocaleString()}원

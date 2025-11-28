@@ -83,12 +83,11 @@ export default function Reviews() {
         setOrdersError(null);
 
         const res = await fetch(`/api/user/orders/getOrders`, {
-          method: "POST",
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ user_id: userId }),
         });
 
         const contentType = res.headers.get("content-type");
@@ -220,9 +219,9 @@ export default function Reviews() {
   if (!userId) {
     return (
       <ProtectedRoute>
-        <div className="w-full bg-gray-50 min-h-screen py-10 flex justify-center">
-          <div className="w-full max-w-5xl bg-white rounded-xl shadow-sm p-8">
-            <p className="text-center mt-10">로그인이 필요합니다.</p>
+        <div className="flex justify-center w-full min-h-screen py-10 bg-gray-50">
+          <div className="w-full max-w-5xl p-8 bg-white shadow-sm rounded-xl">
+            <p className="mt-10 text-center">로그인이 필요합니다.</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -233,15 +232,15 @@ export default function Reviews() {
 
   return (
     <ProtectedRoute>
-      <div className="w-full min-h-screen flex lg:ml-50">
+      <div className="flex w-full min-h-screen lg:ml-50">
         <div className="w-full max-w-5xl p-8">
           {/* 🏷️ 헤더 */}
-          <div className="flex justify-between items-center pb-4 mb-6">
+          <div className="flex items-center justify-between pb-4 mb-6">
             <h1 className="text-2xl font-bold text-gray-800">리뷰 관리</h1>
           </div>
 
           {/* 🧭 상단 탭 */}
-          <div className="flex border-b mb-4">
+          <div className="flex mb-4 border-b">
             <button
               onClick={() => setTab("available")}
               className={`flex-1 py-3 font-medium ${
@@ -267,7 +266,7 @@ export default function Reviews() {
           {/* 📋 내용 영역 */}
           <div className="p-8 min-h-[300px]">
             {/* 안내 문구 */}
-            <p className="font-normal text-black my-10">
+            <p className="my-10 font-normal text-black">
               {tab === "available"
                 ? "구매하신 상품 중 리뷰를 작성할 수 있는 도서 목록입니다."
                 : "작성하신 리뷰를 확인하고 관리할 수 있습니다."}
@@ -277,7 +276,7 @@ export default function Reviews() {
             <div className="flex justify-end mb-6">
               {tab === "written" && (
                 <select
-                  className="border border-gray-300 rounded px-3 py-2 text-sm"
+                  className="px-3 py-2 text-sm border border-gray-300 rounded"
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
                 >
@@ -290,7 +289,7 @@ export default function Reviews() {
 
             {/* 로딩 / 에러 처리 */}
             {isLoading && (
-              <div className="flex justify-center items-center py-16">
+              <div className="flex items-center justify-center py-16">
                 <p className="text-gray-500">
                   리뷰 정보를 불러오는 중입니다...
                 </p>
@@ -298,9 +297,9 @@ export default function Reviews() {
             )}
 
             {!isLoading && (ordersError || userReviewError) && (
-              <div className="flex flex-col items-center justify-center text-center py-16">
-                <FaExclamationCircle size={40} className="text-red-400 mb-3" />
-                <p className="text-sm text-red-500 mb-2">
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <FaExclamationCircle size={40} className="mb-3 text-red-400" />
+                <p className="mb-2 text-sm text-red-500">
                   리뷰 또는 주문 정보를 불러오는 중 오류가 발생했습니다.
                 </p>
                 <p className="text-xs text-gray-500">
@@ -315,12 +314,12 @@ export default function Reviews() {
                 {tab === "available" && (
                   <>
                     {sortedAvailableItems.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center text-center py-20">
+                      <div className="flex flex-col items-center justify-center py-20 text-center">
                         <FaExclamationCircle
                           size={40}
-                          className="text-gray-400 mb-3"
+                          className="mb-3 text-gray-400"
                         />
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="mb-4 text-sm text-gray-500">
                           배송완료된 주문 중, 아직 작성 가능한 리뷰가 없습니다.
                         </p>
                       </div>
@@ -331,22 +330,22 @@ export default function Reviews() {
                             key={`${item.order_number}-${item.book_id}`}
                             className="flex flex-col gap-4 justify-between items-end border rounded-sm p-10 bg-[var(--bg-color)] md:flex-row md:p-20"
                           >
-                            <div className="flex items-start gap-6 w-full">
+                            <div className="flex items-start w-full gap-6">
                               <img
                                 src={
                                   item.cover || "https://placehold.co/80x110"
                                 }
                                 alt={item.title}
-                                className="w-80 h-110 object-cover rounded border"
+                                className="object-cover border rounded w-80 h-110"
                               />
-                              <div className=" mt-5">
-                                <p className="font-medium text-16 mb-2 overflow-hidden text-ellipsis w-150 line-clamp-1 md:w-600">
+                              <div className="mt-5 ">
+                                <p className="mb-2 overflow-hidden font-medium text-16 text-ellipsis w-150 line-clamp-1 md:w-600">
                                   {item.title}
                                 </p>
-                                <p className="text-xs text-gray-500 mb-1">
+                                <p className="mb-1 text-xs text-gray-500">
                                   주문번호: {item.order_number}
                                 </p>
-                                <p className="text-xs text-gray-500 mb-3">
+                                <p className="mb-3 text-xs text-gray-500">
                                   주문일: {convertToKoreaTime(item.date)}
                                 </p>
                               </div>
@@ -367,12 +366,12 @@ export default function Reviews() {
                 {tab === "written" && (
                   <>
                     {sortedWrittenItems.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center text-center py-20">
+                      <div className="flex flex-col items-center justify-center py-20 text-center">
                         <FaExclamationCircle
                           size={40}
-                          className="text-gray-400 mb-3"
+                          className="mb-3 text-gray-400"
                         />
-                        <p className="text-sm font-normal text-gray-500 mb-4">
+                        <p className="mb-4 text-sm font-normal text-gray-500">
                           아직 작성한 리뷰가 없습니다.
                         </p>
                       </div>
@@ -389,7 +388,7 @@ export default function Reviews() {
                                   item.cover || "https://placehold.co/80x110"
                                 }
                                 alt={item.title}
-                                className="w-80 h-110 object-cover rounded border"
+                                className="object-cover border rounded w-80 h-110"
                               />
                               <div className="flex-1 mt-5">
                                 <div className="flex justify-between mb-2">
@@ -397,11 +396,11 @@ export default function Reviews() {
                                     <p className="font-medium text-16 mb-5 overflow-hidden text-ellipsis w-[80px] line-clamp-1 md:w-600">
                                       {item.title}
                                     </p>
-                                    <p className="text-12 font-normal text-gray-500 ">
+                                    <p className="font-normal text-gray-500 text-12 ">
                                       주문일: {convertToKoreaTime(item.date)}
                                     </p>
                                   </div>
-                                  <div className="text-right font-normal text-12 text-gray-500">
+                                  <div className="font-normal text-right text-gray-500 text-12">
                                     <p className=" w-125">
                                       리뷰 작성일:{" "}
                                       {item.review?.date ||
@@ -411,7 +410,7 @@ export default function Reviews() {
                                 </div>
 
                                 {/* 평점 */}
-                                <div className="text-yellow-500 text-sm mb-5">
+                                <div className="mb-5 text-sm text-yellow-500">
                                   {"⭐".repeat(item.review?.rating || 0)}
                                 </div>
 
@@ -420,7 +419,7 @@ export default function Reviews() {
                                   {item.review?.content}
                                 </p>
 
-                                <div className="flex gap-3 justify-end">
+                                <div className="flex justify-end gap-3">
                                   <button
                                     onClick={() =>
                                       handleEditReview(
@@ -436,7 +435,7 @@ export default function Reviews() {
                                     onClick={() =>
                                       handleDeleteReview(item.review?.id)
                                     }
-                                    className="px-15 py-8 bg-red-500 text-white rounded text-sm hover:opacity-90 transition cursor-pointer"
+                                    className="py-8 text-sm text-white transition bg-red-500 rounded cursor-pointer px-15 hover:opacity-90"
                                   >
                                     삭제
                                   </button>

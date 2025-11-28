@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { authenticate } from "@/lib/authenticate";
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(req) {
   try {
-    const { userId } = await req.json();
+    const auth = await authenticate(req);
 
-    console.log("✅ recentBooks API userId:", userId);
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+
+    const { user_id } = auth;
 
     const { data, error } = await supabase
       .from("user_recent_books")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user_id)
       .order("viewed_at", { ascending: false })
       .limit(10);
-
-    console.log("✅ recentBooks result:", data, error);
 
     if (error) throw error;
 

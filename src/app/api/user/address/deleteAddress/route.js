@@ -1,10 +1,5 @@
 import { authenticate } from "@/lib/authenticate";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(request) {
   try {
@@ -18,8 +13,6 @@ export async function POST(request) {
     }
     const { user_id } = auth;
     const { addressIdx } = body;
-
-    console.log("삭제 요청:", { user_id, addressIdx });
 
     if (!user_id || !addressIdx) {
       return Response.json(
@@ -50,8 +43,6 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-
-    console.log("삭제된 주소:", data);
 
     return Response.json({
       success: true,

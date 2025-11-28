@@ -1,14 +1,8 @@
 import { authenticate } from "@/lib/authenticate";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
     const auth = await authenticate(request);
     if (auth.error) {
       return NextResponse.json(
@@ -17,8 +11,6 @@ export async function POST(request) {
       );
     }
     const { user_id } = auth;
-
-    console.log("주소 조회 userId:", user_id);
 
     if (!user_id) {
       return Response.json(
@@ -41,8 +33,6 @@ export async function POST(request) {
         { status: 500 }
       );
     }
-
-    console.log("조회된 주소 목록:", data);
 
     return Response.json({
       success: true,

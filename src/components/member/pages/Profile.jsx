@@ -15,8 +15,6 @@ export default function Profile() {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
 
-  console.log("Profile 렌더링 - userId:", userId);
-
   const [userInfo, setUserInfo] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalField, setModalField] = useState("");
@@ -72,9 +70,8 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ userId }),
       });
 
       const data = await res.json();
@@ -83,8 +80,6 @@ export default function Profile() {
         alert("Supabase DB 삭제 실패: " + data.error);
         return;
       }
-
-      console.log("Supabase 사용자 정보 삭제 완료");
 
       alert("회원 탈퇴가 완료되었습니다.");
 
@@ -162,9 +157,8 @@ export default function Profile() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
+            "Authorization": `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ userId }),
         });
 
         if (!res.ok) throw new Error("사용자 정보 불러오기 실패");
@@ -189,9 +183,8 @@ export default function Profile() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
+            "Authorization": `Bearer ${idToken}`,
           },
-          body: JSON.stringify({ userId }),
         });
 
         const data = await res.json();
@@ -217,9 +210,8 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ userId }),
       });
 
       const data = await res.json();
@@ -251,15 +243,17 @@ export default function Profile() {
         // email: "update/email",
       };
 
-      const payload = { userId };
+      const payload = {};
       if (modalField === "name") payload.newName = modalValue;
       else if (modalField === "phone") payload.newPhone = modalValue;
       // else if (modalField === "email") payload.newEmail = modalValue;
 
+      const idToken = await auth.currentUser.getIdToken();
       const res = await fetch(`/api/user/${endpointMap[modalField]}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -373,7 +367,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -429,10 +423,9 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          userId: userId,
           addressIdx: addressIdx,
         }),
       });
@@ -474,7 +467,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           addressIdx: addressIdx,
@@ -518,7 +511,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
+          "Authorization": `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           nickname: newAddressForm.nickname.trim(),
@@ -600,42 +593,42 @@ export default function Profile() {
   ];
 
   return (
-    <div className="w-full min-h-fit flex lg:ml-50">
+    <div className="flex w-full min-h-fit lg:ml-50">
       <div className="w-full max-w-5xl p-10 space-y-50">
         {/* 상단 정보 */}
-        <div className="flex flex-col justify-between items-start gap-15 border-b py-50 md:flex-row md:items-center md:gap-0">
-          <section className="flex justify-between items-center  pb-6">
+        <div className="flex flex-col items-start justify-between border-b gap-15 py-50 md:flex-row md:items-center md:gap-0">
+          <section className="flex items-center justify-between pb-6">
             <div>
               <h2 className="text-3xl font-semibold text-[#0A400C] mb-15">
                 {userInfo.name}님
               </h2>
-              <p className="text-black-900 text-xl font-semibold mb-2">
+              <p className="mb-2 text-xl font-semibold text-black-900">
                 나만의 서재를 채워보세요. 좋아하는 책을 발견해보세요!
               </p>
             </div>
           </section>
           {/* 나의 활동 */}
           <section>
-            {/* <h3 className="text-xl font-semibold mb-4">나의 활동</h3> */}
+            {/* <h3 className="mb-4 text-xl font-semibold">나의 활동</h3> */}
             <div className="flex gap-40 text-center mr-30">
-              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+              <div className="flex flex-col items-center justify-center gap-6 cursor-pointer">
                 <p className="text-sm font-normal text-gray-500">주문 내역</p>
-                <div className="flex gap-8 items-center">
+                <div className="flex items-center gap-8">
                   <FaBookOpen className="mx-auto text-2xl text-green-700" />
                   <p className="text-lg font-semibold">{orderCount}</p>
                 </div>
               </div>
-              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+              <div className="flex flex-col items-center justify-center gap-6 cursor-pointer">
                 <p className="text-sm font-normal text-gray-500">찜한 도서</p>
-                <div className="flex gap-8 items-center">
+                <div className="flex items-center gap-8">
                   <FaRegHeart className="mx-auto text-2xl text-pink-600" />
                   <p className="text-lg font-semibold">{wishlistCount}</p>
                 </div>
               </div>
-              <div className="flex flex-col justify-center items-center gap-6 cursor-pointer">
+              <div className="flex flex-col items-center justify-center gap-6 cursor-pointer">
                 <p className="text-sm font-normal text-gray-500">리뷰 작성</p>
 
-                <div className="flex gap-8 items-center">
+                <div className="flex items-center gap-8">
                   <FaGift className="mx-auto text-2xl text-yellow-600" />
                   <p className="text-lg font-semibold">{reviewCount}</p>
                 </div>
@@ -644,11 +637,11 @@ export default function Profile() {
           </section>
         </div>
         {/* 기본 정보 */}
-        <section className=" mt-6 border-b pb-50">
+        <section className="mt-6 border-b pb-50">
           <h3 className="text-2xl font-semibold mb-30">기본 정보</h3>
-          <div className="space-y-3 text-18 font-normal">
+          <div className="space-y-3 font-normal text-18">
             {fields.map(({ label, field, value }) => (
-              <div key={field} className="flex gap-20 items-center mt-15">
+              <div key={field} className="flex items-center gap-20 mt-15">
                 <p>
                   <b>{label} :</b> {value}
                 </p>
@@ -668,7 +661,7 @@ export default function Profile() {
             ))}
 
             {/* 배송주소 */}
-            <div className="flex flex-col gap-20 items-start mt-10 md:flex-row md:items-center">
+            <div className="flex flex-col items-start gap-20 mt-10 md:flex-row md:items-center">
               <p>
                 <b>배송주소 :</b> {displayAddress}
               </p>
@@ -687,9 +680,9 @@ export default function Profile() {
           <h3 className="text-2xl font-semibold mb-30">최근 본 도서</h3>
 
           {recentBooks.length === 0 ? (
-            <p className="text-gray-500 text-sm">최근 본 도서가 없습니다.</p>
+            <p className="text-sm text-gray-500">최근 본 도서가 없습니다.</p>
           ) : (
-            <div className=" flex flex-col items-center justify-between gap-10 md:flex-row">
+            <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
               {recentBooks.slice(0, 4).map((book, index) => (
                 <div
                   key={index}
@@ -705,7 +698,7 @@ export default function Profile() {
                   />
                   <div className="p-5 text-sm">
                     <p className="font-medium truncate">{book.title}</p>
-                    <p className="text-gray-500 text-xs truncate">
+                    <p className="text-xs text-gray-500 truncate">
                       {book.author}
                     </p>
                   </div>
@@ -717,10 +710,10 @@ export default function Profile() {
 
         {/* 개인 설정 */}
         <section>
-          <h3 className="text-xl font-semibold mb-4">개인 설정</h3>
+          <h3 className="mb-4 text-xl font-semibold">개인 설정</h3>
           <button
             onClick={handleDeleteAccount}
-            className="mt-6 font-light text-sm text-red-500 hover:underline"
+            className="mt-6 text-sm font-light text-red-500 hover:underline"
           >
             회원 탈퇴하기
           </button>
@@ -764,13 +757,13 @@ export default function Profile() {
               return (
                 <div
                   key={addr.address_id}
-                  className="border rounded-sm p-15 bg-gray-50 space-y-3"
+                  className="space-y-3 border rounded-sm p-15 bg-gray-50"
                 >
                   {isEditing ? (
                     // 수정 모드
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-5">
+                        <label className="block mb-5 text-sm font-medium text-gray-700">
                           주소 닉네임 <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -797,7 +790,7 @@ export default function Profile() {
                         }
                         onPostcodeSearch={handlePostcodeSearchForEdit}
                       />
-                      <div className="flex gap-5 justify-end mt-10">
+                      <div className="flex justify-end gap-5 mt-10">
                         <button
                           onClick={() => saveAddress(addr.address_id)}
                           className="px-12 py-6 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-80 cursor-pointer"
@@ -806,7 +799,7 @@ export default function Profile() {
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="px-12 py-6 bg-gray-300 text-gray-700 rounded-sm hover:bg-gray-400 cursor-pointer"
+                          className="px-12 py-6 text-gray-700 bg-gray-300 rounded-sm cursor-pointer hover:bg-gray-400"
                         >
                           취소
                         </button>
@@ -814,10 +807,10 @@ export default function Profile() {
                     </div>
                   ) : (
                     // 보기 모드
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-8 mb-6">
-                          <span className="font-semibold text-lg">
+                          <span className="text-lg font-semibold">
                             {addr.nickname}
                           </span>
                           {addr.is_default && (
@@ -826,7 +819,7 @@ export default function Profile() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm font-normal text-gray-600 mb-5">
+                        <p className="mb-5 text-sm font-normal text-gray-600">
                           [{addr.postcode}] {addr.road_address}
                         </p>
                         {addr.detail_address && (
@@ -852,7 +845,7 @@ export default function Profile() {
                         </button>
                         <button
                           onClick={() => deleteAddress(addr.address_id)}
-                          className="text-sm font-light px-8 py-3 border rounded-sm hover:bg-red-600 hover:text-white transition cursor-pointer"
+                          className="px-8 py-3 text-sm font-light transition border rounded-sm cursor-pointer hover:bg-red-600 hover:text-white"
                         >
                           삭제
                         </button>
@@ -863,7 +856,7 @@ export default function Profile() {
               );
             })
           ) : (
-            <p className="text-center text-gray-500 py-6">
+            <p className="py-6 text-center text-gray-500">
               등록된 배송지가 없습니다.
             </p>
           )}
@@ -871,10 +864,10 @@ export default function Profile() {
           {/* 새 주소 추가 */}
           {editingAddressIdx === null && (
             <div className="px-10 pt-20">
-              <h4 className="font-semibold text-md mb-10">새 배송지 추가</h4>
+              <h4 className="mb-10 font-semibold text-md">새 배송지 추가</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 my-5">
+                  <label className="block my-5 text-sm font-medium text-gray-700">
                     주소 닉네임 <span className="text-red-500">*</span>
                   </label>
                   <input
