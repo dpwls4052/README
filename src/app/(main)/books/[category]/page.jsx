@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
 import { useCategories } from "@/hooks/book/useCategories";
+import BookListItemSkeleton from "@/components/books/BookListItemSkeleton";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서", id: 1 },
@@ -32,10 +33,12 @@ const BookList = () => {
 
   // 선택된 하위 카테고리 상태
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   // 카테고리 변경 시 선택 초기화
   useEffect(() => {
     setSelectedCategory(null);
+    setHasFetched(false);
   }, [category]);
 
   // rootCategory(prefix)가 있을 때 하위 카테고리 목록 조회
@@ -75,7 +78,12 @@ const BookList = () => {
   const { books, fetchMoreBooks, loading, hasNext } = useBooks({
     category: categoryArray,
   });
-
+  // books 로딩 상태 변할 때
+  useEffect(() => {
+    if (!loading) {
+      setHasFetched(true);
+    }
+  }, [loading]);
   // "기타" 선택 시 필터링 + 랜덤 처리
   const displayBooks = useMemo(() => {
     let result = books;
@@ -166,10 +174,14 @@ const BookList = () => {
         )}
 
         {loading && displayBooks.length === 0 ? (
-          <div className="flex items-center justify-center h-300">
-            <p>Loading...</p>
+          // 첫 로딩 때: 스켈레톤 5개 정도 보여주기
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 10 }, (_, i) => (
+              <BookListItemSkeleton key={i} />
+            ))}
           </div>
-        ) : !loading && displayBooks.length === 0 ? (
+        ) : !loading && hasFetched && displayBooks.length === 0 ? (
+          // 로딩 끝났는데 도서가 없을 때
           <div className="flex items-center justify-center h-300">
             <p className="text-gray-500">해당 카테고리에 도서가 없습니다.</p>
           </div>

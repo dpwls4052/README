@@ -13,6 +13,7 @@ import "swiper/css/pagination";
 
 import { TfiArrowCircleLeft, TfiArrowCircleRight } from "react-icons/tfi";
 import { useBooks } from "@/hooks/book/useBooks";
+import RecommendSkeleton from "./RecommendSkeleton";
 
 export default function Recommend() {
   const router = useRouter();
@@ -40,7 +41,9 @@ export default function Recommend() {
       <div className="flex flex-col lg:justify-between">
         <div className="text-center lg:text-right">
           <div className="mb-4 lg:mb-8">
-            <h2 className="text-xl lg:text-[24px] font-semibold">11월의 추천도서</h2>
+            <h2 className="text-xl lg:text-[24px] font-semibold">
+              11월의 추천도서
+            </h2>
           </div>
 
           <button
@@ -107,39 +110,42 @@ export default function Recommend() {
             },
           }}
         >
-          {(loading
-            ? Array.from({ length: 8 }, (_, i) => ({ id: `skeleton-${i}` }))
-            : randomBooks
-          ).map((book) => (
-            <SwiperSlide key={book.id}>
-              <div
-                className="w-full max-w-[200px] mx-auto h-[280px] rounded-md overflow-hidden hover:cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
-                onClick={() => goDetail(book.bookId)}
-              >
-                <Image
-                  src={
-                    book.highResCover ||
-                    book.cover?.replace(/coversum/gi, "cover500") ||
-                    noimg
-                  }
-                  alt={book.title || "도서"}
-                  className="object-cover w-full h-full"
-                  width={200}
-                  height={280}
-                />
-              </div>
+          {loading
+            ? Array.from({ length: 8 }, (_, i) => (
+                <SwiperSlide key={`skeleton-${i}`}>
+                  <RecommendSkeleton />
+                </SwiperSlide>
+              ))
+            : randomBooks.map((book) => (
+                <SwiperSlide key={book.id}>
+                  <div
+                    className="w-full max-w-[200px] mx-auto h-[280px] rounded-md overflow-hidden hover:cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
+                    onClick={() => goDetail(book.bookId)}
+                  >
+                    <Image
+                      src={
+                        book.highResCover ||
+                        book.cover?.replace(/coversum/gi, "cover500") ||
+                        noimg
+                      }
+                      alt={book.title || "도서"}
+                      className="object-cover w-full h-full"
+                      width={200}
+                      height={280}
+                    />
+                  </div>
 
-              <div className="flex flex-col items-start mt-4 text-left max-w-[200px] mx-auto">
-                <p className="text-base lg:text-lg font-bold overflow-hidden text-ellipsis w-full line-clamp-2">
-                  {book.title || "제목 미상"}
-                </p>
+                  <div className="flex flex-col items-start mt-4 text-left max-w-[200px] mx-auto">
+                    <p className="text-base lg:text-lg font-bold overflow-hidden text-ellipsis w-full line-clamp-2">
+                      {book.title || "제목 미상"}
+                    </p>
 
-                <p className="mt-1 text-sm text-gray-600 overflow-hidden text-ellipsis w-full line-clamp-1">
-                  {book.author || book.writer || "작자 미상"}
-                </p>
-              </div>
-            </SwiperSlide>
-          ))}
+                    <p className="mt-1 text-sm text-gray-600 overflow-hidden text-ellipsis w-full line-clamp-1">
+                      {book.author || book.writer || "작자 미상"}
+                    </p>
+                  </div>
+                </SwiperSlide>
+              ))}
         </Swiper>
       </div>
     </div>
