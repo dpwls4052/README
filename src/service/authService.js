@@ -29,12 +29,18 @@ export async function signupFirebaseWithVerification(email, password) {
     const user = userCredential.user;
 
     // 2. 인증 이메일 발송
+    // ✅ 환경에 따라 올바른 URL 설정
+    const verificationUrl = process.env.NODE_ENV === 'production'
+      ? 'https://readme-kt-2025.vercel.app/login'
+      : 'http://localhost:3000/login';
+
     await sendEmailVerification(user, {
-      url: process.env.NEXT_PUBLIC_EMAIL_VERIFICATION_REDIRECT_URL || 'http://localhost:3000/login',
-      handleCodeInApp: false,
+      url: verificationUrl,
+      handleCodeInApp: false, // Firebase 기본 핸들러 사용
     });
 
-    console.log("✅ 인증 이메일 발송 완료:", email);
+    // console.log("✅ 인증 이메일 발송 완료:", email);
+    // console.log("✅ 리디렉션 URL:", verificationUrl);
 
     // 3. 자동 로그아웃 (이메일 인증 전까지 로그인 불가)
     await auth.signOut();

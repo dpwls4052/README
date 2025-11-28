@@ -45,6 +45,7 @@ const Cart = () => {
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingUpdates, setPendingUpdates] = useState(new Set()); // 처리 중인 업데이트 추적
 
   // Authorization 헤더 생성 함수
   const getAuthHeaders = async () => {
@@ -129,11 +130,22 @@ const Cart = () => {
     );
   };
 
+  // ✨ Optimistic UI: 수량 변경 (즉시 화면 반영)
   const handleCountChange = async (item, delta) => {
     const newCount = item.count + delta;
     if (newCount < 1) return;
     if (newCount > item.stock) return alert("재고가 부족합니다.");
 
+    // 1️⃣ 즉시 UI 업데이트 (Optimistic)
+    setItems(prevItems =>
+      prevItems.map(i =>
+        i.id === item.id ? { ...i, count: newCount } : i
+      )
+    );
+
+    // 2️⃣ 백그라운드에서 서버 업데이트
+    setPendingUpdates(prev => new Set(prev).add(item.cartId));
+    
     try {
       const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
@@ -141,17 +153,35 @@ const Cart = () => {
         headers,
         body: JSON.stringify({ cartId: item.cartId, delta }),
       });
-      fetchCart();
     } catch (err) {
       console.error(err);
+      // 실패 시 원래 값으로 복구
+      setItems(prevItems =>
+        prevItems.map(i =>
+          i.id === item.id ? { ...i, count: item.count } : i
+        )
+      );
       alert("수량 변경 실패");
+    } finally {
+      setPendingUpdates(prev => {
+        const next = new Set(prev);
+        next.delete(item.cartId);
+        return next;
+      });
     }
   };
 
+  // ✨ Optimistic UI: 선택 삭제 (즉시 화면 반영)
   const handleDeleteSelected = async () => {
     const selected = items.filter((item) => item.selected);
     if (selected.length === 0) return alert("선택된 상품이 없습니다");
 
+    // 1️⃣ 즉시 UI 업데이트
+    const deletedIds = selected.map(i => i.id);
+    const originalItems = [...items];
+    setItems(prevItems => prevItems.filter(item => !item.selected));
+
+    // 2️⃣ 백그라운드에서 서버 업데이트
     try {
       const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
@@ -160,16 +190,25 @@ const Cart = () => {
         body: JSON.stringify({ cartIds: selected.map((i) => i.cartId) }),
       });
 
+      // Context 업데이트
       selected.forEach((item) => removeFromCart(item.id));
-      fetchCart();
     } catch (err) {
       console.error(err);
+      // 실패 시 원래 값으로 복구
+      setItems(originalItems);
       alert("삭제 실패");
     }
   };
 
+  // ✨ Optimistic UI: 전체 삭제 (즉시 화면 반영)
   const handleDeleteAll = async () => {
     if (items.length === 0) return;
+
+    // 1️⃣ 즉시 UI 업데이트
+    const originalItems = [...items];
+    setItems([]);
+
+    // 2️⃣ 백그라운드에서 서버 업데이트
     try {
       const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
@@ -178,57 +217,87 @@ const Cart = () => {
         body: JSON.stringify({ cartIds: items.map((i) => i.cartId) }),
       });
 
+      // Context 업데이트
       items.forEach((item) => removeFromCart(item.id));
-      fetchCart();
     } catch (err) {
       console.error(err);
+      // 실패 시 원래 값으로 복구
+      setItems(originalItems);
       alert("전체 삭제 실패");
     }
   };
 
-  const handlePay = () => {
+  // 페이지 이동 시 최종 동기화
+  const handlePay = async () => {
     if (selectedItems.length === 0) return alert("상품을 선택해주세요");
 
-    let hasAdjusted = false;
+    // 🔄 대기 중인 업데이트가 있으면 완료될 때까지 대기
+    if (pendingUpdates.size > 0) {
+      alert("수량 변경 중입니다. 잠시만 기다려주세요.");
+      return;
+    }
 
-    const orderItems = selectedItems.map((item) => {
-      if (item.count > item.stock) {
-        hasAdjusted = true;
-        item.count = item.stock;
+    // 🔄 최종 동기화: 서버에서 최신 데이터 가져오기
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/user/cart`, {
+        method: "GET",
+        headers,
+      });
+
+      if (!res.ok) throw new Error("장바구니 조회 실패");
+      const serverData = await res.json();
+
+      let hasAdjusted = false;
+      const orderItems = selectedItems.map((item) => {
+        // 서버의 최신 재고 확인
+        const serverItem = serverData.find(s => s.book_id === item.id);
+        const actualStock = serverItem?.stock || item.stock;
+        
+        let finalQuantity = item.count;
+        
+        if (finalQuantity > actualStock) {
+          hasAdjusted = true;
+          finalQuantity = actualStock;
+        }
+
+        return {
+          book_id: item.id,
+          title: item.name,
+          image: item.image,
+          quantity: finalQuantity,
+          price: item.price,
+        };
+      });
+
+      if (hasAdjusted) {
+        alert(
+          "재고가 부족한 상품이 있어 최대 구매 가능한 수량으로 조정되었습니다."
+        );
       }
-      return {
-        book_id: item.id,
-        title: item.name,
-        image: item.image,
-        quantity: item.count,
-        price: item.price,
-      };
-    });
 
-    if (hasAdjusted) {
-      alert(
-        "재고가 부족한 상품이 있어 최대 구매 가능한 수량으로 조정되었습니다."
-      );
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "cartData",
+          JSON.stringify({
+            orderItems,
+            totalItemPrice: orderItems.reduce(
+              (acc, i) => acc + i.price * i.quantity,
+              0
+            ),
+            deliveryFee: shippingFee,
+            finalPrice:
+              orderItems.reduce((acc, i) => acc + i.price * i.quantity, 0) +
+              shippingFee,
+          })
+        );
+      }
+
+      router.push("/pay");
+    } catch (err) {
+      console.error(err);
+      alert("주문 정보를 불러오는 중 오류가 발생했습니다.");
     }
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "cartData",
-        JSON.stringify({
-          orderItems,
-          totalItemPrice: orderItems.reduce(
-            (acc, i) => acc + i.price * i.quantity,
-            0
-          ),
-          deliveryFee: shippingFee,
-          finalPrice:
-            orderItems.reduce((acc, i) => acc + i.price * i.quantity, 0) +
-            shippingFee,
-        })
-      );
-    }
-
-    router.push("/pay");
   };
 
   return (
@@ -333,7 +402,7 @@ const Cart = () => {
                     <div className="flex items-center gap-2 ml-auto sm:ml-0">
                       <button
                         onClick={() => handleCountChange(item, -1)}
-                        disabled={item.count <= 1}
+                        disabled={item.count <= 1 || pendingUpdates.has(item.cartId)}
                         className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:cursor-pointer"
                       >
                         <Minus size={14} />
@@ -343,7 +412,8 @@ const Cart = () => {
                       </span>
                       <button
                         onClick={() => handleCountChange(item, 1)}
-                        className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90 hover:cursor-pointer"
+                        disabled={pendingUpdates.has(item.cartId)}
+                        className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm hover:opacity-90 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Plus size={14} />
                       </button>
@@ -383,9 +453,10 @@ const Cart = () => {
                   </div>
                   <button
                     onClick={handlePay}
-                    className="w-full mt-4 md:mt-20 py-3 md:py-16 bg-[var(--main-color)] text-white rounded-sm font-semibold text-base md:text-18 hover:opacity-90 transition hover:cursor-pointer"
+                    disabled={pendingUpdates.size > 0}
+                    className="w-full mt-4 md:mt-20 py-3 md:py-16 bg-[var(--main-color)] text-white rounded-sm font-semibold text-base md:text-18 hover:opacity-90 transition hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    주문하기
+                    {pendingUpdates.size > 0 ? "처리 중..." : "주문하기"}
                   </button>
                   <p className="mt-2 text-xs font-light text-center text-gray-500 md:text-sm md:mt-10">
                     30,000원 이상 구매 시 배송비 무료
