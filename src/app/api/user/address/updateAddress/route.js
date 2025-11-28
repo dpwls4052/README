@@ -1,3 +1,4 @@
+import { authenticate } from "@/lib/authenticate";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -8,9 +9,24 @@ const supabase = createClient(
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userId, addressIdx, nickname, postcode, roadAddress, detailAddress, isDefault } = body;
+    const auth = await authenticate(request);
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+    const { user_id } = auth;
+    const {
+      addressIdx,
+      nickname,
+      postcode,
+      roadAddress,
+      detailAddress,
+      isDefault,
+    } = body;
 
-    if (!userId || !addressIdx) {
+    if (!user_id || !addressIdx) {
       return Response.json(
         { success: false, errorMessage: "userId와 addressIdx는 필수입니다." },
         { status: 400 }
@@ -22,7 +38,7 @@ export async function POST(request) {
       const { error: defaultError } = await supabase
         .from("address")
         .update({ is_default: false })
-        .eq("user_id", userId)
+        .eq("user_id", user_id)
         .neq("address_id", addressIdx);
 
       if (defaultError) {
@@ -41,16 +57,22 @@ export async function POST(request) {
         is_default: isDefault,
       })
       .eq("address_id", addressIdx)
-      .eq("user_id", userId)
+      .eq("user_id", user_id)
       .select();
 
     if (error) {
       console.error("주소 수정 오류:", error);
-      return Response.json({ success: false, errorMessage: error.message }, { status: 500 });
+      return Response.json(
+        { success: false, errorMessage: error.message },
+        { status: 500 }
+      );
     }
 
     if (!data || data.length === 0) {
-      return Response.json({ success: false, errorMessage: "주소를 찾을 수 없습니다." }, { status: 404 });
+      return Response.json(
+        { success: false, errorMessage: "주소를 찾을 수 없습니다." },
+        { status: 404 }
+      );
     }
 
     return Response.json({
@@ -60,6 +82,9 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error(err);
-    return Response.json({ success: false, errorMessage: "서버 오류가 발생했습니다." }, { status: 500 });
+    return Response.json(
+      { success: false, errorMessage: "서버 오류가 발생했습니다." },
+      { status: 500 }
+    );
   }
 }

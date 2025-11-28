@@ -1,3 +1,4 @@
+import { authenticate } from "@/lib/authenticate";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -8,11 +9,18 @@ const supabase = createClient(
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userId } = body;
+    const auth = await authenticate(request);
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+    const { user_id } = auth;
 
-    console.log("주소 조회 userId:", userId);
+    console.log("주소 조회 userId:", user_id);
 
-    if (!userId) {
+    if (!user_id) {
       return Response.json(
         { success: false, errorMessage: "userId는 필수입니다." },
         { status: 400 }
@@ -22,7 +30,7 @@ export async function POST(request) {
     const { data, error } = await supabase
       .from("address")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user_id)
       .eq("status", true)
       .order("is_default", { ascending: false });
 

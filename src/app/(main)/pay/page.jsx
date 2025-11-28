@@ -126,10 +126,14 @@ export default function PaymentPage() {
     if (!userId) return;
 
     async function fetchUser() {
+      const idToken = await auth.currentUser.getIdToken();
       try {
         const res = await fetch("/api/user/getUser", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify({ userId }),
         });
 
@@ -150,12 +154,16 @@ export default function PaymentPage() {
 
   // 3. 주소 목록 로드 및 기본 주소 설정 (Profile 컴포넌트 참고)
   const fetchAddressList = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     if (!userId) return;
 
     try {
       const res = await fetch("/api/user/address/getAddressList", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ userId }),
       });
 
