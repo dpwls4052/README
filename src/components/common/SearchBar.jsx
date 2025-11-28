@@ -1,9 +1,28 @@
 "use client";
 import { IoIosSearch } from "react-icons/io";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function SearchBar({ query, setQuery, handleSearch }) {
+  const searchParams = useSearchParams();
+
+  // URL의 q 파라미터 값을 읽어서 검색어에 설정
+  useEffect(() => {
+    const urlQuery = searchParams.get("q");
+    if (urlQuery) {
+      setQuery(urlQuery);
+    } else {
+      setQuery(""); 
+    }
+  }, [searchParams, setQuery]);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSearch(e);
+  };
+
   return (
-    <form onSubmit={handleSearch} className="relative flex-1 w-full max-w-600">
+    <form onSubmit={onSubmit} className="relative flex-1 w-full max-w-600">
       <input
         type="text"
         placeholder="검색어를 입력하세요."
