@@ -1,21 +1,35 @@
+// src/app/api/books/random/route.js
+
 import { supabase } from "@/lib/supabaseClient";
 
-/**
- * GET /api/books/random
- *
- * 지금 버전은 "랜덤 로직 X"
- * - 단순히 status=true 인 모든 도서를 book_id 순으로 돌려준다.
- * - 랜덤/셔플은 프론트(useRandomBooks)에서 처리할 거라
- *   여기서는 최대한 단순하게 두는 게 포인트.
- */
-export async function GET() {
+export async function GET(req) {
   try {
-    // 1) Supabase에서 판매 중인 도서 전체 가져오기
+    const { searchParams } = new URL(req.url);
+
+    // recommend | season | null
+    const type = searchParams.get("type");
+
+    const LIMIT = 10;
+
+    // 기본: 앞에서 10권 (0~9)
+    let from = 0;
+    let to = LIMIT - 1;
+
+    // type === "season" 이면 10~19
+    if (type === "season") {
+      from = LIMIT; // 10
+      to = LIMIT * 2 - 1; // 19
+    }
+    // 필요하면 type 더 늘릴 수 있음
+    // else if (type === "something") { ... }
+
+    // 1) 판매 중(status = true) 도서를 book_id 오름차순으로 정렬
     const { data, error } = await supabase
       .from("book")
       .select("*")
-      .eq("status", true) // 판매 중인 도서만
-      .order("book_id", { ascending: true }); // 기본 순서를 고정하기 위해 정렬
+      .eq("status", true)
+      .order("book_id", { ascending: true })
+      .range(from, to); // from~to 구간만 잘라서 가져옴
 
     if (error) {
       console.error("Random books query error:", error);
@@ -24,9 +38,9 @@ export async function GET() {
 
     const rows = data ?? [];
 
-    // 2) 프론트에서 쓰기 좋은 형태로 매핑
+    // 2) 프론트에서 쓰기 편하게 매핑
     const books = rows.map((row) => ({
-      id: row.book_id, // 리스트 key
+      id: row.book_id,
       bookId: row.book_id,
       title: row.title,
       author: row.author,
@@ -36,16 +50,14 @@ export async function GET() {
       cover: row.cover,
       stock: row.stock,
       salesCount: row.sales_count,
-      // 필요하면 description, link, isbn 등도 추가 가능
     }));
 
-    // 3) 응답 반환
     return new Response(JSON.stringify({ books }), { status: 200 });
   } catch (err) {
     console.error("Random books API error:", err);
     return new Response(
       JSON.stringify({
-        error: err.message ?? "랜덤 도서 조회 중 오류가 발생했습니다.",
+        error: err.message ?? "특수 도서 조회 중 오류가 발생했습니다.",
       }),
       { status: 500 }
     );
