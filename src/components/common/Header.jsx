@@ -31,7 +31,6 @@ export default function Header() {
       try {
         const idToken = await auth.currentUser.getIdToken();
         const res = await fetch("/api/user/getUser", {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${idToken}`,

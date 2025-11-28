@@ -16,6 +16,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import { useAuth } from "@/hooks/common/useAuth";
+import { auth } from "@/lib/firebase";
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -129,7 +130,6 @@ export default function PaymentPage() {
       const idToken = await auth.currentUser.getIdToken();
       try {
         const res = await fetch("/api/user/getUser", {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${idToken}`,
@@ -158,7 +158,6 @@ export default function PaymentPage() {
 
     try {
       const res = await fetch("/api/user/address/getAddressList", {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${idToken}`,

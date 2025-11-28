@@ -154,7 +154,6 @@ export default function Profile() {
       const idToken = await auth.currentUser.getIdToken();
       try {
         const res = await fetch("/api/user/getUser", {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${idToken}`,
@@ -207,7 +206,6 @@ export default function Profile() {
 
     try {
       const res = await fetch("/api/user/address/getAddressList", {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${idToken}`,
