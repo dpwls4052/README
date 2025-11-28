@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { SlBasket } from "react-icons/sl";
 import { IoIosHeartEmpty } from "react-icons/io";
@@ -84,11 +84,13 @@ export default function Header() {
 
         {/* 검색창 */}
         <div className="flex-1 hidden sm:block max-w-600">
-          <SearchBar
-            query={query}
-            setQuery={setQuery}
-            handleSearch={handleSearch}
-          />
+          <Suspense fallback={<div></div>}>
+            <SearchBar
+              query={query}
+              setQuery={setQuery}
+              handleSearch={handleSearch}
+            />
+          </Suspense>
         </div>
 
         {/* 아이콘 버튼 */}
@@ -228,11 +230,13 @@ export default function Header() {
         </div>
       </div>
       <div className="block w-full pb-15 sm:hidden">
-        <SearchBar
-          query={query}
-          setQuery={setQuery}
-          handleSearch={handleSearch}
-        />
+        <Suspense fallback={<div></div>}>
+          <SearchBar
+            query={query}
+            setQuery={setQuery}
+            handleSearch={handleSearch}
+          />
+        </Suspense>
       </div>
     </header>
   );
