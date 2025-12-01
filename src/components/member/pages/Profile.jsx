@@ -594,7 +594,7 @@ export default function Profile() {
   ];
 
   return (
-    <div className="flex w-full min-h-fit lg:ml-50">
+    <div className="flex w-full min-h-fit lg:pl-50">
       <div className="w-full max-w-5xl p-10 space-y-50">
         {/* 상단 정보 */}
         <div className="flex flex-col items-start justify-between border-b gap-15 py-50 md:flex-row md:items-center md:gap-0">
@@ -685,30 +685,32 @@ export default function Profile() {
           ) : (
             <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
               {recentBooks.slice(0, 4).map((book, index) => (
-<div
-  key={index}
-  className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
-  onClick={() =>
-    (window.location.href = `/product/detail/${book.book_id}`)
-  }
->
-  <div className="relative w-full h-[250px]">
-    <Image
-      src={book.image?.replace(/coversum/gi, "cover500") || noimg}
-      alt={book.title}
-      fill
-      sizes="(max-width: 768px) 250px, 180px"
-      className="object-cover"
-      priority={index < 2}
-    />
-  </div>
-  <div className="p-5 text-sm">
-    <p className="font-medium truncate">{book.title}</p>
-    <p className="text-xs text-gray-500 truncate">
-      {book.author}
-    </p>
-  </div>
-</div>
+                <div
+                  key={index}
+                  className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
+                  onClick={() =>
+                    (window.location.href = `/product/detail/${book.book_id}`)
+                  }
+                >
+                  <div className="relative w-full h-[250px]">
+                    <Image
+                      src={
+                        book.image?.replace(/coversum/gi, "cover500") || noimg
+                      }
+                      alt={book.title}
+                      fill
+                      sizes="(max-width: 768px) 250px, 180px"
+                      className="object-cover"
+                      priority={index < 2}
+                    />
+                  </div>
+                  <div className="p-5 text-sm">
+                    <p className="font-medium truncate">{book.title}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {book.author}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           )}
