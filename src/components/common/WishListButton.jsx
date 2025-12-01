@@ -6,11 +6,16 @@ import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "sonner";
 import { useWishlistCount } from "@/hooks/common/useWishlistCount"; // 추가
 import { auth } from "@/lib/firebase";
+import Modal from "./Modal";
+import { useRouter } from "next/navigation";
 
 export default function WishListButton({ userId, bookId, stock }) {
+  const router = useRouter();
   const [isWished, setIsWished] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setCount } = useWishlistCount(); // Context에서 setCount 가져오기
+
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
 
   // 초기 wishlist 상태 확인
   useEffect(() => {
@@ -21,7 +26,7 @@ export default function WishListButton({ userId, bookId, stock }) {
         const idToken = await auth.currentUser.getIdToken();
         const res = await fetch(`/api/user/wishlist?book_id=${bookId}`, {
           headers: {
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
         const data = await res.json();
@@ -40,7 +45,7 @@ export default function WishListButton({ userId, bookId, stock }) {
 
   const toggleWishlist = async () => {
     if (!userId || !bookId) {
-      alert("로그인이 필요합니다.");
+      setLoginModalOpen(true);
       return;
     }
 
@@ -58,7 +63,7 @@ export default function WishListButton({ userId, bookId, stock }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           book_id: bookId,
@@ -93,13 +98,35 @@ export default function WishListButton({ userId, bookId, stock }) {
     }
   };
 
+  const handleConfirmLogin = () => {
+    router.push("/login");
+    setLoginModalOpen(false);
+  };
+
   return (
-    <button
-      onClick={toggleWishlist}
-      disabled={loading}
-      className="p-4 text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
-    >
-      {isWished ? <IoIosHeart size={28} /> : <IoIosHeartEmpty size={28} />}
-    </button>
+    <>
+      <button
+        onClick={toggleWishlist}
+        disabled={loading}
+        className="p-4 text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
+      >
+        {isWished ? <IoIosHeart size={28} /> : <IoIosHeartEmpty size={28} />}
+      </button>
+
+      {/* 로그인 필요 모달 */}
+      <Modal
+        title="로그인이 필요한 서비스입니다."
+        open={isLoginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        confirmText="로그인 페이지로 이동"
+        cancelText="취소"
+        onConfirm={handleConfirmLogin}
+        onCancel={() => setLoginModalOpen(false)}
+        maxSize="max-w-md"
+        bodyClassName="text-center text-16 font-normal"
+      >
+        로그인 페이지로 이동하시겠습니까?
+      </Modal>
+    </>
   );
 }

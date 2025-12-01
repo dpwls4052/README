@@ -684,7 +684,7 @@ export default function Profile() {
           {recentBooks.length === 0 ? (
             <p className="text-sm text-gray-500">최근 본 도서가 없습니다.</p>
           ) : (
-            <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
+            <div className="flex flex-col items-center gap-30 md:flex-row">
               {recentBooks.slice(0, 4).map((book, index) => (
                 <div
                   key={index}
