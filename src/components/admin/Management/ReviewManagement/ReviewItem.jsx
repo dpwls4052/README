@@ -10,8 +10,15 @@ const ReviewItem = ({ review, handleDelete, handleRestore }) => {
       <div>
         <p className="text-12">{koreaTime}</p>
         <p className="mt-10 mb-20">
-          <span className="font-bold">&quot;{review.user.name}&quot;</span> 님(
-          {review.user.email})
+          {review.user ? (
+            <>
+              <span className="font-bold">&quot;{review.user.name}&quot;</span>{" "}
+              님(
+              {review.user.email})
+            </>
+          ) : (
+            "탈퇴한 사용자"
+          )}
         </p>
         <div className="flex items-start justify-start gap-10 h-100">
           <Image
