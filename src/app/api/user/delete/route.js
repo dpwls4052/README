@@ -1,18 +1,28 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import { authenticate } from "@/lib/authenticate";
 
 export async function POST(req) {
   try {
-    const { userId } = await req.json();
+    const auth = await authenticate(req);
 
-    if (!userId) {
+    if (auth.error) {
+      return NextResponse.json(
+        { message: auth.error },
+        { status: auth.status }
+      );
+    }
+
+    const { user_id } = auth;
+
+    if (!user_id) {
       return NextResponse.json({ success: false, error: "userId is required" });
     }
 
     const { error } = await supabase
       .from("users")
       .delete()
-      .eq("user_id", userId);   // ← 여기를 수정해야 정상 삭제됨!!
+      .eq("user_id", user_id);
 
     if (error) {
       return NextResponse.json({
