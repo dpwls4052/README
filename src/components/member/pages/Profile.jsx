@@ -41,7 +41,8 @@ export default function Profile() {
   });
   // 최근 본 도서 상태
   const [recentBooks, setRecentBooks] = useState([]);
-
+  
+  // Firebase 계정 삭제 및 Supabase 유저 삭제
   const handleDeleteAccount = async () => {
     const idToken = await auth.currentUser.getIdToken();
     if (!confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
@@ -54,8 +55,6 @@ export default function Profile() {
         alert("로그인 정보를 찾을 수 없습니다. 다시 로그인 후 시도해주세요.");
         return;
       }
-
-      // Firebase 계정 삭제
       try {
         await deleteUser(firebaseUser);
         console.log("Firebase 계정 삭제 완료");

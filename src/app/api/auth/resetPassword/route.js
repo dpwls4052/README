@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Gmail 전송 설정
+// 👉 SMTP 설정 (Gmail or Naver 등 사용 가능)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: process.env.SMTP_HOST,      // smtp.gmail.com / smtp.naver.com 등
+  port: Number(process.env.SMTP_PORT), 
+  secure: true,                     // 465이면 true
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.EMAIL_USER,         // 발송 이메일
+    pass: process.env.EMAIL_PASSWORD,     // 앱 비밀번호(SMTP 비번)
   },
 });
 
@@ -20,85 +23,85 @@ export async function POST(req) {
   try {
     const { email, phone_number } = await req.json();
 
-    // console.log("📧 비밀번호 재설정 요청:", { email, phone_number });
-
     if (!email || !phone_number) {
-      // console.error("❌ 필수 필드 누락");
-      return NextResponse.json({ 
-        success: false, 
-        message: "이메일과 전화번호를 모두 입력해주세요." 
+      return NextResponse.json({
+        success: false,
+        message: "이메일과 전화번호를 모두 입력해주세요.",
       });
     }
 
     const cleanPhone = phone_number.replace(/[^0-9]/g, "");
-    // console.log("🔍 정리된 전화번호:", cleanPhone);
 
+    // 1) 사용자 조회
     const { data: user, error: dbError } = await supabase
       .from("users")
-      .select("*")
+      .select("id, email, phone_number")
       .eq("email", email)
       .maybeSingle();
 
-    if (dbError) {
-      // console.error("❌ DB 조회 오류:", dbError);
-      return NextResponse.json({ 
-        success: false, 
-        message: "데이터베이스 오류가 발생했습니다." 
-      });
-    }
-
-    if (!user) {
-      // console.log("⚠️ 사용자를 찾을 수 없음");
-      return NextResponse.json({ 
-        success: false, 
-        message: "입력한 정보와 일치하는 계정을 찾을 수 없습니다." 
+    if (dbError || !user) {
+      return NextResponse.json({
+        success: false,
+        message: "입력한 정보와 일치하는 계정을 찾을 수 없습니다.",
       });
     }
 
     const dbPhone = (user.phone_number ?? "").replace(/[^0-9]/g, "");
-    // console.log("📱 DB 전화번호:", dbPhone);
-    
     if (dbPhone !== cleanPhone) {
-      // console.log("⚠️ 전화번호 불일치");
-      return NextResponse.json({ 
-        success: false, 
-        message: "입력한 정보와 일치하는 계정을 찾을 수 없습니다." 
+      return NextResponse.json({
+        success: false,
+        message: "입력한 정보와 일치하는 계정을 찾을 수 없습니다.",
       });
     }
 
-    // console.log("✅ 사용자 인증 완료");
+    // 2) 토큰 생성
+    const resetToken = crypto.randomBytes(32).toString("hex");
 
+    // 3) 10분 유효기간
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 10);
+
+    // 4) 이전 토큰 삭제 후 새 토큰 저장
+    await supabase
+      .from("password_reset_tokens")
+      .delete()
+      .eq("user_id", user.id);
+
+    await supabase.from("password_reset_tokens").insert({
+      user_id: user.id,
+      token: resetToken,
+      expires_at: expiresAt,
+    });
+
+    // 5) 사용자에게 보낼 URL
     const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000").replace(/\/$/, '');
-    const resetLink = `${baseUrl}/reset-password?email=${encodeURIComponent(email)}`;
-    // console.log("🔗 재설정 링크:", resetLink);
+    const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
 
-    // console.log("📤 이메일 전송 시도...");
-    
+    // 6) 이메일 전송
     await transporter.sendMail({
       from: `"README 비밀번호 재설정" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "비밀번호 재설정 링크",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="font-family: Arial; max-width: 600px; margin: auto;">
           <h2 style="color: #2d6a4f;">비밀번호 재설정 요청</h2>
-          <p>안녕하세요,</p>
-          <p>비밀번호 재설정을 요청하셨습니다. 아래 버튼을 클릭하여 새 비밀번호를 설정해주세요:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" 
-               style="background-color: #2d6a4f; color: white; padding: 12px 30px; 
-                      text-decoration: none; border-radius: 5px; display: inline-block;">
+          <p>안녕하세요.</p>
+          <p>아래 버튼을 클릭하여 비밀번호를 재설정해주세요.</p>
+
+          <div style="margin: 30px 0; text-align: center;">
+            <a href="${resetLink}"
+               style="background: #2d6a4f; color: white; padding: 12px 24px;
+                      border-radius: 5px; text-decoration: none;">
               비밀번호 재설정하기
             </a>
           </div>
+
           <p style="color: #666; font-size: 14px;">
-            이 링크는 24시간 동안 유효합니다.<br>
-            요청하지 않으셨다면 이 이메일을 무시하셔도 됩니다.
+            * 이 링크는 10분 동안 유효합니다.<br>
+            * 요청하지 않으셨다면 이 이메일을 무시하세요.
           </p>
         </div>
       `,
     });
-
-    // console.log("✅ 이메일 전송 성공");
 
     return NextResponse.json({
       success: true,
@@ -106,10 +109,12 @@ export async function POST(req) {
     });
 
   } catch (err) {
-    // console.error("💥 POST /api/auth/resetPassword error:", err);
-    return NextResponse.json({
-      success: false,
-      message: `서버 오류: ${err.message}`,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: `서버 오류: ${err.message}`,
+      },
+      { status: 500 }
+    );
   }
 }
