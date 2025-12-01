@@ -28,12 +28,12 @@ const MemberContent = () => {
     TAB_COMPONENTS[tabValues[tabIndex]] ?? (() => <div>준비 중</div>);
 
   return (
-    <main className="flex flex-col p-5 bg-white gap-5 lg:flex-row">
+    <main className="flex flex-col gap-5 p-5 bg-white lg:flex-row">
       {/* 🔹 사이드바 */}
       <SideBar tabIndex={tabIndex} handleClickTab={handleClickTab} />
 
       {/* 🔹 오른쪽 본문 */}
-      <div className="flex-1 p-6">
+      <div className="w-full p-6">
         <ActiveComponent />
       </div>
     </main>

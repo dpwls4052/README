@@ -36,8 +36,6 @@ export default function useUserReviews(userId) {
         }
 
         const data = await res.json();
-        console.log("유저 리뷰 data:", data);
-        console.log(res.status);
         // 서버에서 배열을 보내줬을 때만 처리
         if (Array.isArray(data)) {
           const mapped = data.map((r) => ({
@@ -45,7 +43,7 @@ export default function useUserReviews(userId) {
             author: r.user_id ? r.user_id.slice(0, 8) : "익명",
             rating: r.rate,
             content: r.review,
-            date: r.created_at ? r.created_at.slice(0, 10) : "",
+            date: r.created_at,
             bookId: r.book_id,
           }));
 
