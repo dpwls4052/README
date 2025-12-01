@@ -21,6 +21,7 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
 
     async function fetchExistingReview() {
       try {
+        const idToken = await auth.currentUser.getIdToken();
         setLoading(true);
         setError(null);
 
@@ -29,7 +30,12 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
           `/api/reviews?userId=${encodeURIComponent(userId)}&bookId=${Number(
             bookId
           )}`,
-          { signal: controller.signal }
+          {
+            signal: controller.signal,
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
         );
 
         if (!res.ok) {
@@ -39,16 +45,21 @@ export default function useReviewForm({ bookId, userId, reviewId }) {
 
         const data = await res.json();
 
-        if (Array.isArray(data) && data.length > 0) {
-          // reviewId가 있으면 우선 그걸 찾고, 없으면 첫 번째 사용
-          const target = reviewId
-            ? data.find((r) => r.review_id === Number(reviewId)) || data[0]
-            : data[0];
+        let target = null;
 
+        if (Array.isArray(data) && data.length > 0 && reviewId) {
+          // reviewId를 통해서 가져온 데이터
+          target = data.find((r) => r.review_id === Number(reviewId)) || null;
+        }
+
+        if (target) {
+          // 수정모드
           setRate(target.rate ?? 5);
           setContent(target.review ?? "");
         } else {
           // 리뷰가 없으면 그냥 생성 모드처럼 둠
+          setRate(5);
+          setContent("");
         }
       } catch (err) {
         if (err.name === "AbortError") return;
