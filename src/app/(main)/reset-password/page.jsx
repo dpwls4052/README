@@ -13,7 +13,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async () => {
     if (!password) {
-      alert("비밀번호를 입력하세요.");
+      toast.error("비밀번호를 입력하세요.");
       return;
     }
 

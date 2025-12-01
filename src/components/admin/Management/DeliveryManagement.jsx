@@ -5,6 +5,7 @@ import { FiPackage, FiTruck, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useScroll } from "@/contexts/ScrollContext";
 import { auth } from "@/lib/firebase";
 import axios from "axios";
+import { toast } from "sonner";
 
 const DeliveryManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -21,7 +22,7 @@ const DeliveryManagement = () => {
 
         const res = await axios.get("/api/order/admin/getAllOrders", {
           headers: {
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
         setOrders(res.data);
@@ -48,7 +49,7 @@ const DeliveryManagement = () => {
         },
         {
           headers: {
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         }
       );
@@ -62,7 +63,7 @@ const DeliveryManagement = () => {
         )
       );
 
-      alert("배송 상태가 변경되었습니다.");
+      toast.success("배송 상태가 변경되었습니다.");
     } catch (err) {
       console.error("상태 변경 에러:", err);
       alert(err.response?.data?.error || err.message || "상태 변경 실패");

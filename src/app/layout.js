@@ -1,6 +1,7 @@
 import ScrollTopBtn from "@/components/common/ScrollTopBtn";
 import "./globals.css";
 import ScrollProviderWrapper from "@/components/common/ScrollProviderWrapper";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata = {
   title: "Create Next App",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
           {children}
           <ScrollTopBtn />
         </ScrollProviderWrapper>
+        <Toaster />
       </body>
     </html>
   );

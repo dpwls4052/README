@@ -106,7 +106,7 @@ export default function Orders() {
 
         // 🌟 날짜 형식 확인용 로그
         if (data.length > 0) {
-          console.log("주문 날짜 형식:", data[0].date);
+          // console.log("주문 날짜 형식:", data[0].date);
         }
 
         setOrders(data);

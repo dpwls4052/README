@@ -17,6 +17,7 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "@/hooks/common/useAuth";
 import { auth } from "@/lib/firebase";
+import { toast } from "sonner";
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -132,7 +133,7 @@ export default function PaymentPage() {
         const res = await fetch("/api/user/getUser", {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
 
@@ -160,7 +161,7 @@ export default function PaymentPage() {
       const res = await fetch("/api/user/address/getAddressList", {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
 
@@ -366,58 +367,58 @@ export default function PaymentPage() {
   const handlePaymentClick = async () => {
     // ✅ 이미 처리 중이면 리턴
     if (isProcessing) {
-      console.log("⚠️ 이미 결제 처리 중입니다.");
+      // console.log("⚠️ 이미 결제 처리 중입니다.");
       return;
     }
 
     // 기존 유효성 검사들
     if (!agreed) {
-      console.error("구매 조건 및 결제 진행에 동의해주세요.");
+      toast.warning("구매 조건 및 결제 진행에 동의해주세요.");
       return;
     }
     if (!widgetReady) {
-      console.error("결제 준비 중입니다. 잠시만 기다려주세요.");
+      toast.warning("결제 준비 중입니다. 잠시만 기다려주세요.");
       return;
     }
     if (orderItems.length === 0) {
-      console.error("주문할 상품이 없습니다.");
+      toast.error("주문할 상품이 없습니다.");
       return;
     }
 
     // 주문자 정보 유효성 검사
     if (!finalName) {
-      console.error("주문자 이름(필수)을 입력/확인해주세요.");
+      toast.warning("주문자 이름(필수)을 입력/확인해주세요.");
       return;
     }
     if (!finalEmail) {
-      console.error("주문자 이메일(필수)을 입력/확인해주세요.");
+      toast.warning("주문자 이메일(필수)을 입력/확인해주세요.");
       return;
     }
 
     if (!finalPhone || finalPhone.length < 10) {
-      console.error("유효한 주문자 연락처(필수)를 입력/확인해주세요.");
+      toast.warning("유효한 주문자 연락처(필수)를 입력/확인해주세요.");
       return;
     }
 
     // 배송지 정보 유효성 검사
     if (addressType === "existing") {
       if (!selectedAddressId || !finalAddress) {
-        console.error("등록된 배송지 중 하나를 선택해주세요.");
+        toast.warning("등록된 배송지 중 하나를 선택해주세요.");
         return;
       }
     } else if (addressType === "new") {
       if (!newPostcode) {
-        console.error("새 배송지의 우편번호(필수)를 입력해주세요.");
+        toast.warning("새 배송지의 우편번호(필수)를 입력해주세요.");
         return;
       }
       if (!newAddress) {
-        console.error("새 배송지의 주소(필수)를 입력해주세요.");
+        toast.warning("새 배송지의 주소(필수)를 입력해주세요.");
         return;
       }
     }
 
     if (!finalAddress?.postcode || !finalAddress?.address1) {
-      console.error("유효한 배송지 정보를 선택/입력해주세요.");
+      toast.warning("유효한 배송지 정보를 선택/입력해주세요.");
       return;
     }
 
@@ -454,7 +455,7 @@ export default function PaymentPage() {
         return;
       }
 
-      console.log("✅ 재고 검증 완료");
+      // console.log("✅ 재고 검증 완료");
 
       await persistPendingOrder();
 

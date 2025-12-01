@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/hooks/common/useAuth";
 import { useCartCount } from "@/hooks/common/useCartCount";
 import { auth } from "@/lib/firebase";
+import { toast } from "sonner";
 
 const Plus = ({ size = 16 }) => (
   <svg
@@ -53,7 +54,7 @@ const Cart = () => {
     const token = await auth.currentUser.getIdToken();
     return {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
   };
 
@@ -134,18 +135,19 @@ const Cart = () => {
   const handleCountChange = async (item, delta) => {
     const newCount = item.count + delta;
     if (newCount < 1) return;
-    if (newCount > item.stock) return alert("재고가 부족합니다.");
+    if (newCount > item.stock) {
+      toast.error("재고가 부족합니다.");
+      return;
+    }
 
     // 1️⃣ 즉시 UI 업데이트 (Optimistic)
-    setItems(prevItems =>
-      prevItems.map(i =>
-        i.id === item.id ? { ...i, count: newCount } : i
-      )
+    setItems((prevItems) =>
+      prevItems.map((i) => (i.id === item.id ? { ...i, count: newCount } : i))
     );
 
     // 2️⃣ 백그라운드에서 서버 업데이트
-    setPendingUpdates(prev => new Set(prev).add(item.cartId));
-    
+    setPendingUpdates((prev) => new Set(prev).add(item.cartId));
+
     try {
       const headers = await getAuthHeaders();
       await fetch("/api/user/cart", {
@@ -156,14 +158,14 @@ const Cart = () => {
     } catch (err) {
       console.error(err);
       // 실패 시 원래 값으로 복구
-      setItems(prevItems =>
-        prevItems.map(i =>
+      setItems((prevItems) =>
+        prevItems.map((i) =>
           i.id === item.id ? { ...i, count: item.count } : i
         )
       );
       alert("수량 변경 실패");
     } finally {
-      setPendingUpdates(prev => {
+      setPendingUpdates((prev) => {
         const next = new Set(prev);
         next.delete(item.cartId);
         return next;
@@ -174,12 +176,15 @@ const Cart = () => {
   // ✨ Optimistic UI: 선택 삭제 (즉시 화면 반영)
   const handleDeleteSelected = async () => {
     const selected = items.filter((item) => item.selected);
-    if (selected.length === 0) return alert("선택된 상품이 없습니다");
+    if (selected.length === 0) {
+      toast.error("선택된 상품이 없습니다.");
+      return;
+    }
 
     // 1️⃣ 즉시 UI 업데이트
-    const deletedIds = selected.map(i => i.id);
+    const deletedIds = selected.map((i) => i.id);
     const originalItems = [...items];
-    setItems(prevItems => prevItems.filter(item => !item.selected));
+    setItems((prevItems) => prevItems.filter((item) => !item.selected));
 
     // 2️⃣ 백그라운드에서 서버 업데이트
     try {
@@ -229,11 +234,14 @@ const Cart = () => {
 
   // 페이지 이동 시 최종 동기화
   const handlePay = async () => {
-    if (selectedItems.length === 0) return alert("상품을 선택해주세요");
+    if (selectedItems.length === 0) {
+      toast.error("상품을 선택해주세요");
+      return;
+    }
 
     // 🔄 대기 중인 업데이트가 있으면 완료될 때까지 대기
     if (pendingUpdates.size > 0) {
-      alert("수량 변경 중입니다. 잠시만 기다려주세요.");
+      toast.error("수량 변경 중입니다. 잠시만 기다려주세요.");
       return;
     }
 
@@ -251,11 +259,11 @@ const Cart = () => {
       let hasAdjusted = false;
       const orderItems = selectedItems.map((item) => {
         // 서버의 최신 재고 확인
-        const serverItem = serverData.find(s => s.book_id === item.id);
+        const serverItem = serverData.find((s) => s.book_id === item.id);
         const actualStock = serverItem?.stock || item.stock;
-        
+
         let finalQuantity = item.count;
-        
+
         if (finalQuantity > actualStock) {
           hasAdjusted = true;
           finalQuantity = actualStock;
@@ -296,7 +304,7 @@ const Cart = () => {
       router.push("/pay");
     } catch (err) {
       console.error(err);
-      alert("주문 정보를 불러오는 중 오류가 발생했습니다.");
+      toast.error("주문 정보를 불러오는 중 오류가 발생했습니다.");
     }
   };
 
@@ -402,7 +410,9 @@ const Cart = () => {
                     <div className="flex items-center gap-2 ml-auto sm:ml-0">
                       <button
                         onClick={() => handleCountChange(item, -1)}
-                        disabled={item.count <= 1 || pendingUpdates.has(item.cartId)}
+                        disabled={
+                          item.count <= 1 || pendingUpdates.has(item.cartId)
+                        }
                         className="p-2 md:p-4 bg-[var(--sub-color)] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:cursor-pointer"
                       >
                         <Minus size={14} />
