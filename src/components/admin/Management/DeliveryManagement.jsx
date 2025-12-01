@@ -11,7 +11,7 @@ const DeliveryManagement = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("전체");
 
-  // 관리자 권한 확인 및 주문 내역 조회
+  // 주문 내역 조회
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,14 +36,14 @@ const DeliveryManagement = () => {
   }, []);
 
   // 배송 상태 변경
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderNumber, newStatus) => {
     try {
       const idToken = await auth.currentUser.getIdToken();
 
       const res = await axios.patch(
         "/api/order/admin/updateShippingStatus",
         {
-          order_id: orderId,
+          order_number: orderNumber,
           shipping_status: newStatus,
         },
         {
@@ -56,7 +56,7 @@ const DeliveryManagement = () => {
       // 상태 업데이트
       setOrders((prev) =>
         prev.map((order) =>
-          order.order_id === orderId
+          order.order_number === orderNumber
             ? { ...order, shipping_status: newStatus }
             : order
         )
@@ -239,7 +239,7 @@ const DeliveryManagement = () => {
                     <select
                       value={order.shippingStatus}
                       onChange={(e) =>
-                        handleStatusChange(order.orderId, e.target.value)
+                        handleStatusChange(order.orderNumber, e.target.value)
                       }
                       className={`px-12 py-8 rounded border text-sm font-medium cursor-pointer ${
                         order.shippingStatus === "배송완료"
