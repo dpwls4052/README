@@ -27,7 +27,7 @@ export async function POST(req) {
 
     // 2. 현재 bookId가 이미 존재하는지 확인
     const existingBookIndex = existingBooks?.findIndex(
-      (book) => book.book_id === bookId
+      (book) => Number(book.book_id) === bookId
     );
 
     if (existingBookIndex !== -1) {
