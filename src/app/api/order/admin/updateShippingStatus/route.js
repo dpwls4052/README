@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 /**
  * 배송 상태 변경 API
  * PATCH /api/admin/orders/updateShippingStatus
- * Body: { order_id: string, shipping_status: string }
+ * Body: { order_number: string, shipping_status: string }
  */
 export async function PATCH(req) {
   try {
@@ -31,12 +31,12 @@ export async function PATCH(req) {
     }
 
     const body = await req.json();
-    const { order_id, shipping_status } = body;
+    const { order_number, shipping_status } = body;
 
     // 1. 필수 필드 검증
-    if (!order_id || !shipping_status) {
+    if (!order_number || !shipping_status) {
       return NextResponse.json(
-        { error: "order_id, shipping_status가 필요합니다." },
+        { error: "order_number, shipping_status가 필요합니다." },
         { status: 400 }
       );
     }
@@ -60,7 +60,7 @@ export async function PATCH(req) {
     const { data: updatedOrders, error: updateError } = await supabase
       .from("orders")
       .update({ shipping_status })
-      .eq("order_id", order_id)
+      .eq("order_number", order_number)
       .select();
 
     if (updateError) {
