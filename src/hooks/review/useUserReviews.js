@@ -25,7 +25,7 @@ export default function useUserReviews(userId) {
           {
             signal: controller.signal,
             headers: {
-              "Authorization": `Bearer ${idToken}`,
+              Authorization: `Bearer ${idToken}`,
             },
           }
         );
@@ -36,7 +36,9 @@ export default function useUserReviews(userId) {
         }
 
         const data = await res.json();
-
+        console.log("유저 리뷰 data:", data);
+        console.log(res.status);
+        // 서버에서 배열을 보내줬을 때만 처리
         if (Array.isArray(data)) {
           const mapped = data.map((r) => ({
             id: r.review_id,
@@ -46,6 +48,8 @@ export default function useUserReviews(userId) {
             date: r.created_at ? r.created_at.slice(0, 10) : "",
             bookId: r.book_id,
           }));
+
+          // 상태에 저장
           setReviews(mapped);
         } else {
           setReviews([]);

@@ -22,19 +22,14 @@ export default function Reviews() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState(null);
 
+  // 리뷰 삭제 훅 (리뷰 삭제요청 보내는 함수 + 로딩 상태)
   const { deleteReview, deleting } = useDeleteReview();
-  // ✅ 내 리뷰 가져오기 (userId 기준)
+  // 내 리뷰 가져오기 (userId 기준)
   const {
     reviews: userReviews,
     loading: userReviewLoading,
     error: userReviewError,
   } = useUserReviews(userId);
-
-  // ✅ bookId 기준 내 리뷰 맵
-  const userReviewMap = userReviews.reduce((acc, r) => {
-    acc[r.bookId] = r; // 한 책당 하나라고 가정
-    return acc;
-  }, {});
 
   // ✅ 날짜 포맷 함수 (UTC → 한국 시간)
   const convertToKoreaTime = (dateString) => {
@@ -112,6 +107,12 @@ export default function Reviews() {
     fetchOrders();
   }, [userId]);
 
+  // bookId 기준 내 리뷰 맵
+  const userReviewMap = userReviews.reduce((acc, r) => {
+    acc[r.bookId] = r; // 한 책당 하나라고 가정
+    return acc;
+  }, {});
+
   // ✅ 배송완료 주문만 대상으로 사용
   const deliveredItems = orders.filter(
     (order) => order.shipping_status === "배송완료"
@@ -128,6 +129,7 @@ export default function Reviews() {
   const availableMap = new Map();
 
   availableItemsRaw.forEach((item) => {
+    // book_id가 availableMap에 있는지 찾아보기
     const existing = availableMap.get(item.book_id);
 
     if (!existing) {
@@ -215,18 +217,6 @@ export default function Reviews() {
       toast.error(err.message || "리뷰 삭제 중 오류가 발생했습니다.");
     }
   };
-
-  if (!userId) {
-    return (
-      <ProtectedRoute>
-        <div className="flex justify-center w-full min-h-screen py-10 bg-gray-50">
-          <div className="w-full max-w-5xl p-8 bg-white shadow-sm rounded-xl">
-            <p className="mt-10 text-center">로그인이 필요합니다.</p>
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
-  }
 
   const isLoading = ordersLoading || userReviewLoading;
 
