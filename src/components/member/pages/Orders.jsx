@@ -158,9 +158,11 @@ export default function Orders() {
   // 탭별 필터링
   const filteredOrders = orderList.filter((order) => {
     if (activeTab === "전체") return true;
+    if (activeTab === "결제완료") return order.shippingStatus === "결제완료";
     if (activeTab === "배송준비") return order.shippingStatus === "배송준비";
     if (activeTab === "배송중") return order.shippingStatus === "배송중";
     if (activeTab === "배송완료") return order.shippingStatus === "배송완료";
+    if (activeTab === "주문취소") return order.shippingStatus === "주문취소";
     return true;
   });
 
@@ -245,7 +247,7 @@ export default function Orders() {
 
           {/* 탭 메뉴 */}
           <div className="flex border-b-2 border-gray-200 gap-30 ">
-            {["전체", "배송준비", "배송중", "배송완료"].map((tab) => (
+            {["전체","결제완료", "배송준비", "배송중", "배송완료","주문취소"].map((tab) => (
               <button
                 key={tab}
                 className={`pb-10 px-2 font-normal text-20 cursor-pointer transition-colors ${
