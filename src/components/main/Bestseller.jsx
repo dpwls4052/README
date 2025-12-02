@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/common/useAuth";
 import BestsellerItem from "./BestsellerItem";
 import BestsellerItemSkeleton from "./BestsellerItemSkeleton";
+import { useWishlistAll } from "@/hooks/common/useWishlistAll";
 
 const Bestseller = () => {
   const { userId } = useAuth();
@@ -44,19 +45,26 @@ const Bestseller = () => {
     fetchBestsellers();
   }, []);
 
+  const { books: allWishlists, loading: allWishlistLoading } = useWishlistAll();
+
   return (
     <div className="w-full p-0 mx-auto text-center my-100 max-w-1200">
       <p className="font-semibold text-32">베스트셀러</p>
 
       <div className="grid w-full grid-cols-1 gap-40 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 my-80">
-        {loading ? (
+        {loading || allWishlistLoading || allWishlists === null ? (
           Array.from({ length: 8 }, (_, i) => (
             <BestsellerItemSkeleton key={i} />
           ))
         ) : (
           <>
             {books.map((book) => (
-              <BestsellerItem key={book.id} book={book} userId={userId} />
+              <BestsellerItem
+                key={book.id}
+                book={book}
+                userId={userId}
+                wishlist={allWishlists?.includes(book.bookId)}
+              />
             ))}
           </>
         )}

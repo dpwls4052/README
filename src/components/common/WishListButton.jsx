@@ -1,7 +1,7 @@
 // WishListButton.jsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "sonner";
 import { useWishlistCount } from "@/hooks/common/useWishlistCount"; // 추가
@@ -9,39 +9,16 @@ import { auth } from "@/lib/firebase";
 import Modal from "./Modal";
 import { useRouter } from "next/navigation";
 
-export default function WishListButton({ userId, bookId, stock }) {
+export default function WishListButton({ userId, bookId, wishlist }) {
   const router = useRouter();
   const [isWished, setIsWished] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setCount } = useWishlistCount(); // Context에서 setCount 가져오기
+  useEffect(() => {
+    setIsWished(wishlist);
+  }, [wishlist]);
 
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-
-  // 초기 wishlist 상태 확인
-  useEffect(() => {
-    if (!userId || !bookId) return;
-
-    const checkWishlistStatus = async () => {
-      try {
-        const idToken = await auth.currentUser.getIdToken();
-        const res = await fetch(`/api/user/wishlist?book_id=${bookId}`, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setIsWished(data.status || false);
-        } else {
-          console.error("Wishlist status check error:", data);
-        }
-      } catch (err) {
-        console.error("Wishlist status check failed:", err);
-      }
-    };
-
-    checkWishlistStatus();
-  }, [userId, bookId]);
 
   const toggleWishlist = async () => {
     if (!userId || !bookId) {
