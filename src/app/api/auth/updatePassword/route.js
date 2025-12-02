@@ -1,46 +1,71 @@
+console.log("🔍 token:", token);
+console.log("🔍 tokenRow:", tokenRow);
+
+
 import { NextResponse } from "next/server";
-import admin from "@/lib/firebaseAdmin"; 
 import { supabase } from "@/lib/supabaseClient";
+import bcrypt from "bcryptjs";
 
 export async function POST(req) {
   try {
-    const { email, newPassword } = await req.json();
+    const { token, newPassword } = await req.json();
 
-    if (!email || !newPassword) {
+    if (!token || !newPassword) {
+      return NextResponse.json(
+        { success: false, message: "token, newPassword 모두 필요합니다." },
+        { status: 400 }
+      );
+    }
+
+    // 1) 토큰으로 user_id 조회
+    const { data: tokenRow, error: tokenError } = await supabase
+      .from("password_reset_tokens")
+      .select("email, expires_at")
+      .eq("token", token)
+      .single();
+
+    if (tokenError || !tokenRow) {
       return NextResponse.json({
         success: false,
-        error: "email, newPassword 모두 필요합니다."
+        message: "유효하지 않은 토큰입니다.",
       });
     }
 
-    const { data: user, error } = await supabase
+    // 2) 만료 확인
+    if (new Date(tokenRow.expires_at) < new Date()) {
+      return NextResponse.json({
+        success: false,
+        message: "토큰이 만료되었습니다.",
+      });
+    }
+
+    // 3) 새 비밀번호 해시
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // 4) Supabase users 테이블 비밀번호 업데이트
+    const { error: updateError } = await supabase
       .from("users")
-      .select("uid") 
-      .eq("email", email)
-      .maybeSingle();
+      .update({ password: hashed })
+      .eq("email", tokenRow.email);
 
-    if (error || !user) {
+    if (updateError) {
       return NextResponse.json({
         success: false,
-        error: "해당 이메일의 사용자를 찾지 못했습니다."
+        message: "비밀번호 변경 실패: " + updateError.message,
       });
     }
 
-    const uid = user.uid;
-
-    await admin.auth().updateUser(uid, {
-      password: newPassword,
-    });
+    // 5) 토큰 삭제
+    await supabase.from("password_reset_tokens").delete().eq("token", token);
 
     return NextResponse.json({
       success: true,
-      message: "비밀번호 업데이트 성공!",
+      message: "비밀번호가 성공적으로 변경되었습니다.",
     });
-
   } catch (err) {
-    return NextResponse.json({
-      success: false,
-      error: err.message,
-    });
+    return NextResponse.json(
+      { success: false, message: "서버 오류: " + err.message },
+      { status: 500 }
+    );
   }
 }
