@@ -166,10 +166,10 @@ export default function Header() {
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <p className="text-lg font-bold text-black truncate">
-                        {userInfo.name || "사용자"} 님
+                        {userInfo?.name || "사용자"} 님
                       </p>
                       <p className="text-sm font-light text-gray-600 truncate">
-                        {user.email}
+                        {user.email || ""}
                       </p>
                     </div>
                   </div>
