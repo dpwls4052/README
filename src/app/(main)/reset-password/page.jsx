@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 export default function ResetPasswordPage() {
@@ -90,7 +90,8 @@ export default function ResetPasswordPage() {
 
   // status === "ready"
   return (
-    <div className="w-full max-w-[400px] mx-auto mt-20">
+    <Suspense>
+          <div className="w-full max-w-[400px] mx-auto mt-20">
       <h1 className="text-2xl font-bold text-center mb-4">새 비밀번호 설정</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,5 +108,7 @@ export default function ResetPasswordPage() {
         <button className="w-full bg-green-700 text-white py-3 rounded">비밀번호 변경하기</button>
       </form>
     </div>
+    </Suspense>
+
   );
 }
