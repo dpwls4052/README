@@ -72,8 +72,8 @@ const BookList = () => {
     return [config.prefix, selectedCategory];
   }, [selectedCategory, wantRandom, config.prefix]);
 
-  console.log("Current category array:", categoryArray);
-  console.log("All sub category names:", allSubCategoryNames);
+  // console.log("Current category array:", categoryArray);
+  // console.log("All sub category names:", allSubCategoryNames);
 
   // 카테고리 기반 책 조회
   const {
@@ -125,7 +125,7 @@ const BookList = () => {
         return !hasDefinedCategory;
       });
 
-      console.log(`'기타' 카테고리: ${result.length}개 책 표시`);
+      // console.log(`'기타' 카테고리: ${result.length}개 책 표시`);
     }
 
     //  추천/계절(wantRandom)은 이미 서버에서 랜덤 10개만 받았으므로 그대로 반환

@@ -106,7 +106,7 @@ export default function Orders() {
 
         // 🌟 날짜 형식 확인용 로그
         if (data.length > 0) {
-          console.log("주문 날짜 형식:", data[0].date);
+          // console.log("주문 날짜 형식:", data[0].date);
         }
 
         setOrders(data);
@@ -204,7 +204,7 @@ export default function Orders() {
 
   return (
     <ProtectedRoute>
-      <div className="flex w-full min-h-screen lg:ml-50">
+      <div className="flex w-full min-h-screen lg:pl-50">
         <div className="w-full max-w-5xl p-10 space-y-50">
           {/* 상단 헤더 */}
           <div className="flex flex-col items-start justify-between border-b gap-15 py-50 md:flex-row md:items-center md:gap-0">
@@ -247,7 +247,14 @@ export default function Orders() {
 
           {/* 탭 메뉴 */}
           <div className="flex border-b-2 border-gray-200 gap-30 ">
-            {["전체","결제완료", "배송준비", "배송중", "배송완료","주문취소"].map((tab) => (
+            {[
+              "전체",
+              "결제완료",
+              "배송준비",
+              "배송중",
+              "배송완료",
+              "주문취소",
+            ].map((tab) => (
               <button
                 key={tab}
                 className={`pb-10 px-2 font-normal text-20 cursor-pointer transition-colors ${

@@ -11,6 +11,7 @@ import { auth } from "@/lib/firebase";
 
 import Image from "next/image";
 import noimg from "@/assets/no_image.png";
+import { toast } from "sonner";
 
 export default function Profile() {
   const { userId } = useAuth();
@@ -72,7 +73,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
 
@@ -83,7 +84,7 @@ export default function Profile() {
         return;
       }
 
-      alert("회원 탈퇴가 완료되었습니다.");
+      toast.success("회원 탈퇴가 완료되었습니다.");
 
       // 쿠키 삭제 (로그아웃)
       document.cookie = "auth_token=; expires=Thu, 01 Jan 1970; path=/;";
@@ -158,7 +159,7 @@ export default function Profile() {
         const res = await fetch("/api/user/getUser", {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
 
@@ -184,7 +185,7 @@ export default function Profile() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
 
@@ -210,13 +211,13 @@ export default function Profile() {
       const res = await fetch("/api/user/address/getAddressList", {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
 
       const data = await res.json();
       if (data.success) {
-        console.log("조회된 주소 목록:", data.addresses);
+        // console.log("조회된 주소 목록:", data.addresses);
         setAddressList(data.addresses);
       }
     } catch (err) {
@@ -253,7 +254,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -326,15 +327,15 @@ export default function Profile() {
     }
 
     if (!editForm.nickname.trim()) {
-      alert("주소 닉네임을 입력해주세요.");
+      toast.warning("주소 닉네임을 입력해주세요.");
       return;
     }
     if (!editForm.postcode.trim()) {
-      alert("우편번호를 입력해주세요.");
+      toast.warning("우편번호를 입력해주세요.");
       return;
     }
     if (!editForm.address.trim()) {
-      alert("주소를 입력해주세요.");
+      toast.warning("주소를 입력해주세요.");
       return;
     }
 
@@ -367,7 +368,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -381,7 +382,7 @@ export default function Profile() {
         throw new Error(data.errorMessage || "수정 실패");
       }
 
-      alert("주소가 수정되었습니다.");
+      toast.success("주소가 수정되었습니다.");
       cancelEdit();
       fetchAddressList();
     } catch (err) {
@@ -423,7 +424,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           addressIdx: addressIdx,
@@ -433,7 +434,7 @@ export default function Profile() {
       const data = await res.json();
       if (!data.success) throw new Error(data.errorMessage);
 
-      alert("주소가 삭제되었습니다.");
+      toast.success("주소가 삭제되었습니다.");
       fetchAddressList();
     } catch (err) {
       console.error(err);
@@ -459,7 +460,7 @@ export default function Profile() {
       // console.log("찾은 주소:", targetAddr);
 
       if (targetAddr?.is_default === true) {
-        alert("이미 기본 배송지입니다.");
+        toast.warning("이미 기본 배송지입니다.");
         return;
       }
 
@@ -467,7 +468,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           addressIdx: addressIdx,
@@ -482,7 +483,7 @@ export default function Profile() {
       const data = await res.json();
       if (!data.success) throw new Error(data.errorMessage);
 
-      alert("기본 배송지로 설정되었습니다.");
+      toast.success("기본 배송지로 설정되었습니다.");
       fetchAddressList();
     } catch (err) {
       console.error(err);
@@ -494,15 +495,15 @@ export default function Profile() {
   const addNewAddress = async () => {
     const idToken = await auth.currentUser.getIdToken();
     if (!newAddressForm.nickname.trim()) {
-      alert("주소 닉네임을 입력해주세요.");
+      toast.warning("주소 닉네임을 입력해주세요.");
       return;
     }
     if (!newAddressForm.postcode.trim()) {
-      alert("우편번호를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
+      toast.warning("우편번호를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
       return;
     }
     if (!newAddressForm.address.trim()) {
-      alert("주소를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
+      toast.warning("주소를 입력해주세요.\n'주소찾기' 버튼을 클릭하세요.");
       return;
     }
 
@@ -511,7 +512,7 @@ export default function Profile() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           nickname: newAddressForm.nickname.trim(),
@@ -525,7 +526,7 @@ export default function Profile() {
       const data = await res.json();
       if (!data.success) throw new Error(data.errorMessage);
 
-      alert("주소가 추가되었습니다.");
+      toast.success("주소가 추가되었습니다.");
       setNewAddressForm({
         nickname: "",
         postcode: "",
@@ -593,7 +594,7 @@ export default function Profile() {
   ];
 
   return (
-    <div className="flex w-full min-h-fit lg:ml-50">
+    <div className="flex w-full min-h-fit lg:pl-50">
       <div className="w-full max-w-5xl p-10 space-y-50">
         {/* 상단 정보 */}
         <div className="flex flex-col items-start justify-between border-b gap-15 py-50 md:flex-row md:items-center md:gap-0">
@@ -682,32 +683,34 @@ export default function Profile() {
           {recentBooks.length === 0 ? (
             <p className="text-sm text-gray-500">최근 본 도서가 없습니다.</p>
           ) : (
-            <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
+            <div className="flex flex-col items-center gap-30 md:flex-row">
               {recentBooks.slice(0, 4).map((book, index) => (
-<div
-  key={index}
-  className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
-  onClick={() =>
-    (window.location.href = `/product/detail/${book.book_id}`)
-  }
->
-  <div className="relative w-full h-[250px]">
-    <Image
-      src={book.image?.replace(/coversum/gi, "cover500") || noimg}
-      alt={book.title}
-      fill
-      sizes="(max-width: 768px) 250px, 180px"
-      className="object-cover"
-      priority={index < 2}
-    />
-  </div>
-  <div className="p-5 text-sm">
-    <p className="font-medium truncate">{book.title}</p>
-    <p className="text-xs text-gray-500 truncate">
-      {book.author}
-    </p>
-  </div>
-</div>
+                <div
+                  key={index}
+                  className="border rounded-sm overflow-hidden hover:shadow-md transition cursor-pointer w-[180px]"
+                  onClick={() =>
+                    (window.location.href = `/product/detail/${book.book_id}`)
+                  }
+                >
+                  <div className="relative w-full h-[250px]">
+                    <Image
+                      src={
+                        book.image?.replace(/coversum/gi, "cover500") || noimg
+                      }
+                      alt={book.title}
+                      fill
+                      sizes="(max-width: 768px) 250px, 180px"
+                      className="object-cover"
+                      priority={index < 2}
+                    />
+                  </div>
+                  <div className="p-5 text-sm">
+                    <p className="font-medium truncate">{book.title}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {book.author}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           )}

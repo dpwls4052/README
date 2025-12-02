@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
 // src/app/layout.jsx 파일 예시
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 
 export default function RootLayout({ children }) {
   return (
@@ -14,14 +14,14 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-import { toast as sonnerToast } from 'sonner'
+import { toast as sonnerToast } from "sonner";
 
 /**
  * sonner 라이브러리를 사용하여 toast 알림을 생성합니다.
  * 기존 toaster.create 인터페이스를 유지하여 다른 컴포넌트의 수정을 최소화합니다.
  */
 export const toaster = {
-  create: ({ title, description, type = 'info', duration }) => {
+  create: ({ title, description, type = "info", duration }) => {
     // sonner는 title과 description을 하나의 메시지로 처리합니다.
     const message = (
       <>
@@ -31,13 +31,13 @@ export const toaster = {
     );
 
     switch (type) {
-      case 'success':
+      case "success":
         sonnerToast.success(message, { duration });
         break;
-      case 'error':
+      case "error":
         sonnerToast.error(message, { duration });
         break;
-      case 'loading':
+      case "loading":
         sonnerToast.loading(message, { duration });
         break;
       default:

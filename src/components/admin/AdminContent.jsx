@@ -9,6 +9,7 @@ import {
   DeliveryManagement,
 } from "@/components/admin/Management";
 import { useAuth } from "@/hooks/common/useAuth";
+import { toast } from "sonner";
 
 const NotReady = () => <div>준비 중(스켈레톤)</div>;
 
@@ -31,13 +32,13 @@ const AdminContent = () => {
         const idToken = await user.getIdToken();
 
         const res = await fetch("/api/auth/verify-admin", {
-          headers: { "Authorization": `Bearer ${idToken}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         });
 
         const data = await res.json();
 
         if (!data.isAdmin) {
-          alert("관리자 권한이 필요합니다.");
+          toast.error("관리자 권한이 필요합니다.");
           window.location.href = "/";
           return;
         }

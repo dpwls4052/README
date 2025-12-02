@@ -444,7 +444,7 @@ const ProductDetail = () => {
                       <div className="text-sm min-[900px]:text-16">
                         {"⭐".repeat(item.rating)}
                       </div>
-                      <p className="mt-3 min-[900px]:mt-20 font-light leading-relaxed text-black text-sm min-[900px]:text-18">
+                      <p className="mt-3 min-[900px]:mt-20 font-light leading-relaxed text-black text-sm min-[900px]:text-18 whitespace-pre-wrap break-words">
                         {item.content}
                       </p>
                     </div>

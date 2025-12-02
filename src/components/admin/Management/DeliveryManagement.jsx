@@ -5,13 +5,14 @@ import { FiPackage, FiTruck, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useScroll } from "@/contexts/ScrollContext";
 import { auth } from "@/lib/firebase";
 import axios from "axios";
+import { toast } from "sonner";
 
 const DeliveryManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("전체");
 
-  // 관리자 권한 확인 및 주문 내역 조회
+  // 주문 내역 조회
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -21,7 +22,7 @@ const DeliveryManagement = () => {
 
         const res = await axios.get("/api/order/admin/getAllOrders", {
           headers: {
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
         setOrders(res.data);
@@ -36,19 +37,19 @@ const DeliveryManagement = () => {
   }, []);
 
   // 배송 상태 변경
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderNumber, newStatus) => {
     try {
       const idToken = await auth.currentUser.getIdToken();
 
       const res = await axios.patch(
         "/api/order/admin/updateShippingStatus",
         {
-          order_id: orderId,
+          order_number: orderNumber,
           shipping_status: newStatus,
         },
         {
           headers: {
-            "Authorization": `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         }
       );
@@ -56,13 +57,13 @@ const DeliveryManagement = () => {
       // 상태 업데이트
       setOrders((prev) =>
         prev.map((order) =>
-          order.order_id === orderId
+          order.order_number === orderNumber
             ? { ...order, shipping_status: newStatus }
             : order
         )
       );
 
-      alert("배송 상태가 변경되었습니다.");
+      toast.success("배송 상태가 변경되었습니다.");
     } catch (err) {
       console.error("상태 변경 에러:", err);
       alert(err.response?.data?.error || err.message || "상태 변경 실패");
@@ -239,7 +240,7 @@ const DeliveryManagement = () => {
                     <select
                       value={order.shippingStatus}
                       onChange={(e) =>
-                        handleStatusChange(order.orderId, e.target.value)
+                        handleStatusChange(order.orderNumber, e.target.value)
                       }
                       className={`px-12 py-8 rounded border text-sm font-medium cursor-pointer ${
                         order.shippingStatus === "배송완료"

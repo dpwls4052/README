@@ -179,8 +179,8 @@ export default function Reviews() {
     if (sortOption === "review") {
       // 리뷰 작성일 기준 내림차순 (written 탭에서만 의미 있음)
       return [...items].sort((a, b) => {
-        const aDate = a.review?.date || a.review?.createdAt || a.date;
-        const bDate = b.review?.date || b.review?.createdAt || b.date;
+        const aDate = a.review?.date || a.date;
+        const bDate = b.review?.date || b.date;
         return new Date(bDate).getTime() - new Date(aDate).getTime();
       });
     }
@@ -222,7 +222,7 @@ export default function Reviews() {
 
   return (
     <ProtectedRoute>
-      <div className="flex w-full min-h-screen lg:ml-50">
+      <div className="flex w-full min-h-screen lg:pl-50">
         <div className="w-full max-w-5xl p-8">
           {/* 🏷️ 헤더 */}
           <div className="flex items-center justify-between pb-4 mb-6">
@@ -383,18 +383,17 @@ export default function Reviews() {
                               <div className="flex-1 mt-5">
                                 <div className="flex justify-between mb-2">
                                   <div>
-                                    <p className="font-medium text-16 mb-5 overflow-hidden text-ellipsis w-[80px] line-clamp-1 md:w-600">
+                                    <p className="w-full mb-5 overflow-hidden font-medium text-16 text-ellipsis line-clamp-1">
                                       {item.title}
                                     </p>
                                     <p className="font-normal text-gray-500 text-12 ">
                                       주문일: {convertToKoreaTime(item.date)}
                                     </p>
                                   </div>
-                                  <div className="font-normal text-right text-gray-500 text-12">
-                                    <p className=" w-125">
+                                  <div className="font-normal text-right text-gray-500 text-12 shrink-0">
+                                    <p className="">
                                       리뷰 작성일:{" "}
-                                      {item.review?.date ||
-                                        item.review?.createdAt}
+                                      {convertToKoreaTime(item.review.date)}
                                     </p>
                                   </div>
                                 </div>
