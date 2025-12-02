@@ -1,111 +1,98 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import {
+  getAuth,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+} from "firebase/auth";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const auth = getAuth();
 
-  const [token, setToken] = useState(null);   // ★ 여기 중요
-  const [status, setStatus] = useState("loading");
-  const [password, setPassword] = useState("");
+  const oobCode = searchParams.get("oobCode");
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState("validating"); 
   const [message, setMessage] = useState("");
 
-  // ⭐ token을 안전하게 state에 저장
   useEffect(() => {
-    const t = searchParams.get("token");
-    setToken(t);
-  }, [searchParams]);
-
-  // ⭐ token이 준비되면 검증 실행
-  useEffect(() => {
-    if (!token) return;
-
-    const checkToken = async () => {
-      const res = await fetch("/api/auth/checkResetToken", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await res.json();
-
-      if (data.valid) {
+    async function checkCode() {
+      try {
+        await verifyPasswordResetCode(auth, oobCode);
         setStatus("ready");
-      } else {
-        setStatus("invalid");
-        setMessage(data.message || "유효하지 않은 링크입니다.");
+      } catch (error) {
+        console.error(error);
+        setMessage("유효하지 않거나 만료된 링크입니다.");
+        setStatus("error");
       }
-    };
+    }
 
-    checkToken();
-  }, [token]);
+    if (oobCode) checkCode();
+  }, [oobCode]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!password) {
-      setMessage("비밀번호를 입력해주세요.");
+  const handleReset = async () => {
+    if (newPassword !== confirmPassword) {
+      setMessage("비밀번호가 서로 일치하지 않습니다.");
       return;
     }
 
-    const res = await fetch("/api/auth/updatePassword", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, newPassword: password }),
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      setStatus("done");
+    try {
+      await confirmPasswordReset(auth, oobCode, newPassword);
       setMessage("비밀번호가 성공적으로 변경되었습니다.");
-    } else {
-      setMessage(data.message || "비밀번호 변경 실패");
+      setTimeout(() => router.push("/login"), 1500);
+    } catch (error) {
+      console.error("RESET FAIL:", error);
+      setMessage("비밀번호 재설정에 실패했습니다.");
     }
   };
 
-  if (status === "loading") return <p className="text-center mt-20">링크 확인 중...</p>;
+  if (status === "validating") {
+    return <p className="text-center mt-10">링크 확인 중...</p>;
+  }
 
-  if (status === "invalid")
+  if (status === "error") {
     return (
-      <div className="text-center mt-20">
-        <p className="text-red-600 font-semibold mb-4">{message}</p>
-        <button onClick={() => router.push("/login")} className="bg-green-700 p-3 text-white rounded">
-          로그인 이동
-        </button>
-      </div>
+      <p className="text-center mt-10 text-red-700">{message}</p>
     );
+  }
 
-  if (status === "done")
-    return (
-      <div className="text-center mt-20">
-        <p className="text-green-700 font-semibold mb-4">{message}</p>
-        <button onClick={() => router.push("/login")} className="bg-green-700 p-3 text-white rounded">
-          로그인 이동
-        </button>
-      </div>
-    );
-
-  // status === "ready"
   return (
-    <div className="w-full max-w-[400px] mx-auto mt-20">
-      <h1 className="text-2xl font-bold text-center mb-4">새 비밀번호 설정</h1>
+    <div className="max-w-[500px] mx-auto mt-20 p-6 bg-white shadow rounded">
+      <h1 className="text-2xl font-bold mb-6 text-center">새 비밀번호 설정</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex flex-col gap-4">
         <input
           type="password"
           placeholder="새 비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="border p-3 rounded"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
         />
 
-        {message && <p className="text-red-600 text-sm">{message}</p>}
+        <input
+          type="password"
+          placeholder="새 비밀번호 확인"
+          className="border p-3 rounded"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
 
-        <button className="w-full bg-green-700 text-white py-3 rounded">비밀번호 변경하기</button>
-      </form>
+        {message && (
+          <p className="text-center text-sm text-red-700">{message}</p>
+        )}
+
+        <button
+          onClick={handleReset}
+          className="w-full py-3 bg-green-800 text-white rounded hover:bg-green-700"
+        >
+          비밀번호 변경
+        </button>
+      </div>
     </div>
   );
 }
