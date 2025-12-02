@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 export default function FindPasswordForm() {
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // ← supabase 검증 시 필요하면 유지
   const [result, setResult] = useState({ message: "", isError: false });
   const [loading, setLoading] = useState(false);
 
@@ -15,33 +16,25 @@ export default function FindPasswordForm() {
     setResult({ message: "", isError: false });
 
     try {
-      const res = await fetch("/api/auth/resetPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone_number: phone }),
+      // 1) 먼저 Supabase에서 전화번호로 계정 검증을 원하면 여기서 API 한 번 호출 가능
+      // 하지만 비밀번호만 Firebase가 관리하므로 Supabase 확인은 선택
+
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+
+      setResult({
+        message: "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
+        isError: false,
       });
 
-      const data = await res.json();
-      console.log("📥 응답:", data);
+      setEmail("");
+      setPhone("");
 
-      if (data.success) {
-        setResult({
-          message: data.message || "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
-          isError: false,
-        });
-        // 성공 시 입력 필드 초기화
-        setEmail("");
-        setPhone("");
-      } else {
-        setResult({
-          message: data.message || "입력한 정보와 일치하는 계정을 찾을 수 없습니다.",
-          isError: true,
-        });
-      }
     } catch (error) {
-      console.error("❌ 요청 실패:", error);
+      console.error("❌ Firebase 오류:", error);
+
       setResult({
-        message: "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        message: "등록된 이메일이 아닙니다.",
         isError: true,
       });
     } finally {

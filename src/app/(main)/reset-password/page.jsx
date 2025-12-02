@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import ResetPasswordPage from "@/components/auth/ResetPassword";
 
