@@ -1,7 +1,3 @@
-console.log("🔍 token:", token);
-console.log("🔍 tokenRow:", tokenRow);
-
-
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import bcrypt from "bcryptjs";
