@@ -18,8 +18,8 @@ const SearchSection = ({
             도서를 검색해보세요.
           </div>
         )}
-        {aladinBookList.map((book) => (
-          <BookItem key={book.isbn} book={book}>
+        {aladinBookList.map((book, i) => (
+          <BookItem key={`${i}-${book.isbn}`} book={book}>
             <div className="text-end">
               <button
                 onClick={() => handleAddBook(book)}
