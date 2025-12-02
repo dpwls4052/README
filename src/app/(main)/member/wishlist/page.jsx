@@ -112,7 +112,7 @@ const Wishlist = () => {
                         <WishListButton
                           userId={userId}
                           bookId={item.id}
-                          stock={item.stock}
+                          wishlist={true}
                         />
                         <AddToCartButton
                           book={{

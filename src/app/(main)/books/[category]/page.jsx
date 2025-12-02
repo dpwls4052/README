@@ -9,6 +9,7 @@ import { useBooks } from "@/hooks/book/useBooks";
 import { useCategories } from "@/hooks/book/useCategories";
 import BookListItemSkeleton from "@/components/books/BookListItemSkeleton";
 import { useRandomBooks } from "@/hooks/book/useRandomBooks";
+import { useWishlistAll } from "@/hooks/common/useWishlistAll";
 
 const CATEGORY_MAP = {
   domestic: { title: "국내도서", prefix: "국내도서", id: 1 },
@@ -93,6 +94,7 @@ const BookList = () => {
     enabled: wantRandom, // 추천/계절 페이지일 때만 호출
     type: category, // "recommend" | "season" (추후 확장용)
   });
+  const { books: allWishlists, loading: allWishlistLoading } = useWishlistAll();
 
   //  화면에서 사용할 loading / books는 모드에 따라 선택
   const loading = wantRandom ? randomLoading : normalLoading;
@@ -181,7 +183,9 @@ const BookList = () => {
           </div>
         )}
 
-        {loading && displayBooks.length === 0 ? (
+        {(loading && displayBooks.length === 0) ||
+        allWishlistLoading ||
+        allWishlists === null ? (
           // 첫 로딩 때: 스켈레톤 5개 정도 보여주기
           <div className="flex flex-col gap-4">
             {Array.from({ length: 10 }, (_, i) => (
@@ -200,6 +204,7 @@ const BookList = () => {
                 key={book.id ?? book.bookId}
                 book={book}
                 goDetail={() => goDetail(book.bookId)}
+                wishlist={allWishlists.includes(book.bookId)}
               />
             ))}
 
