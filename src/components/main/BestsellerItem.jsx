@@ -5,7 +5,7 @@ import BuyNowButton from "../common/BuyNowButton";
 import WishListButton from "../common/WishListButton";
 import noimg from "@/assets/no_image.png";
 
-const BestsellerItem = ({ book, userId }) => {
+const BestsellerItem = ({ book, userId, wishlist }) => {
   const router = useRouter();
   const goDetail = (id) => {
     router.push(`/product/detail/${id}`);
@@ -34,7 +34,11 @@ const BestsellerItem = ({ book, userId }) => {
         </p>
 
         <div className="flex items-center gap-2">
-          <WishListButton userId={userId} bookId={book.bookId} />
+          <WishListButton
+            userId={userId}
+            bookId={book.bookId}
+            wishlist={wishlist}
+          />
         </div>
       </div>
 

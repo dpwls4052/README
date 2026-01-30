@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import BookListItem from "@/components/books/BookListItem";
 import { useBooks } from "@/hooks/book/useBooks";
+import { useWishlistAll } from "@/hooks/common/useWishlistAll";
 
 export default function SearchContent() {
   const searchParams = useSearchParams();
@@ -23,9 +24,11 @@ export default function SearchContent() {
 
   const hasResult = Array.isArray(books) && books.length > 0;
 
+  const { books: allWishlists } = useWishlistAll();
+
   return (
-    <div className="mx-auto py-8 md:py-16 lg:py-80 px-4 md:px-6 lg:px-8 max-w-full lg:max-w-1200">
-      <p className="mb-6 md:mb-8 lg:mb-10 text-xl md:text-2xl font-bold">
+    <div className="max-w-full px-4 py-8 mx-auto md:py-16 lg:py-80 md:px-6 lg:px-8 lg:max-w-1200">
+      <p className="mb-6 text-xl font-bold md:mb-8 lg:mb-10 md:text-2xl">
         검색 결과: <span className="text-(--main-color)">"{q}"</span>
       </p>
 
@@ -34,17 +37,22 @@ export default function SearchContent() {
           <p className="text-base md:text-lg">Loading...</p>
         </div>
       ) : !hasResult ? (
-        <div className="py-10 md:py-20 lg:py-40 text-center text-gray-500 text-sm md:text-base">
+        <div className="py-10 text-sm text-center text-gray-500 md:py-20 lg:py-40 md:text-base">
           해당 검색어에 대한 결과가 없습니다.
         </div>
       ) : (
         <div className="flex flex-col">
           {books.map((book) => (
-            <BookListItem key={book.bookId} book={book} goDetail={goDetail} />
+            <BookListItem
+              key={book.bookId}
+              book={book}
+              goDetail={goDetail}
+              wishlist={allWishlists?.includes(book.bookId)}
+            />
           ))}
 
           {hasNext && (
-            <div className="p-4 md:p-8 lg:p-20 mt-6 md:mt-12 lg:mt-20 text-center">
+            <div className="p-4 mt-6 text-center md:p-8 lg:p-20 md:mt-12 lg:mt-20">
               <button
                 className="bg-(--main-color) w-full max-w-[200px] md:w-200 font-medium text-white p-3 md:p-4 lg:p-16 rounded-sm hover:cursor-pointer text-sm md:text-base"
                 onClick={fetchMoreBooks}

@@ -81,6 +81,7 @@ const ProductDetail = () => {
   const params = useParams();
   const bookId = params?.id;
   const { userId } = useAuth();
+  const [isWished, setIsWished] = useState(false);
   const {
     reviews,
     loading: reviewLoading,
@@ -184,6 +185,32 @@ const ProductDetail = () => {
 
     saveRecentBook();
   }, [bookInfo, userId]);
+
+  // 초기 wishlist 상태 확인
+  useEffect(() => {
+    if (!userId || !bookId) return;
+
+    const checkWishlistStatus = async () => {
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`/api/user/wishlist?book_id=${bookId}`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setIsWished(data.status || false);
+        } else {
+          console.error("Wishlist status check error:", data);
+        }
+      } catch (err) {
+        console.error("Wishlist status check failed:", err);
+      }
+    };
+
+    checkWishlistStatus();
+  }, [userId, bookId]);
 
   const isLoading = !bookId || loading || (!book && !error);
 
@@ -309,7 +336,11 @@ const ProductDetail = () => {
 
           {/* 버튼 영역 */}
           <div className="flex flex-col sm:flex-row gap-3 min-[900px]:gap-6 py-4 min-[900px]:py-20">
-            <WishListButton userId={userId} bookId={bookInfo.bookId} />
+            <WishListButton
+              userId={userId}
+              bookId={bookInfo.bookId}
+              wishlist={isWished}
+            />
             <AddToCartButton
               book={{ bookId: bookInfo.bookId }}
               iconMode={false}
