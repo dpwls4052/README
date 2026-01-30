@@ -1,36 +1,293 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📚 TripleCore Bookstore Platform
 
-## Getting Started
+> **"새로운 책과 만나는 즐거움"**  
+> Next.js 기반 온라인 서점 플랫폼
 
-First, run the development server:
+<br />
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 배포 링크
+
+👉 **서비스 바로가기**: [https://readme-kt-2025.vercel.app/](https://readme-kt-2025.vercel.app/)
+
+<br />
+
+---
+
+## 📋 목차
+
+1. [프로젝트 소개](#-프로젝트-소개)
+2. [팀 소개](#-팀-소개)
+3. [개발 환경 & 기술 스택](#-개발-환경--기술-스택)
+4. [시스템 아키텍처](#-시스템-아키텍처)
+5. [주요 기능](#-주요-기능)
+6. [관리자 페이지](#-관리자-페이지)
+7. [트러블 슈팅](#-트러블-슈팅)
+8. [프로젝트 회고](#-프로젝트-회고)
+
+<br />
+
+---
+
+## 📌 프로젝트 소개
+
+트리플코어 3팀은 단순한 쇼핑몰이 아닌, **빠르고 편한 구매 경험 중심의 웹 서비스**를 목표로 Next.js 기반 온라인 서점 플랫폼을 개발했습니다.
+
+### 🔎 기존 온라인 서점의 문제점
+
+- 원하는 책을 빠르게 찾기 어려움
+- 관리자·직원 업무가 분산됨
+- 구매 과정이 복잡함
+
+### 🎯 해결 목표
+
+- ✅ 빠르고 정확한 검색 환경 제공
+- ✅ 관리자 업무 효율화 (UI 통합)
+- ✅ 실무형 전체 서비스 흐름 구현
+- ✅ 확장 가능한 구조 설계
+
+### 📐 개발 프로세스
+
+프로젝트는 다음과 같은 단계를 거쳐 진행되었습니다.
+
+1. **요구사항 정의**: 회원 / 상품 / 관리자 3대 분류로 기능 방식, 필요한 값, 우선순위를 문서화
+2. **와이어프레임 & 프로토타입**: 전체 레이아웃 중심 초기 설계 후 애자일 기반 실시간 수정
+3. **DB 설계**: User, Address, Book, Review, Cart, Wishlist, Order 등 외래키 중심 설계
+4. **개발 & 테스트**: Git Flow 전략을 활용한 브랜치별 개발 및 코드 리뷰
+5. **배포**: Vercel을 통한 자동 배포
+
+<br />
+
+---
+
+## 👥 팀 소개
+
+| 이름 | 역할 | 담당 기능 |
+|------|------|-----------|
+| **김근영** (팀장) | 프론트엔드 / 백엔드 / DB | 결제, 장바구니, 위시리스트 |
+| **배예진** | 프론트엔드 / 백엔드 | 디자인, 메인, 검색, 리뷰 |
+| **이주형** | 프론트엔드 / 백엔드 | 회원 관련 전체 기능 |
+| **강두연** | 프론트엔드 / 백엔드 / DB | 관리자 페이지 전체 |
+
+<br />
+
+---
+
+## 🛠 개발 환경 & 기술 스택
+
+### 기술 스택
+
+#### 초기 스택
+```
+React + Chakra UI + JavaScript
+```
+제한된 커스터마이징으로 인해 스택 변경을 결정
+
+#### 최종 스택
+```
+Next.js + Tailwind CSS + JavaScript
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**변경 이유**
+- API 라우팅이 간편함
+- 스타일링 자유도 향상
+- 협업 속도 및 유지보수성 개선
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 개발 도구
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 도구 | 용도 |
+|------|------|
+| **Figma** | UI/UX 디자인 |
+| **GitHub** | 버전 관리 및 협업 |
+| **Firebase** | 사용자 인증 (Authentication) |
+| **Supabase** | 데이터베이스 |
+| **Vercel** | 배포 플랫폼 |
 
-## Learn More
+### 협업 방식
 
-To learn more about Next.js, take a look at the following resources:
+- **Git Flow 전략 적용**: 개인 브랜치 → PR → 코드 리뷰 → dev 병합
+- **데일리 스크럼**: 매일 진행 상황 공유 및 이슈 해결
+- **애자일 방식**: 빠른 피드백과 반복적인 개선
+- **실시간 커뮤니케이션**: 디스코드 및 노션 활용
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<br />
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🏗 시스템 아키텍처
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+Next.js (Vercel)
+  └─ App Router
+  └─ Supabase (Database)
+  └─ Firebase (Authentication)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+클라이언트가 Next.js를 통해 요청을 보내면, Firebase에서 인증을 처리하고 Supabase에서 데이터를 관리하는 구조입니다.
+
+### 📁 주요 DB 테이블
+
+| 테이블명 | 설명 |
+|----------|------|
+| **User** | 회원 정보 |
+| **Address** | 배송지 (1:N 관계) |
+| **Book** | 도서 상세 정보 |
+| **Review** | 리뷰 (Soft Delete 적용) |
+| **Cart** | 장바구니 |
+| **Wishlist** | 위시리스트 (찜) |
+| **Order** | 주문 내역 |
+
+<br />
+
+---
+
+## ✨ 주요 기능
+
+### 🏠 메인 페이지
+
+- 베스트셀러 조회
+- 장바구니/바로구매 재고 기반 활성화
+- 비로그인 시 로그인 모달 표시
+- 위시리스트(찜) 기능
+
+### 📚 상품 목록 & 상세
+
+- 카테고리 기반 필터링
+- 도서 상세 정보 및 리뷰 조회
+- 실제 구매자 리뷰만 노출
+
+### 🛒 장바구니
+
+- 수량/가격/정보 확인
+- 재고 기반 수량 제한
+- 선택 금액 자동 계산
+
+### 💳 결제 페이지
+
+- 최종 구매 확인 UI
+- 기본 배송 정보 자동 로드
+- 재고 재확인 후 주문번호 생성
+
+### 🔐 인증
+
+- 로그인, 회원가입
+- 아이디/비밀번호 찾기
+- Firebase Auth + Supabase 연동
+
+### 👤 마이 페이지
+
+- 회원 정보 수정
+- 찜 목록 / 최근 본 책 / 구매 내역
+- 배송 상태 조회
+
+### ✏️ 리뷰 관리
+
+- 구매 완료 도서에 대한 리뷰 작성
+- 리뷰 수정 및 삭제
+
+### ❤️ 위시리스트
+
+- 하트 버튼으로 추가/삭제
+- 장바구니로 이동 가능
+
+<br />
+
+---
+
+## 🔧 관리자 페이지
+
+관리자는 별도의 관리자 페이지를 통해 서점 운영에 필요한 모든 작업을 수행할 수 있습니다.
+
+### 📘 도서 관리
+
+- 알라딘 API 기반 도서 등록
+- 재고 변경 / 수정 / 삭제
+
+### 📝 리뷰 관리
+
+- Soft Delete 적용 (완전 삭제 방지)
+- 사용자·도서 기준 조회
+
+### 🚚 배송 관리
+
+- 배송 상태 실시간 업데이트
+- 배송 준비 → 배송 중 → 배송 완료
+
+<br />
+
+---
+
+## 🚨 트러블 슈팅
+
+### 1️⃣ 장바구니·위시리스트 숫자 갱신 문제
+
+**문제**: 사용자가 아이템을 추가/삭제할 때 UI 갱신이 즉시 반영되지 않음
+
+**해결**: Optimistic UI 도입으로 사용자 경험 개선
+
+### 2️⃣ Git Rebase 충돌
+
+**문제**: 브랜치 병합 시 충돌이 자주 발생
+
+**해결**: 
+- `git status` 기반 비교 분석
+- 충돌 구조 이해를 통한 해결 능력 향상
+
+<br />
+
+---
+
+## 💭 프로젝트 회고
+
+이번 프로젝트를 통해 팀원들은 다음과 같은 경험을 얻었습니다.
+
+- ✅ 전체 서비스 흐름(인증 → 검색 → 구매 → 결제 → 배송) 이해도 향상
+- ✅ 팀장 경험을 통한 방향성 유지 및 일정 조율 능력 습득
+- ✅ 백엔드/DB/인증 전반에 대한 실력 상승
+- ✅ 팀 규칙과 코드 기준의 중요성 학습
+- ✅ 실 서비스 수준의 프로젝트 완성 경험
+
+<br />
+
+---
+
+## 📦 커밋 규칙 & 폴더 구조
+
+### 커밋 규칙
+
+```
+[타입]_MM/DD - 변경 내용
+```
+
+**예시**
+```
+[feat]_10/22 - 로그인 UI 추가
+[fix]_10/23 - 장바구니 버그 수정
+[docs]_10/24 - README 업데이트
+```
+
+### 폴더 구조
+
+- 기능 단위로 폴더 그룹핑
+- 파일명은 기능이 드러나도록 구성
+- 유지보수 용이성 중심 설계
+
+<br />
+
+---
+
+## 🎉 마무리
+
+이번 프로젝트는 **서비스 흐름 구축 + 협업 + 실무 기술 경험**을 모두 담은 완성형 프로젝트였습니다.
+
+앞으로도 더 나은 웹 서비스를 만들어가겠습니다.
+
+감사합니다! 🙌
+
+---
+
+## 📞 문의
+
+프로젝트 관련 문의사항이 있으시면 언제든지 연락 주세요.
+
+**Repository**: [\[https://github.com/kimJAVAN/README_KT_2025\]  ]
+**Email**: [ookim7717@naver.com]

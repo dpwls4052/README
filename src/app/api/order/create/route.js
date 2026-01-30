@@ -1,0 +1,195 @@
+import { supabase } from "@/lib/supabaseClient";
+import { NextResponse } from "next/server";
+import { authenticate } from "@/lib/authenticate";
+
+export async function POST(req) {
+  console.log("🚀 주문 생성 API 시작");
+  
+  try {
+    // 인증 확인
+    const auth = await authenticate(req);
+    if (auth.error) {
+      console.error("❌ 인증 실패:", auth.error);
+      return NextResponse.json(
+        { success: false, errorMessage: auth.error },
+        { status: auth.status }
+      );
+    }
+    const { user_id } = auth;
+    // console.log("✅ 인증된 사용자:", user_id);
+
+    const body = await req.json();
+    console.log("📦 받은 데이터:", JSON.stringify(body, null, 2));
+    
+    const {
+      orderItems,
+      price,
+      name,
+      phone,
+      email,
+      postal_code,
+      address1,
+      address2,
+      memo,
+      paymentMethod,
+    } = body;
+
+    // 1️⃣ 필수 필드 검증
+    if (!orderItems || orderItems.length === 0 || !price) {
+      // console.error("❌ 필수 필드 누락:", { user_id, orderItemsLength: orderItems?.length, price });
+      return NextResponse.json(
+        { success: false, errorMessage: "필수 주문 정보가 누락되었습니다." },
+        { status: 400 }
+      );
+    }
+
+    // 2️⃣ 주문번호 생성
+    const timestamp = Date.now().toString().slice(-8);
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const orderNumber = `ON${new Date().toISOString().slice(0, 10).replace(/-/g, '')}${timestamp}${randomSuffix}`;
+    console.log("✅ 주문번호 생성:", orderNumber);
+
+    // 3️⃣ orders 테이블에 삽입할 데이터 생성 (book_id 포함)
+    const orderRows = orderItems.map((item) => {
+      const row = {
+        order_number: orderNumber,
+        user_id: user_id,
+        book_id: item.book_id || null,
+        title: item.title || "",
+        cover: item.cover || item.image || "",
+        book_price: Number(item.price) || 0,
+        amount: Number(item.quantity) || 1,
+        price: Number(price) || 0,
+        name: name || "",
+        phone: phone || "",
+        email: email || "",
+        postal_code: postal_code || "",
+        address1: address1 || "",
+        address2: address2 || "",
+        memo: memo || "",
+        payment_method: paymentMethod || "toss",
+        status: true,
+        shipping_status: "결제완료",
+      };
+      
+      console.log("📝 주문 행 생성:", row);
+      return row;
+    });
+
+    // 4️⃣ orders 테이블에 주문 데이터 삽입
+    console.log("💾 orders 테이블에 삽입 시작...");
+    const { data: insertedData, error: insertError } = await supabase
+      .from("orders")
+      .insert(orderRows)
+      .select();
+
+    if (insertError) {
+      console.error("❌ orders 테이블 삽입 실패:", insertError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          errorMessage: "주문 정보 저장에 실패했습니다.",
+          dbDetails: insertError.message 
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log("✅ orders 테이블 삽입 성공:", insertedData?.length || 0, "개");
+
+    // 5️⃣ 장바구니에서 구매한 상품 삭제 (book_id 기준, 본인 것만)
+    const purchasedBookIds = orderItems
+      .map(item => item.book_id)
+      .filter(Boolean);
+
+    console.log("🛒 장바구니 삭제 대상 book_id:", purchasedBookIds);
+
+    if (purchasedBookIds.length > 0) {
+      const { error: cartDeleteError } = await supabase
+        .from('cart')
+        .delete()
+        .eq('user_id', user_id) // 본인 장바구니만 삭제
+        .in('book_id', purchasedBookIds);
+
+      if (cartDeleteError) {
+        console.error("⚠️ 장바구니 삭제 실패:", cartDeleteError);
+      } else {
+        console.log(`✅ 장바구니에서 ${purchasedBookIds.length}개 상품 삭제 완료`);
+      }
+    }
+
+    // 6️⃣ 재고 차감 & 판매량 증가 (book 테이블 업데이트)
+    console.log("📦 재고 차감 & 판매량 업데이트 시작...");
+    
+    for (const item of orderItems) {
+      if (!item.book_id) {
+        console.warn(`⚠️ book_id 없음: ${item.title} - 업데이트 건너뜀`);
+        continue;
+      }
+
+      try {
+        // 현재 재고 & 판매량 조회
+        const { data: bookData, error: fetchError } = await supabase
+          .from('book')
+          .select('stock, title, sales_count')
+          .eq('book_id', item.book_id)
+          .single();
+
+        if (fetchError || !bookData) {
+          console.error(`❌ 책 정보 조회 실패 (book_id: ${item.book_id}):`, fetchError?.message);
+          continue;
+        }
+
+        const currentStock = bookData.stock || 0;
+        const currentSalesCount = bookData.sales_count || 0;
+        const quantity = item.quantity || 1;
+        const newStock = Math.max(0, currentStock - quantity);
+        const newSalesCount = currentSalesCount + quantity;
+
+        console.log(`  📊 ${bookData.title}:`);
+        console.log(`     재고: ${currentStock} → ${newStock} (-${quantity})`);
+        console.log(`     판매량: ${currentSalesCount} → ${newSalesCount} (+${quantity})`);
+
+        // 재고 차감 & 판매량 증가
+        const { error: updateError } = await supabase
+          .from('book')
+          .update({ 
+            stock: newStock,
+            sales_count: newSalesCount
+          })
+          .eq('book_id', item.book_id);
+
+        if (updateError) {
+          console.error(`❌ 업데이트 실패 (book_id: ${item.book_id}):`, updateError.message);
+        } else {
+          console.log(`  ✅ 업데이트 완료!`);
+        }
+      } catch (stockError) {
+        console.error(`❌ 처리 중 예외 (book_id: ${item.book_id}):`, stockError);
+      }
+    }
+
+    // 7️⃣ 성공 응답
+    console.log("🎉 주문 처리 완료!");
+    return NextResponse.json({
+      success: true,
+      orderNumber,
+      message: "주문이 성공적으로 완료되었습니다.",
+      details: {
+        totalItems: orderItems.length,
+        totalPrice: price,
+        cartCleared: purchasedBookIds.length,
+      }
+    });
+
+  } catch (error) {
+    console.error("💥 주문 처리 중 예외 발생:", error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        errorMessage: `서버 오류가 발생했습니다: ${error.message}` 
+      },
+      { status: 500 }
+    );
+  }
+}
